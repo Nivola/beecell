@@ -12,7 +12,7 @@ import logging
 import pickle
 import multiprocessing
 import threading
-from gibbonutil.simple import id_gen
+from beecell.simple import id_gen
 
 class Event(object):
     """Event """

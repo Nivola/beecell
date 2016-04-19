@@ -8,7 +8,7 @@ import logging
 from multiprocessing import current_process
 from threading import current_thread
 from functools import wraps
-from gibbonutil.simple import id_gen, get_member_class
+from beecell.simple import id_gen, get_member_class
 
 logger = logging.getLogger(__name__)
 
