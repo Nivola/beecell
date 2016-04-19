@@ -1,0 +1,86 @@
+#!/bin/bash
+#
+# clsk_proxy
+#
+# chkconfig:   - 85 15
+# description:  proxy clsk service from 10.102.90.1 network
+# processname:  clsk_proxy
+# config:       
+# pidfile:      
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+start() {
+    #VCENTER_HOST=10.102.90.202
+    VCENTER_HOST=10.102.90.11
+    PORTS=(389, 443, 636, 902, 903, 8080, 8443, 60099, 6501, 6502, 7444, 7005, 7080, 7009, 9443, 9090, 10080, 10443, 10109, 10111)
+    #PORTS=(80, 389, 443, 636, 902, 903, 8080, 8443, 60099, 6501, 6502, 7444, 7005, 7080, 7009, 9443, 9090, 10080, 10443, 10109, 10111)
+
+    PROCSID=`ps|grep tcpproxy |awk '{print $1}'`
+    if [[ -z $PROCSID ]]
+    then
+	# proxy port
+	for PORT in "${PORTS[@]}";
+	do
+	  ./tcpproxy_server 10.102.47.205 $PORT $VCENTER_HOST $PORT &
+	  echo "Start proxy for port $VCENTER_HOST:$PORT"
+	done;
+
+	# start proxy over libvirt
+	./tcpproxy_server 10.102.47.205 16509 10.102.90.3 16509 &
+	echo "Start proxy for 10.102.90.3:16509"
+	./tcpproxy_server 10.102.47.205 16510 10.102.90.4 16509 &
+	echo "Start proxy for 10.102.90.4:16509"
+
+	# start proxy over mysql
+	./tcpproxy_server 10.102.47.205 3308 10.102.90.203 3308 &
+	echo "Start proxy for 10.102.90.203:3308"
+	
+	# start proxy over rabbitmq
+	./tcpproxy_server 10.102.47.205 5672 10.102.90.203 5672 &
+	echo "Start proxy for 10.102.90.203:5672"
+	
+        # start proxy over cloudstack console
+	./tcpproxy_server 10.102.47.205 8000 10.102.90.204 8080 &
+	echo "Start proxy for 10.102.90.204:8000"
+	./tcpproxy_server 10.102.47.205 8001 10.102.90.207 8080 &
+	echo "Start proxy for 10.102.90.207:8001"
+	./tcpproxy_server 10.102.47.205 8002 10.102.90.209 8080 &
+	echo "Start proxy for 10.102.90.209:8002"
+	
+        # start proxy over logstash console
+	./tcpproxy_server 10.102.47.205 5000 10.102.90.206 80 &
+	echo "Start proxy for 10.102.90.206:80"
+	./tcpproxy_server 10.102.47.205 9200 10.102.90.206 9200 &
+	echo "Start proxy for 10.102.90.206:9200"
+    fi
+
+    return 0
+}
+
+stop() {
+    # stop it here, often "killproc $prog"
+    #killproc $prog
+    PROCSID=`ps -efa|grep tcpproxy |awk '{print $2}'`
+    if [[ $PROCSID ]]
+    then
+       echo -n $"Stopping proxy processes: $PROCSID"
+       kill -9 $PROCSID
+    fi
+    return 0
+}
+
+restart() {
+    stop
+    start
+}
+
+case "$1" in
+    start|stop|restart)
+        $1
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart}"
+        exit 2
+esac

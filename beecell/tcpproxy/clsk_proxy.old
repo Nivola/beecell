@@ -1,0 +1,18 @@
+#!/bin/bash
+VCENTER_HOST=10.102.90.201
+#./tcpproxy_server 10.102.47.205 9091 10.102.90.204 8080
+
+PORTS=(80, 389, 443, 636, 902, 903, 8080, 8443, 60099, 6501, 6502, 7444, 7005, 7080, 7009, 9443, 9090, 10080, 10443, 10109, 10111)
+
+# proxy port
+for PORT in "${PORTS[@]}";
+do
+  ./tcpproxy_server 10.102.47.205 $PORT $VCENTER_HOST $PORT &
+  echo "Start proxy for port $VCENTER_HOST:$PORT"
+done;
+
+./tcpproxy_server 10.102.47.205 3306 10.102.90.203 3306 &
+echo "Start proxy for 10.102.90.203:3306"
+
+
+ps|grep tcpproxy |awk '{print $1}'

@@ -1,0 +1,14 @@
+run : 
+$ python setup.py install --prefix .
+
+test:
+$ python
+>>> import sys
+>>> sys.path.append('./cmathlib/lib/python2.7/site-packages')
+>>> import Extest
+>>> Extest.fac(19)
+109641728
+>>> Extest.doppel('cdscndsal cuc h uc')
+('cdscndsal cuc h uc', 'cu h cuc lasdncsdc')
+>>> quit()
+

@@ -1,0 +1,132 @@
+Package to install
+------------------
+sudo apt-get install libevent-1.4-2 libevent1-dev
+sudo apt-get install httperf
+sudo easy_install greenlet
+sudo easy_install gevent
+sudo easy_install pyrex
+sudo python -c "from Pyrex.Compiler import Scanning;Scanning.get_lexicon()"
+sudo easy_install concurrence
+
+
+httperf --client=0/1 --server=localhost --port=8000 --uri=/ --rate=4000 --send-buffer=4096 --recv-buffer=16384 --num-conns=20000 --num-calls=1
+
+-----------------------------------------------------------------
+test_concurrency
+-----------------------------------------------------------------
+Total: connections 20000 requests 20000 replies 20000 test-duration 5.003 s
+
+Connection rate: 3997.7 conn/s (0.3 ms/conn, <=82 concurrent connections)
+Connection time [ms]: min 0.2 avg 1.2 max 21.0 median 0.5 stddev 1.2
+Connection time [ms]: connect 0.1
+Connection length [replies/conn]: 1.000
+
+Request rate: 3997.7 req/s (0.3 ms/req)
+Request size [B]: 62.0
+
+Reply rate [replies/s]: min 3996.8 avg 3996.8 max 3996.8 stddev 0.0 (1 samples)
+Reply time [ms]: response 1.1 transfer 0.0
+Reply size [B]: header 39.0 content 12.0 footer 0.0 (total 51.0)
+Reply status: 1xx=0 2xx=20000 3xx=0 4xx=0 5xx=0
+
+CPU time [s]: user 0.61 system 4.26 (user 12.2% system 85.2% total 97.4%)
+Net I/O: 441.2 KB/s (3.6*10^6 bps)
+
+Errors: total 0 client-timo 0 socket-timo 0 connrefused 0 connreset 0
+Errors: fd-unavail 0 addrunavail 0 ftab-full 0 other 0
+
+-----------------------------------------------------------------
+test_socketserver_thread
+-----------------------------------------------------------------
+Total: connections 18995 requests 18995 replies 18931 test-duration 29.264 s
+
+Connection rate: 649.1 conn/s (1.5 ms/conn, <=1022 concurrent connections)
+Connection time [ms]: min 0.3 avg 271.1 max 28004.5 median 1.5 stddev 936.5
+Connection time [ms]: connect 211.8
+Connection length [replies/conn]: 1.000
+
+Request rate: 649.1 req/s (1.5 ms/req)
+Request size [B]: 62.0
+
+Reply rate [replies/s]: min 0.0 avg 756.9 max 3597.2 stddev 1589.8 (5 samples)
+Reply time [ms]: response 62.5 transfer 0.0
+Reply size [B]: header 39.0 content 12.0 footer 0.0 (total 51.0)
+Reply status: 1xx=0 2xx=18931 3xx=0 4xx=0 5xx=0
+
+CPU time [s]: user 1.48 system 27.51 (user 5.1% system 94.0% total 99.1%)
+Net I/O: 71.5 KB/s (0.6*10^6 bps)
+
+Errors: total 1069 client-timo 0 socket-timo 0 connrefused 0 connreset 64
+Errors: fd-unavail 1005 addrunavail 0 ftab-full 0 other 0
+
+-----------------------------------------------------------------
+test_socketserver_threadpool - 10 threads
+-----------------------------------------------------------------
+Total: connections 19835 requests 19835 replies 19798 test-duration 24.420 s
+
+Connection rate: 812.2 conn/s (1.2 ms/conn, <=1022 concurrent connections)
+Connection time [ms]: min 0.2 avg 185.2 max 23412.5 median 0.5 stddev 720.0
+Connection time [ms]: connect 161.9
+Connection length [replies/conn]: 1.000
+
+Request rate: 812.2 req/s (1.2 ms/req)
+Request size [B]: 62.0
+
+Reply rate [replies/s]: min 3.0 avg 989.8 max 3779.7 stddev 1861.6 (4 samples)
+Reply time [ms]: response 26.3 transfer 0.0
+Reply size [B]: header 39.0 content 12.0 footer 0.0 (total 51.0)
+Reply status: 1xx=0 2xx=19798 3xx=0 4xx=0 5xx=0
+
+CPU time [s]: user 1.06 system 22.32 (user 4.3% system 91.4% total 95.7%)
+Net I/O: 89.6 KB/s (0.7*10^6 bps)
+
+Errors: total 202 client-timo 0 socket-timo 0 connrefused 0 connreset 37
+Errors: fd-unavail 165 addrunavail 0 ftab-full 0 other 0
+
+-----------------------------------------------------------------
+test_socketserver_threadpool - 20 threads
+-----------------------------------------------------------------
+Total: connections 19969 requests 19969 replies 19910 test-duration 24.014 s
+
+Connection rate: 831.6 conn/s (1.2 ms/conn, <=1022 concurrent connections)
+Connection time [ms]: min 0.2 avg 188.5 max 23771.6 median 0.5 stddev 721.2
+Connection time [ms]: connect 151.6
+Connection length [replies/conn]: 1.000
+
+Request rate: 831.6 req/s (1.2 ms/req)
+Request size [B]: 62.0
+
+Reply rate [replies/s]: min 0.0 avg 995.2 max 3797.0 stddev 1869.8 (4 samples)
+Reply time [ms]: response 42.6 transfer 0.0
+Reply size [B]: header 39.0 content 12.0 footer 0.0 (total 51.0)
+Reply status: 1xx=0 2xx=19910 3xx=0 4xx=0 5xx=0
+
+CPU time [s]: user 1.02 system 22.55 (user 4.2% system 93.9% total 98.2%)
+Net I/O: 91.6 KB/s (0.8*10^6 bps)
+
+Errors: total 90 client-timo 0 socket-timo 0 connrefused 0 connreset 59
+Errors: fd-unavail 31 addrunavail 0 ftab-full 0 other 0
+
+Total: connections 20000 requests 20000 replies 19999 test-duration 11.009 s
+
+-----------------------------------------------------------------
+test_socketserver_threadpool - 100 threads
+-----------------------------------------------------------------
+Connection rate: 1816.6 conn/s (0.6 ms/conn, <=603 concurrent connections)
+Connection time [ms]: min 0.2 avg 116.0 max 7010.5 median 0.5 stddev 396.6
+Connection time [ms]: connect 105.4
+Connection length [replies/conn]: 1.000
+
+Request rate: 1816.6 req/s (0.6 ms/req)
+Request size [B]: 62.0
+
+Reply rate [replies/s]: min 87.4 avg 1999.8 max 3912.3 stddev 2704.6 (2 samples)
+Reply time [ms]: response 10.6 transfer 0.0
+Reply size [B]: header 39.0 content 12.0 footer 0.0 (total 51.0)
+Reply status: 1xx=0 2xx=19999 3xx=0 4xx=0 5xx=0
+
+CPU time [s]: user 0.57 system 9.84 (user 5.2% system 89.4% total 94.6%)
+Net I/O: 200.5 KB/s (1.6*10^6 bps)
+
+Errors: total 1 client-timo 0 socket-timo 0 connrefused 0 connreset 1
+Errors: fd-unavail 0 addrunavail 0 ftab-full 0 other 0
