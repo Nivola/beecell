@@ -11,7 +11,7 @@ from time import time
 import base64
 import ssl
 import re
-from gibbonutil.simple import truncate
+from beecell.simple import truncate
 from urllib3.util.ssl_ import create_urllib3_context
 
 urllib3.disable_warnings()
