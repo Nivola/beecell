@@ -329,11 +329,16 @@ class RemoteClient(object):
         elif response.status == 500:
             raise RemoteException('CLOUDAPI_SERVER_ERROR', 500)        
         
+        # NO_CONTENT             204    HTTP/1.1, RFC 2616, Section 10.2.5            
+        elif response.status == 204:
+            res = None
+            conn.close()
+            return res
+        
         # OK                     200    HTTP/1.1, RFC 2616, Section 10.2.1
         # CREATED                201    HTTP/1.1, RFC 2616, Section 10.2.2
         # ACCEPTED               202    HTTP/1.1, RFC 2616, Section 10.2.3
         # NON_AUTHORITATIVE_INFORMATION    203    HTTP/1.1, RFC 2616, Section 10.2.4
-        # NO_CONTENT             204    HTTP/1.1, RFC 2616, Section 10.2.5
         # RESET_CONTENT          205    HTTP/1.1, RFC 2616, Section 10.2.6
         # PARTIAL_CONTENT        206    HTTP/1.1, RFC 2616, Section 10.2.7
         # MULTI_STATUS           207    WEBDAV RFC 2518, Section 10.2
@@ -347,6 +352,7 @@ class RemoteClient(object):
             else:
                 conn.close()
                 return res
+        
         return None
     
     def run_http_request3(self, path, method, data='', headers={}, timeout=30):
