@@ -10,13 +10,13 @@ from threading import current_thread
 from functools import wraps
 from beecell.simple import id_gen, get_member_class
 
-logger = logging.getLogger(__name__)
-
 def watch(func):
     """Decorator function used to capture elapsed time.
     Configure 'watch' logger to save data."""
     @wraps(func)
     def inner(*args, **kwargs): #1
+        logger = logging.getLogger(__name__)
+        
         # get runtime info
         cp = current_process()
         ct = current_thread()
