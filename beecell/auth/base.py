@@ -5,7 +5,7 @@ Created on Jan 25, 2014
 '''
 import logging
 from flask_login import UserMixin
-from gibbonutil.perf import watch
+from beecell.perf import watch
 
 class SystemUser(UserMixin):
     """System user returned after authentication. Use this with flask_login. 
