@@ -8,7 +8,7 @@ import time
 import logging
 import platform
 from .base import AuthError, AbstractAuth
-from gibbonutil.perf import watch
+from beecell.perf import watch
     
 class LdapAuth(AbstractAuth):
     def __init__(self, host, domain, user_class, port=None, timeout=20, 

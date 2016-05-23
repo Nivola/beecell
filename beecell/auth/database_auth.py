@@ -3,19 +3,19 @@ Created on Jan 16, 2014
 
 @author: darkbk
 '''
-from gibbonutil.simple import id_gen
-from gibbonutil.perf import watch
+from beecell.simple import id_gen
+from beecell.perf import watch
 from .base import AuthError, AbstractAuth
-from gibbonutil.db import TransactionError, QueryError
+from beecell.db import TransactionError, QueryError
     
 class DatabaseAuth(AbstractAuth):
     def __init__(self, auth_manager, conn_manager, user_class):
         """
         :param auth_manager: authentication manager. A class that extend 
-                             gibbonutil.auth.model.AuthManager and implement at 
+                             beecell.auth.model.AuthManager and implement at 
                              least two method 'get_user' and 'verify_user_password'
         :param conn_manager: database connection manager. Instance of a class 
-                             that extend 'gibbonutil.db.manager.ConnectionManager'
+                             that extend 'beecell.db.manager.ConnectionManager'
                              and implement at least two method 'get_session' and 
                              'release_session'
         :param user_class: flask_login user class
