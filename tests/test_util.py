@@ -12,9 +12,9 @@ import json
 import urllib, urllib2
 import httplib
 import redis
-from gibbonutil.perf import watch_test
-from gibbonutil.logger import LoggerHelper
-from gibbonutil.db import MysqlManager
+from beecell.perf import watch_test
+from beecell.logger import LoggerHelper
+from beecell.db import MysqlManager
 #from gibboncloudapi.model import AuthDbManager
 from sqlalchemy import create_engine, exc
 from sqlalchemy.orm import sessionmaker

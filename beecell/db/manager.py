@@ -200,7 +200,7 @@ class SqlManager(ConnectionManager):
             self.logger1.debug('New db session %s over engine %s' % (
                               self.db_session, self.engine))            
         else:
-            raise MysqlManagerError('Engine already configured')            
+            raise SqlManagerError('Engine already configured')            
     
     def create_pool_engine(self, pool_size=10, 
                                  max_overflow=10, 
@@ -228,7 +228,7 @@ class SqlManager(ConnectionManager):
             self.logger1.debug('New db session %s over engine %s' % (
                               self.db_session, self.engine))
         else:
-            raise MysqlManagerError('Engine already configured')
+            raise SqlManagerError('Engine already configured')
         
         @event.listens_for(self.engine, "connect")
         def connect(dbapi_connection, connection_record):
@@ -307,7 +307,7 @@ class SqlManager(ConnectionManager):
         :param table_name: name of the table to query [optional]
         :param where: query filter [optional]
         :return: rows count
-        :raise MysqlManagerError:
+        :raise SqlManagerError:
         """
         query = "SELECT COUNT(*) FROM %s" % (table_name)
         if where is not None:
@@ -325,7 +325,7 @@ class SqlManager(ConnectionManager):
         except Exception as ex:
             err = 'Mysql query %s error: %s' % (query, ex)
             self.logger.error(err)
-            raise MysqlManagerError(err)
+            raise SqlManagerError(err)
     
     def query_table(self, table_name, where=None, fields="*", 
                           rows=100, offset=0):
@@ -337,7 +337,7 @@ class SqlManager(ConnectionManager):
         :param rows: number of rows to fetch [default=100]
         :param offset: row fecth offset [default=0]
         :return: query rows
-        :raise MysqlManagerError:
+        :raise SqlManagerError:
         """
         if fields is not None:
             fields = ",".join(fields)
@@ -373,21 +373,21 @@ class SqlManager(ConnectionManager):
         except Exception as ex:
             err = 'Mysql query %s error: %s' % (query, ex)
             self.logger.error(err)
-            raise MysqlManagerError(err)
+            raise SqlManagerError(err)
     
     def get_connection(self):
         try:
             if self.engine:
                 conn = self.engine.connect()
                 return conn
-            raise MysqlManagerError("There isn't active db session to use. \
+            raise SqlManagerError("There isn't active db session to use. \
                                      Session can not be opened.")  
         except exc.DBAPIError, e:
             # an exception is raised, Connection is invalidated. Connection 
             # pool will be refresh
             if e.connection_invalidated:
                 self.logger1.warning("Connection was invalidated!")
-                #raise MysqlManagerError("Connection was invalidated! Try to reconnect")
+                #raise SqlManagerError("Connection was invalidated! Try to reconnect")
                 self.engine.connect()
     
     def release_connection(self, conn):
@@ -406,7 +406,7 @@ class SqlManager(ConnectionManager):
                 # session._model_changes = {}
                 self.logger1.debug("Open session: %s" % (session))
                 return session
-            raise MysqlManagerError("There isn't active db session to use. \
+            raise SqlManagerError("There isn't active db session to use. \
                                      Session can not be opened.")
         except (exc.DBAPIError, Exception), e:
             self.logger1.error(e)
@@ -415,7 +415,7 @@ class SqlManager(ConnectionManager):
             #if e.connection_invalidated:
             #    self.logger1.warning("Connection was invalidated! Try to reconnect")
             #    self.engine.connect()
-            raise MysqlManagerError(e)
+            raise SqlManagerError(e)
             
     def release_session(self, session):        
         """Close active database session.

@@ -4,8 +4,8 @@ Created on Sep 2, 2013
 @author: darkbk
 '''
 import unittest
-from gibbonutil.auth import extract
-from gibbonutil.db.manager import RedisManager, MysqlManager
+from beecell.auth import extract
+from beecell.db.manager import RedisManager, MysqlManager
 from tests.test_util import run_test, UtilTestCase
 import pprint
 
@@ -14,7 +14,7 @@ class RedisManagerTestCase(UtilTestCase):
     """
     def setUp(self):
         UtilTestCase.setUp(self)
-        redis_uri = '10.102.160.12;6379;1'
+        redis_uri = '10.102.160.12;6379;3'
         self.manager = RedisManager(redis_uri)
         self.mysql_manager = MysqlManager(1, self.db_uri)
         self.mysql_manager.create_pool_engine()
@@ -41,10 +41,11 @@ class RedisManagerTestCase(UtilTestCase):
         self.manager.cleandb()
     
     def test_redis_inspect(self):
-        keys = self.manager.inspect(pattern='*celery-schedule*', debug=False)
+        keys = self.manager.inspect(pattern='*', debug=False)
+        #pprint.pprint(keys)
         #pprint.pprint(keys)
         pprint.pprint(self.manager.query(keys))
-        self.manager.delete(pattern='celery-schedule')     
+        #self.manager.delete(pattern='celery-task-meta*')     
 
     #
     # mysql
