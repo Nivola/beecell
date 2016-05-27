@@ -26,7 +26,7 @@ class RedisManagerTestCase(UtilTestCase):
     # redis
     #
     def test_redis_ping(self):
-        self.manager.ping()
+        res = self.manager.ping()
         
     def test_redis_info(self):
         pprint.pprint(self.manager.info())
@@ -70,12 +70,12 @@ class RedisManagerTestCase(UtilTestCase):
 
 def test_suite():
     tests = [
-             #'test_redis_ping',
+             'test_redis_ping',
              #'test_redis_info',
              #'test_redis_size',
              #'test_redis_config',
              #'test_redis_cleandb',
-             'test_redis_inspect',
+             #'test_redis_inspect',
              
              #'test_mysql_ping',
              #'test_get_tables_names',

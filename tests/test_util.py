@@ -148,15 +148,12 @@ def run_test(suite):
     
     #setting logger
     logger = logging.getLogger('gibbon.test')
-    LoggerHelper.setup_file_handler(logger, logging.DEBUG, log_file)    
-
-    severLogger = logging.getLogger('gibbon.cloudapi')
-    LoggerHelper.setup_file_handler(severLogger, logging.DEBUG, log_file) 
+    LoggerHelper.setup_file_handler(logger, logging.DEBUG, log_file)
     
-    severLogger = logging.getLogger('gibbon.util')
+    severLogger = logging.getLogger('beecell')
     LoggerHelper.setup_file_handler(severLogger, logging.DEBUG, log_file) 
 
-    severLogger = logging.getLogger('gibbon.util.watch')
+    severLogger = logging.getLogger('beecell.perf')
     LoggerHelper.setup_file_handler(severLogger, logging.DEBUG, watch_file, frmt='%(message)s') 
     
     # run test suite

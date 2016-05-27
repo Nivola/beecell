@@ -77,3 +77,4 @@ mapping worker 1 to CPUs: 0
 *** running gevent loop engine [addr:0x48dbf0] ***
 [pid: 23811|app: 0|req: 1/1] 127.0.0.1 () {32 vars in 583 bytes} [Fri May 27 09:49:25 2016] GET / => generated 5 bytes in 20 msecs (HTTP/1.1 200) 2 headers in 78 bytes (3 switches on core 49)
 [pid: 23811|app: 0|req: 2/2] 127.0.0.1 () {32 vars in 537 bytes} [Fri May 27 09:49:25 2016] GET /favicon.ico => generated 233 bytes in 136 msecs (HTTP/1.1 404) 2 headers in 72 bytes (3 switches on core 49)
+Fri May 27 16:24:48 2016 - uWSGI worker 1 screams: UAAAAAAH my master disconnected: i will kill myself !!!

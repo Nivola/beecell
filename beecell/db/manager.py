@@ -13,6 +13,7 @@ from sqlalchemy.pool import Pool
 from datetime import datetime
 
 class SqlManagerError(Exception): pass
+class RedisManagerError(Exception): pass
 class MysqlManagerError(Exception): pass
 
 class ConnectionManager(object):
@@ -42,7 +43,7 @@ class RedisManager(ConnectionManager):
     :param: redis_uri: redis connection uri. Ex ``redis://localhost:6379/1``
     """
     
-    def __init__(self, redis_uri):
+    def __init__(self, redis_uri, timeout=2):
         ConnectionManager.__init__(self)
         
         if redis_uri.find('redis') >= 0:
@@ -52,7 +53,7 @@ class RedisManager(ConnectionManager):
         else:
             host, port, db = redis_uri.split(";")
         self.server = redis.StrictRedis(host=host, port=int(port), db=int(db),
-                                        password=None, socket_timeout=None, 
+                                        password=None, socket_timeout=timeout, 
                                         connection_pool=None)
         self.logger.debug('Setup redis: %s' % self.conn)
     
@@ -61,9 +62,13 @@ class RedisManager(ConnectionManager):
         return self.server
     
     def ping(self):
-        res = self.server.ping()
-        self.logger.debug('Ping redis %s: %s' % (self.conn, res))
-        return res
+        try:
+            res = self.server.ping()
+            self.logger.debug('Ping redis %s: %s' % (self.conn, res))
+            return res
+        except redis.exceptions.ConnectionError as ex:
+            self.logger.error(ex)
+            return False
     
     def shutdown(self):
         res = self.server.shutdown()
@@ -266,15 +271,19 @@ class SqlManager(ConnectionManager):
     
     def ping(self):
         """Ping dbms engine"""
+        connection = None
         try:
             connection = self.engine.connect()
             connection.execute(self.ping_query)
             self.logger.debug('Ping dbms %s: OK' % self.engine)
-            connection.close()
             return True
-        except:
-            self.logger.error('Ping dbms %s: KO' % self.engine)
+        except Exception as ex:
+            self.logger.error('Ping dbms %s: KO - %s' % (self.engine, ex))
             return False
+        finally:
+            if connection is not None:
+                connection.close()
+                
     
     def invalidate_connection_pool(self):
         self.engine.dispose()
