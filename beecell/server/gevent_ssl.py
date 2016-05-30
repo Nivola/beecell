@@ -7,7 +7,7 @@ from ssl import PROTOCOL_SSLv23, CERT_NONE, CERT_REQUIRED, CERT_OPTIONAL
 from warnings import warn
 from sys import version_info
 
-if version_info.major==2 & version_info.minor==7 & version_info.micro>=9:    
+if version_info.major==2 and version_info.minor==7 and version_info.micro>=8:    
     from gevent import _sslgte279 as _source
 else:
     #__ssl__ = __import__('gevent._ssl2')

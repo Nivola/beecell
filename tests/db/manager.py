@@ -14,7 +14,7 @@ class RedisManagerTestCase(UtilTestCase):
     """
     def setUp(self):
         UtilTestCase.setUp(self)
-        redis_uri = '10.102.160.12;6379;3'
+        redis_uri = '10.102.160.12;6379;1'
         self.manager = RedisManager(redis_uri)
         self.mysql_manager = MysqlManager(1, self.db_uri)
         self.mysql_manager.create_pool_engine()
@@ -42,9 +42,9 @@ class RedisManagerTestCase(UtilTestCase):
     
     def test_redis_inspect(self):
         keys = self.manager.inspect(pattern='*', debug=False)
+        pprint.pprint(keys)
         #pprint.pprint(keys)
-        #pprint.pprint(keys)
-        pprint.pprint(self.manager.query(keys))
+        pprint.pprint(self.manager.query(keys, ttl=True))
         #self.manager.delete(pattern='celery-task-meta*')     
 
     #
@@ -70,12 +70,12 @@ class RedisManagerTestCase(UtilTestCase):
 
 def test_suite():
     tests = [
-             'test_redis_ping',
+             #'test_redis_ping',
              #'test_redis_info',
              #'test_redis_size',
              #'test_redis_config',
              #'test_redis_cleandb',
-             #'test_redis_inspect',
+             'test_redis_inspect',
              
              #'test_mysql_ping',
              #'test_get_tables_names',

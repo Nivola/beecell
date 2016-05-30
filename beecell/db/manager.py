@@ -128,24 +128,37 @@ class RedisManager(ConnectionManager):
         #pipe.execute()
         return res
     
-    def query(self, keys):
-        """Keys list from inspect """
+    def query(self, keys, ttl=False):
+        """Query key list value.
+        
+        :param ttl: if True return for every key (value, ttl)
+        :param keys: keys list from inspect
+        :return: lists of keys with value
+        """
         data = {}
         for key in keys:
             ktype = key[1]
             kname = key[0]
+            kttl = key[2]
+            
+            def get_value(kvalue, kttl):
+                if ttl is True:
+                    return (kvalue, kttl)
+                else: 
+                    return kvalue
+            
             if ktype == 'hash':
-                data[kname] = self.server.hgetall(kname)
+                data[kname] = get_value(self.server.hgetall(kname), kttl)
             elif ktype == 'list':
                 items = []
                 for index in xrange(0, self.server.llen(kname)):
                     items.append(self.server.lindex(kname, index))
-                data[kname] = items
+                data[kname] = get_value(items, kttl)
             elif ktype == 'string':
-                data[kname] = self.server.get(kname)
+                data[kname] = get_value(self.server.get(kname), kttl)
             else:
                 try:
-                    data[kname] = self.server.get(kname)
+                    data[kname] = get_value(self.server.get(kname), kttl)
                 except:
                     data[kname] = None
         return data
