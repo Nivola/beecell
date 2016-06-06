@@ -50,11 +50,42 @@ def str2uni(value):
         return value.decode('UTF8')
     return value
 
+'''
 def get_attrib(value_dict, key, default_value):
     """ """
     value = default_value
     if key in value_dict:
         value = value_dict[key]
+
+    return value'''
+
+class AttribException(Exception): pass
+
+def get_attrib(value_dict, key, default_value, exception=False):
+    """ """
+    if exception is True:
+        try:
+            value = value_dict[key]
+        except:
+            raise AttribException("Attribute %s has not been specified" % key)
+    else:
+        value = default_value
+        if key in value_dict:
+            value = value_dict[key]
+
+    return value
+
+def get_value(value_dict, key, default_value, exception=False):
+    """ """
+    if exception is True:
+        try:
+            value = value_dict[key]
+        except:
+            raise AttribException("Attribute %s has not been specified" % key)
+    else:
+        value = default_value
+        if key in value_dict:
+            value = value_dict[key]
 
     return value
 
