@@ -123,7 +123,6 @@ class RedisManager(ConnectionManager):
         """
         #pipe = self.server.pipeline(transaction=True)
         keys = self.server.keys(pattern)
-        print keys
         res = self.server.delete(*keys)
         #pipe.execute()
         return res
