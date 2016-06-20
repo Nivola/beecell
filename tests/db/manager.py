@@ -42,7 +42,7 @@ class RedisManagerTestCase(UtilTestCase):
     
     def test_redis_inspect(self):
         keys = self.manager.inspect(pattern='*', debug=False)
-        pprint.pprint(keys)
+        #pprint.pprint(keys)
         #pprint.pprint(keys)
         pprint.pprint(self.manager.query(keys, ttl=True))
         #self.manager.delete(pattern='celery-task-meta*')     
