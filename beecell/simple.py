@@ -12,6 +12,7 @@ from prettytable import PrettyTable
 #import M2Crypto
 import string
 import binascii
+from uuid import uuid4
 
 def merge_dicts(*dict_args):
     '''
@@ -175,8 +176,9 @@ def get_class_name(classref):
     return "%s.%s" % (classref.__module__, name)
 
 def id_gen(length = 10):
+    """Generate unique uuid according to RFC 4122
     """
-    """
+    '''
     #print random.seed()
     #random.seed(time.time())
     num = 1
@@ -184,6 +186,9 @@ def id_gen(length = 10):
         num = num * 10
     return str(int(round(random.random()*num, 0)))
     #return binascii.b2a_hex(os.urandom(length))
+    '''
+    oid = str(uuid4())
+    return oid
 
 def transaction_id_generator(length = 20):
     '''
