@@ -4,7 +4,23 @@ Created on Dec 6, 2013
 @author: darkbk
 '''
 import time
-from gibbonutil.simple import run_command
+from beecell.simple import run_command
+from sqlalchemy.sql import compiler
+from MySQLdb.converters import conversions, escape
+
+def compile_query(query):
+    dialect = query.session.bind.dialect
+    statement = query.statement
+    comp = compiler.SQLCompiler(dialect, statement)
+    comp.compile()
+    enc = dialect.encoding
+    params = []
+    for k in comp.positiontup:
+        v = comp.params[k]
+        if isinstance(v, unicode):
+            v = v.encode(enc)
+        params.append( escape(v, conversions) )
+    return (comp.string.encode(enc) % tuple(params)).decode(enc)
 
 def get_process_list():
     port = 3308
@@ -44,7 +60,7 @@ def get_process_list():
                 process_info[(item[0].lower())] = item[1].strip()
                 
         return process_list
-    
+'''
 i = 0
 while True:
     process_list = get_process_list()
@@ -54,3 +70,4 @@ while True:
             print "id: %-8s state: %-15s db: %-10s user: %-10s host: %-40s cmd: %-10s info: %s [%s]" % (
                 item['id'], item['state'], item['db'], item['user'], item['host'], item['command'], item['info'], item['time'])
     i += 1
+'''
