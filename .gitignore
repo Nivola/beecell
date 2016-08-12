@@ -3,3 +3,4 @@ build/
 *.so
 .project
 .pydevproject
+*.pyc
