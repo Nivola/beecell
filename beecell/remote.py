@@ -293,7 +293,7 @@ class RemoteClient(object):
         elif response.status == 404:
             res = response.read()
             self.logger.debug('Response data: %s' % truncate(res))            
-            raise RemoteException('NOT_FOUND : %s' % res, 404)        
+            raise RemoteException('NOT_FOUND : %s' % res, 404)
         
         # METHOD_NOT_ALLOWED     405     HTTP/1.1, RFC 2616, Section 10.4.6
         elif response.status == 405:
