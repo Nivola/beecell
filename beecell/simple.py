@@ -68,7 +68,7 @@ def get_attrib(value_dict, key, default_value, exception=False):
         try:
             value = value_dict[key]
         except:
-            raise AttribException("Attribute %s has not been specified" % key)
+            raise AttribException("Attribute %s must be specified" % key)
     else:
         value = default_value
         if key in value_dict:
@@ -82,7 +82,7 @@ def get_value(value_dict, key, default_value, exception=False):
         try:
             value = value_dict[key]
         except:
-            raise AttribException("Attribute %s has not been specified" % key)
+            raise AttribException("Attribute %s must be specified" % key)
     else:
         value = default_value
         if key in value_dict:
