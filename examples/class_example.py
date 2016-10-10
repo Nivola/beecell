@@ -4,7 +4,7 @@ Created on Feb 11, 2015
 
 @author: darkbr
 '''
-from gibbonutil.simple import str2uni
+from beecell.simple import str2uni
 
 class prova(object):
     def __getattr__(self, name):

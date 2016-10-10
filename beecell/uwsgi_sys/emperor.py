@@ -1,6 +1,6 @@
-from gibbonutil.remote import RemoteClient
-from gibbonutil.remote import RemoteManager
-from gibbonutil.remote import RemoteExcpetion
+from beecell.remote import RemoteClient
+from beecell.remote import RemoteManager
+from beecell.remote import RemoteExcpetion
 from gibbon.manager.db.dto.emperor import Emperor
 
 class EmperorManagerExcpetion(Exception):

@@ -3,7 +3,7 @@ Created on Nov 11, 2014
 
 @author: darkbk
 '''
-from gibbonutil.auth import LdapAuth
+from beecell.auth import LdapAuth
 
 class SystemUser():
     confirmed_at = None

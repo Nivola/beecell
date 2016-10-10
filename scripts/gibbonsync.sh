@@ -17,8 +17,8 @@ if [ "$env" = "prod" ]; then
         PORT='5022'
         REFPATH='/home/io/workspace/git'
 		echo "Sync environment: $env (host:$HOST, port:$PORT) from: $from"
-        if [ "$pkg" = "gibbonutil" -o "$pkg" = "all" ]; then
-            rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 5022 -i .ssh/id_rsa' $REFPATH/gibbonutil/gibbonutil root@$HOST:/usr/local/lib/gibbon
+        if [ "$pkg" = "beecell" -o "$pkg" = "all" ]; then
+            rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 5022 -i .ssh/id_rsa' $REFPATH/beecell/beecell root@$HOST:/usr/local/lib/gibbon
         fi
         if [ "$pkg" = "gibboncloud" -o "$pkg" = "all" ]; then
             rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 5022 -i .ssh/id_rsa' $REFPATH/gibboncloud/gibboncloud root@$HOST:/usr/local/lib/gibbon
@@ -31,7 +31,7 @@ if [ "$env" = "prod" ]; then
         fi
         if [ "$pkg" = "portal-stage" ]; then
             SYNC_PATH='/usr/local/lib/gibbon/portal-02/lib/python2.7/site-packages/'
-            rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 5022 -i .ssh/id_rsa' $REFPATH/gibbonutil/gibbonutil root@$HOST:$SYNC_PATH
+            rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 5022 -i .ssh/id_rsa' $REFPATH/beecell/beecell root@$HOST:$SYNC_PATH
             rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 5022 -i .ssh/id_rsa' $REFPATH/gibboncloud/gibboncloud root@$HOST:$SYNC_PATH
             rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 5022 -i .ssh/id_rsa' $REFPATH/gibbonportal/gibbonportal root@$HOST:$SYNC_PATH
         fi        
@@ -42,8 +42,8 @@ if [ "$env" = "prod" ]; then
         PORT='22'
         REFPATH='/home/io/workspace/git'
         echo "Sync environment: $env (host:$HOST, port:$PORT) from: $from"
-        if [ "$pkg" = "gibbonutil" -o "$pkg" = "all" ]; then
-            rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 22 -i .ssh/id_rsa' $REFPATH/gibbonutil/gibbonutil root@$HOST:/usr/local/lib/gibbon
+        if [ "$pkg" = "beecell" -o "$pkg" = "all" ]; then
+            rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 22 -i .ssh/id_rsa' $REFPATH/beecell/beecell root@$HOST:/usr/local/lib/gibbon
         fi
         if [ "$pkg" = "gibboncloud" -o "$pkg" = "all" ]; then
             rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 22 -i .ssh/id_rsa' $REFPATH/gibboncloud/gibboncloud root@$HOST:/usr/local/lib/gibbon
@@ -56,7 +56,7 @@ if [ "$env" = "prod" ]; then
         fi
         if [ "$pkg" = "portal-stage" ]; then
             SYNC_PATH='/usr/local/lib/gibbon/portal-02/lib/python2.7/site-packages/'
-            rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 22 -i .ssh/id_rsa' $REFPATH/gibbonutil/gibbonutil root@$HOST:$SYNC_PATH
+            rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 22 -i .ssh/id_rsa' $REFPATH/beecell/beecell root@$HOST:$SYNC_PATH
             rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 22 -i .ssh/id_rsa' $REFPATH/gibboncloud/gibboncloud root@$HOST:$SYNC_PATH
             rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 22 -i .ssh/id_rsa' $REFPATH/gibbonportal/gibbonportal root@$HOST:$SYNC_PATH
         fi
@@ -68,8 +68,8 @@ elif [ "$env" = "test" ]; then
         PORT='4022'
         REFPATH='/home/io/workspace/git'
         echo "Sync environment: $env (host:$HOST, port:$PORT) from: $from"
-        if [ "$pkg" = "gibbonutil" -o "$pkg" = "all" ]; then
-            rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 4022 -i .ssh/id_rsa' $REFPATH/gibbonutil/gibbonutil root@$HOST:/usr/local/lib/gibbon
+        if [ "$pkg" = "beecell" -o "$pkg" = "all" ]; then
+            rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 4022 -i .ssh/id_rsa' $REFPATH/beecell/beecell root@$HOST:/usr/local/lib/gibbon
         fi
         if [ "$pkg" = "gibboncloud" -o "$pkg" = "all" ]; then
             rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 4022 -i .ssh/id_rsa' $REFPATH/gibboncloud/gibboncloud root@$HOST:/usr/local/lib/gibbon
@@ -86,8 +86,8 @@ elif [ "$env" = "test" ]; then
         PORT='22'
         REFPATH='/root/workspace/git'
         echo "Sync environment: $env (host:$HOST, port:$PORT) from: $from"
-        if [ "$pkg" = "gibbonutil" -o "$pkg" = "all" ]; then
-            rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 22 -i .ssh/id_rsa' $REFPATH/gibbonutil/gibbonutil root@$HOST:/usr/local/lib/gibbon
+        if [ "$pkg" = "beecell" -o "$pkg" = "all" ]; then
+            rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 22 -i .ssh/id_rsa' $REFPATH/beecell/beecell root@$HOST:/usr/local/lib/gibbon
         fi
         if [ "$pkg" = "gibboncloud" -o "$pkg" = "all" ]; then
             rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 22 -i .ssh/id_rsa' $REFPATH/gibboncloud/gibboncloud root@$HOST:/usr/local/lib/gibbon

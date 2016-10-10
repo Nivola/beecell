@@ -10,7 +10,7 @@ except ImportError:
 from flask import request
 from flask_wtf import Form as BaseForm
 from wtforms import ValidationError
-from gibbonutil.auth import AuthError
+from beecell.auth import AuthError
 from .bootstrap.wtforms_fields import TextField, PasswordField, SelectField
 from .bootstrap.wtforms_fields import SubmitField, HiddenField, BooleanField
 from .bootstrap.wtforms_widget import TextInput, PasswordInput

@@ -4,7 +4,7 @@ Created on Sep 2, 2013
 @author: darkbk
 '''
 import unittest
-from gibbonutil.auth import extract
+from beecell.auth import extract
 from tests.test_util import run_test, UtilTestCase
 
 class PermTestCase(UtilTestCase):

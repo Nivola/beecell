@@ -13,7 +13,7 @@ if [ "$from" = "home" ]; then
     REFPATH='/home/io/workspace/git/cloudstack/plugins/hypervisors/kvm/target'
     FILE='cloud-plugin-hypervisor-kvm-4.3.1.jar'
     echo "Sync environment: (host:$HOST, port:$PORT) from: $from"
-    #rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 10022' $REFPATH/gibbonutil/gibbonutil root@$HOST:/usr/local/lib/gibbon
+    #rsync -avzPr --exclude-from 'exclude-list' -e 'ssh -p 10022' $REFPATH/beecell/beecell root@$HOST:/usr/local/lib/gibbon
     scp -P $PORT $REFPATH/$FILE root@$HOST:/usr/share/cloudstack-agent/lib
 elif [ "$from" = "office" ]; then
     # prod from office

@@ -8,8 +8,8 @@ import unittest
 import traceback
 import random
 import pprint
-from gibbonutil.perf import watch_test
-from gibbonutil.logger import LoggerHelper
+from beecell.perf import watch_test
+from beecell.logger import LoggerHelper
 
 class HelperTestCase(unittest.TestCase):
     logger = logging.getLogger('gibbon.test')
@@ -41,7 +41,7 @@ def test_suite():
 
 if __name__ == '__main__':
     import os
-    from gibbonutil.test_util import run_test
+    from beecell.test_util import run_test
     
     syspath = os.path.expanduser("~")
     log_file = syspath + '/workspace/gibbon/util/log/test.log'

@@ -7,7 +7,7 @@ import time
 import logging
 import multiprocessing
 import threading
-from gibbonutil.uwsgi_sys.wrapper import uwsgi_util
+from beecell.uwsgi_sys.wrapper import uwsgi_util
 
 def watch(func):
     """Decorator function used to capture elapsed time.

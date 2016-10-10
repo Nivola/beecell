@@ -3,11 +3,11 @@ Created on Dec 9, 2013
 
 @author: darkbk
 '''
-import gibbonutil.server.gevent_ssl
+import beecell.server.gevent_ssl
 import cProfile
 import logging
 import unittest
-from gibbonutil.logger import LoggerHelper
+from beecell.logger import LoggerHelper
 
 def run_test(suite, test_log_file):
     #setting logger

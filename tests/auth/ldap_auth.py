@@ -5,7 +5,7 @@ Created on Oct 11, 2014
 '''
 import unittest
 from tests.test_util import run_test, UtilTestCase
-from gibbonutil.auth import LdapAuth, SystemUser
+from beecell.auth import LdapAuth, SystemUser
 
 class LdapAuthTestCase(UtilTestCase):
     def setUp(self):

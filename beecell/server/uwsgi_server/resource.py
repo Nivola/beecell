@@ -6,9 +6,9 @@ Created on Mar 10, 2013
 import psutil
 from logging import getLogger
 from time import gmtime, strftime
-from gibbonutil.uwsgi_sys.wrapper import uwsgi_util
+from beecell.uwsgi_sys.wrapper import uwsgi_util
 from datetime import datetime
-from gibbonutil.simple import truncate
+from beecell.simple import truncate
 import traceback
 
 class UwsgiManagerError(Exception):

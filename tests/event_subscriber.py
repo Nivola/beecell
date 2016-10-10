@@ -11,8 +11,8 @@ import traceback
 sys.path.append(os.path.expanduser("~/workspace/gibbon/src"))
 sys.path.append(os.path.expanduser("~/workspace/gibbon/tests"))
 
-from gibbonutil.logger import LoggerHelper
-from gibbonutil.amqp import AsyncSubscriber, ConsumerError
+from beecell.logger import LoggerHelper
+from beecell.amqp import AsyncSubscriber, ConsumerError
 
 syspath = os.path.expanduser("~")
 log_file = syspath + '/workspace/gibbon/util/log/test.log'
