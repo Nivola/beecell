@@ -3,6 +3,7 @@
 	<name>BeeCell</name>
 	<comment></comment>
 	<projects>
+		<project>gibboncloudapi</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

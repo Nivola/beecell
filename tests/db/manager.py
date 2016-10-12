@@ -8,13 +8,14 @@ from beecell.auth import extract
 from beecell.db.manager import RedisManager, MysqlManager
 from tests.test_util import run_test, UtilTestCase
 import pprint
+import redis_collections
 
 class RedisManagerTestCase(UtilTestCase):
     """
     """
     def setUp(self):
         UtilTestCase.setUp(self)
-        redis_uri = '10.102.160.12;6379;1'
+        redis_uri = '10.102.160.240;6379;5'
         self.manager = RedisManager(redis_uri)
         self.mysql_manager = MysqlManager(1, self.db_uri)
         self.mysql_manager.create_pool_engine()
@@ -45,7 +46,10 @@ class RedisManagerTestCase(UtilTestCase):
         #pprint.pprint(keys)
         #pprint.pprint(keys)
         pprint.pprint(self.manager.query(keys, ttl=True))
-        #self.manager.delete(pattern='celery-task-meta*')     
+        #self.manager.delete(pattern='celery-schedule')
+        
+        schedule = redis_collections.Dict(key='celery-schedule', redis=self.manager.conn)
+        print schedule.keys()
 
     #
     # mysql

@@ -53,14 +53,14 @@ class RemoteClient(object):
         """
         self.logger = getLogger(self.__class__.__module__+ \
                                 '.'+self.__class__.__name__)        
-        
+        print self.__class__.__module__+'.'+self.__class__.__name__
         self.syspath = os.path.expanduser("~")
         self.conn = conn
         self.user = user
         self.pwd = pwd
-        self.h = httplib2.Http(".cache")
-        if user is not None:
-            self.h.add_credentials(user, pwd)
+        #self.h = httplib2.Http(".cache")
+        #if user is not None:
+        #    self.h.add_credentials(user, pwd)
         self.proxy = proxy
         
         self.keyfile = keyfile
@@ -190,30 +190,30 @@ class RemoteClient(object):
         :param timeout: Request timeout. [default=30s]
         :raise RemoteException:
         """
-        start = time()
-        path = self.conn['path'] + path
-        proto = self.conn['proto']
-        host = self.conn['host']
-        if 'port' not in self.conn:
-            if proto == 'http':
-                port = 80
-            else:
-                port = 443
-        else:
-            port = self.conn['port']
-        
-        # set simple authentication
-        auth = base64.encodestring('%s:%s' % (self.user, self.pwd)).replace('\n', '')
-        headers["Authorization"] = "Basic %s" % auth
-        
-        self.logger.debug('Send http %s request to %s://%s:%s%s' % 
-                          (method, proto, host, port, path))
-        self.logger.debug('Send headers: %s' % headers)
-        if data.lower().find('password') < 0:
-            self.logger.debug('Send data: %s' % data)
-        else:
-            self.logger.debug('Send data: XXXXXXXXX')
         try:
+            path = self.conn['path'] + path
+            proto = self.conn['proto']
+            host = self.conn['host']
+            if 'port' not in self.conn:
+                if proto == 'http':
+                    port = 80
+                else:
+                    port = 443
+            else:
+                port = self.conn['port']
+            
+            # set simple authentication
+            auth = base64.encodestring('%s:%s' % (self.user, self.pwd)).replace('\n', '')
+            headers["Authorization"] = "Basic %s" % auth
+            
+            self.logger.debug('Send http %s request to %s://%s:%s%s' % 
+                              (method, proto, host, port, path))
+            self.logger.debug('Send headers: %s' % headers)
+            if data.lower().find('password') < 0:
+                self.logger.debug('Send data: %s' % data)
+            else:
+                self.logger.debug('Send data: XXXXXXXXX')
+
             _host = host
             _port = port
             _headers = headers
@@ -266,19 +266,23 @@ class RemoteClient(object):
             self.logger.debug('Response content-type: %s' % content_type)
             
         except httplib.HTTPException as ex:
-            raise RemoteException(ex, 400)            
+            self.logger.error(ex, exc_info=True)
+            raise RemoteException(ex, 400)
+        except Exception as ex:
+            self.logger.error(ex, exc_info=True)
+            raise RemoteException(ex, 400)        
 
         # evaluate response status
         # BAD_REQUEST     400     HTTP/1.1, RFC 2616, Section 10.4.1
         if response.status == 400:
             res = response.read()
-            self.logger.debug('Response data: %s' % truncate(res))
+            self.logger.error('Response data: %s' % truncate(res), exc_info=True)
             raise RemoteException('BAD_REQUEST : %s' % res, 400)
   
         # UNAUTHORIZED           401     HTTP/1.1, RFC 2616, Section 10.4.2
         elif response.status == 401:
             res = response.read()
-            self.logger.debug('Response data: %s' % truncate(res))            
+            self.logger.error('Response data: %s' % truncate(res), exc_info=True)            
             raise RemoteException('UNAUTHORIZED : %s' % res, 401)
         
         # PAYMENT_REQUIRED       402     HTTP/1.1, RFC 2616, Section 10.4.3
@@ -286,48 +290,50 @@ class RemoteClient(object):
         # FORBIDDEN              403     HTTP/1.1, RFC 2616, Section 10.4.4
         elif response.status == 403:
             res = response.read()
-            self.logger.debug('Response data: %s' % truncate(res))            
+            self.logger.error('Response data: %s' % truncate(res), exc_info=True)            
             raise RemoteException('FORBIDDEN : %s' % res, 403)
         
         # NOT_FOUND              404     HTTP/1.1, RFC 2616, Section 10.4.5
         elif response.status == 404:
             res = response.read()
-            self.logger.debug('Response data: %s' % truncate(res))            
+            self.logger.error('Response data: %s' % truncate(res), exc_info=True)            
             raise RemoteException('NOT_FOUND : %s' % res, 404)
         
         # METHOD_NOT_ALLOWED     405     HTTP/1.1, RFC 2616, Section 10.4.6
         elif response.status == 405:
             res = response.read()
-            self.logger.debug('Response data: %s' % truncate(res))            
+            self.logger.error('Response data: %s' % truncate(res), exc_info=True)            
             raise RemoteException('METHOD_NOT_ALLOWED : %s' % res, 405)
         
         # NOT_ACCEPTABLE         406     HTTP/1.1, RFC 2616, Section 10.4.7
         elif response.status == 406:
             res = response.read()
-            self.logger.debug('Response data: %s' % truncate(res))            
+            self.logger.error('Response data: %s' % truncate(res), exc_info=True)            
             raise RemoteException('NOT_ACCEPTABLE : %s' % res, 405)        
         
         # PROXY_AUTHENTICATION_REQUIRED     407     HTTP/1.1, RFC 2616, Section 10.4.8
         
         # REQUEST_TIMEOUT        408
-        elif response.status == 408:         
+        elif response.status == 408:
+            self.logger.error('REQUEST_TIMEOUT - 408', exc_info=True)
             raise RemoteException('REQUEST_TIMEOUT', 408)
         
         # CONFLICT               409
         elif response.status == 409:
             res = response.read()
-            self.logger.debug('Response data: %s' % truncate(res))            
+            self.logger.error('Response data: %s' % truncate(res), exc_info=True)            
             raise RemoteException('CONFLICT : %s' % res, 409)
         
         # UNSUPPORTED_MEDIA_TYPE 415
         elif response.status == 415:
             res = response.read()
-            self.logger.debug('Response data: %s' % truncate(res))            
+            self.logger.error('Response data: %s' % truncate(res), exc_info=True)            
             raise RemoteException('UNSUPPORTED_MEDIA_TYPE : %s' % res, 415)    
         
         # INTERNAL SERVER ERROR  500
         elif response.status == 500:
-            raise RemoteException('CLOUDAPI_SERVER_ERROR', 500)        
+            self.logger.error('SERVER_ERROR - 500', exc_info=True)
+            raise RemoteException('SERVER_ERROR', 500)        
         
         # NO_CONTENT             204    HTTP/1.1, RFC 2616, Section 10.2.5            
         elif response.status == 204:
