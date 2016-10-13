@@ -52,8 +52,7 @@ class RemoteClient(object):
         :param proxy: proxy server. Ex. ('proxy.it', 3128) [default=None]
         """
         self.logger = getLogger(self.__class__.__module__+ \
-                                '.'+self.__class__.__name__)        
-        print self.__class__.__module__+'.'+self.__class__.__name__
+                                '.'+self.__class__.__name__)
         self.syspath = os.path.expanduser("~")
         self.conn = conn
         self.user = user
@@ -101,7 +100,7 @@ class RemoteClient(object):
                            look_for_keys=False, 
                            compress=False)
             stdin, stdout, stderr = client.exec_command(cmd)
-            res = {'stdout':[], 'stderr':stderr.read()}            
+            res = {'stdout':[], 'stderr':stderr.read()}
             for line in stdout:
                 res['stdout'].append(line.strip('\n'))         
             '''if len(stderr.read()) != 0:
