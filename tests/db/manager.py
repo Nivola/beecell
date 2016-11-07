@@ -50,6 +50,22 @@ class RedisManagerTestCase(UtilTestCase):
         
         schedule = redis_collections.Dict(key='celery-schedule', redis=self.manager.conn)
         print schedule.keys()
+        
+    def test_redis_list(self):
+        keys = self.manager.inspect(pattern=u'prova_list', debug=False)
+        pprint.pprint(keys)
+        
+        conn = self.manager.conn
+        conn.lpush(u'prova_list', u'val1')
+        conn.lpush(u'prova_list', u'val2')
+        print conn.lpop(u'prova_list')
+        print conn.lpop(u'prova_list')
+        print conn.lpop(u'prova_list')
+        
+        #keys = self.manager.inspect(pattern=u'prova_list', debug=False)
+        #pprint.pprint(keys)        
+        
+        #self.manager.delete(pattern=u'prova_list')
 
     #
     # mysql
@@ -79,7 +95,8 @@ def test_suite():
              #'test_redis_size',
              #'test_redis_config',
              #'test_redis_cleandb',
-             'test_redis_inspect',
+             #'test_redis_inspect',
+             'test_redis_list',
              
              #'test_mysql_ping',
              #'test_get_tables_names',
