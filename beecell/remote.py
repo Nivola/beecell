@@ -13,6 +13,7 @@ import ssl
 import re
 from beecell.simple import truncate
 from urllib3.util.ssl_ import create_urllib3_context
+from sys import version_info
 
 urllib3.disable_warnings()
 
@@ -225,6 +226,18 @@ class RemoteClient(object):
             if proto == 'http':       
                 conn = httplib.HTTPConnection(_host, _port, timeout=timeout)
             else:
+                if self.keyfile is None:
+                    # python >= 2.7.9
+                    if version_info.major==2 and version_info.minor==7 and \
+                       version_info.micro>8:                
+                        ssl._create_default_https_context = ssl._create_unverified_context()
+                    # python < 2.7.8
+                    elif version_info.major==2 and version_info.minor==7 and \
+                       version_info.micro<9:
+                        ssl._create_default_https_context = create_urllib3_context(cert_reqs=ssl.CERT_NONE)
+                    else:
+                        ssl._create_default_https_context = None                
+                
                 '''
                 # python >= 2.7.9
                 if version_info > (2,7,8):
@@ -242,14 +255,15 @@ class RemoteClient(object):
                     except:
                         pass
 
-                ssl._create_default_https_context = ssl._create_unverified_context'''
+                ssl._create_default_https_context = ssl._create_unverified_context
                 if self.keyfile is None:
                     try:
                         ssl._create_default_https_context = ssl._create_unverified_context
                     except:
                         pass
                     #ctx = create_urllib3_context(cert_reqs=ssl.CERT_NONE)
-                    #ssl._create_default_https_context = ssl._create_unverified_context
+                    #ssl._create_default_https_context = ssl._create_unverified_context'''
+                    
                 conn = httplib.HTTPSConnection(_host, _port, timeout=timeout,
                                                key_file=self.keyfile, 
                                                cert_file=self.certfile)
