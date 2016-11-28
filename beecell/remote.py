@@ -128,49 +128,7 @@ class RemoteClient(object):
             sock.close()
             return response
         except Exception as ex:
-            raise RemoteException(ex)
-
-    def run_http_request(self, proto, path, method, 
-                               data='', headers={}, port=80, timeout=30):
-        """
-        :param proto: Request proto. Ex. http, https
-        :param host: Request host. Ex. 10.102.90.30
-        :param port: Request port. [default=80]
-        :param path: Request path. Ex. /api/
-        :param method: Request method. Ex. GET, POST, PUT, DELETE
-        :param headers: Request headers. [default={}]. Ex. 
-                        {"Content-type": "application/x-www-form-urlencoded",
-                         "Accept": "text/plain"}
-        :param data: Request data. [default={}]. Ex. 
-                       {'@number': 12524, '@type': 'issue', '@action': 'show'}
-        :param timeout: Request timeout. [default=30s]
-        :raise RemoteException:
-        """
-        try:
-            self.logger.debug('Send http %s request to %s://%s:%s%s' % 
-                              (method, proto, self.conn, port, path))
-            if proto == 'http':       
-                conn = httplib.HTTPConnection(self.conn, port, timeout=timeout)
-            else:
-                conn = httplib.HTTPSConnection(self.conn, port, timeout=timeout)
-            conn.request(method, path, data, headers)
-            response = conn.getresponse()
-            self.logger.debug('Response status: %s %s' % 
-                              (response.status, response.reason))
-            if response.status in [200, 400]:
-                res = response.read()
-                self.logger.debug(response.getheader('Content-type'))
-                if response.getheader('Content-type') == 'application/json':
-                    res_dict = json.loads(res)
-                    #self.logger.debug('Response data: \n %s' % self.pp.pformat(res_dict))
-                    return res_dict
-                else:
-                    #self.logger.debug('Response data: \n %s' % res)
-                    return res
-            conn.close()
-            return None
-        except Exception as ex:
-            raise RemoteException(ex)    
+            raise RemoteException(ex) 
         
     def run_http_request2(self, path, method, data='', headers={}, timeout=30):
         """Http client. Usage:
@@ -191,28 +149,29 @@ class RemoteClient(object):
         :raise RemoteException:
         """
         try:
-            path = self.conn['path'] + path
-            proto = self.conn['proto']
-            host = self.conn['host']
-            if 'port' not in self.conn:
-                if proto == 'http':
+            path = self.conn[u'path'] + path
+            proto = self.conn[u'proto']
+            host = self.conn[u'host']
+            if u'port' not in self.conn:
+                if proto == u'http':
                     port = 80
                 else:
                     port = 443
             else:
-                port = self.conn['port']
+                port = self.conn[u'port']
             
             # set simple authentication
-            auth = base64.encodestring('%s:%s' % (self.user, self.pwd)).replace('\n', '')
-            headers["Authorization"] = "Basic %s" % auth
+            auth = base64.encodestring(u'%s:%s' % (self.user, self.pwd)).replace(u'\n', u'')
+            headers[u'Authorization'] = u'Basic %s' % auth
             
-            self.logger.debug('Send http %s request to %s://%s:%s%s' % 
-                              (method, proto, host, port, path))
-            self.logger.debug('Send headers: %s' % headers)
-            if data.lower().find('password') < 0:
-                self.logger.debug('Send data: %s' % data)
+            self.logger.info(u'Send http %s api request to %s://%s:%s%s' % 
+                             (method, proto, host, port, path))
+            if data.lower().find(u'password') < 0:
+                self.logger.debug(u'Send [headers=%s] [data=%s]' % 
+                                  (headers, data))
             else:
-                self.logger.debug('Send data: XXXXXXXXX')
+                self.logger.debug(u'Send [headers=%s] [data=%s]' % 
+                                  (headers, u'xxxxxxx'))
 
             _host = host
             _port = port
@@ -223,47 +182,21 @@ class RemoteClient(object):
                 _headers = {}
                 path = "%s://%s:%s%s" % (proto, host, port, path)
             
-            if proto == 'http':       
+            if proto == u'http':       
                 conn = httplib.HTTPConnection(_host, _port, timeout=timeout)
             else:
                 if self.keyfile is None:
                     # python >= 2.7.9
                     if version_info.major==2 and version_info.minor==7 and \
                        version_info.micro>8:                
-                        ssl._create_default_https_context = ssl._create_unverified_context()
+                        ssl._create_default_https_context = ssl._create_unverified_context
                     # python < 2.7.8
                     elif version_info.major==2 and version_info.minor==7 and \
                        version_info.micro<9:
                         ssl._create_default_https_context = create_urllib3_context(cert_reqs=ssl.CERT_NONE)
                     else:
-                        ssl._create_default_https_context = None                
-                
-                '''
-                # python >= 2.7.9
-                if version_info > (2,7,8):
-                    try:
-                        ctx = ssl.create_default_context()
-                        ctx.verify_mode = ssl.CERT_NONE
-                        ctx.check_hostname = False
-                        ctx = ssl._create_unverified_context()      
-                    except:
-                        pass
-                # python < 2.7.9                        
-                else:
-                    try:
-                        ssl._create_default_https_context = ssl._create_unverified_context
-                    except:
-                        pass
+                        ssl._create_default_https_context = None
 
-                ssl._create_default_https_context = ssl._create_unverified_context
-                if self.keyfile is None:
-                    try:
-                        ssl._create_default_https_context = ssl._create_unverified_context
-                    except:
-                        pass
-                    #ctx = create_urllib3_context(cert_reqs=ssl.CERT_NONE)
-                    #ssl._create_default_https_context = ssl._create_unverified_context'''
-                    
                 conn = httplib.HTTPSConnection(_host, _port, timeout=timeout,
                                                key_file=self.keyfile, 
                                                cert_file=self.certfile)
@@ -274,79 +207,87 @@ class RemoteClient(object):
             
             conn.request(method, path, data, _headers)
             response = conn.getresponse()
-            content_type = response.getheader('content-type')
-            self.logger.debug('Response status: %s' % response.status)
-            self.logger.debug('Response content-type: %s' % content_type)
+            content_type = response.getheader(u'content-type')
+            self.logger.info(u'Response status: %s %s' % 
+                              (response.status, response.reason))
             
         except httplib.HTTPException as ex:
             self.logger.error(ex, exc_info=True)
             raise RemoteException(ex, 400)
         except Exception as ex:
             self.logger.error(ex, exc_info=True)
-            raise RemoteException(ex, 400)        
+            raise RemoteException(ex, 400)
 
         # evaluate response status
         # BAD_REQUEST     400     HTTP/1.1, RFC 2616, Section 10.4.1
         if response.status == 400:
             res = response.read()
-            self.logger.error('Response data: %s' % truncate(res), exc_info=True)
-            raise RemoteException('BAD_REQUEST : %s' % res, 400)
+            self.logger.error(u'Response [content-type=%s] [data=%s]' % 
+                              (content_type, truncate(res)), exc_info=True)
+            raise RemoteException(u'BAD_REQUEST : %s' % res, 400)
   
         # UNAUTHORIZED           401     HTTP/1.1, RFC 2616, Section 10.4.2
         elif response.status == 401:
             res = response.read()
-            self.logger.error('Response data: %s' % truncate(res), exc_info=True)            
-            raise RemoteException('UNAUTHORIZED : %s' % res, 401)
+            self.logger.error(u'Response [content-type=%s] [data=%s]' % 
+                              (content_type, truncate(res)), exc_info=True)    
+            raise RemoteException(u'UNAUTHORIZED : %s' % res, 401)
         
         # PAYMENT_REQUIRED       402     HTTP/1.1, RFC 2616, Section 10.4.3
         
         # FORBIDDEN              403     HTTP/1.1, RFC 2616, Section 10.4.4
         elif response.status == 403:
             res = response.read()
-            self.logger.error('Response data: %s' % truncate(res), exc_info=True)            
-            raise RemoteException('FORBIDDEN : %s' % res, 403)
+            self.logger.error(u'Response [content-type=%s] [data=%s]' % 
+                              (content_type, truncate(res)), exc_info=True)         
+            raise RemoteException(u'FORBIDDEN : %s' % res, 403)
         
         # NOT_FOUND              404     HTTP/1.1, RFC 2616, Section 10.4.5
         elif response.status == 404:
             res = response.read()
-            self.logger.error('Response data: %s' % truncate(res), exc_info=True)            
-            raise RemoteException('NOT_FOUND : %s' % res, 404)
+            self.logger.error(u'Response [content-type=%s] [data=%s]' % 
+                              (content_type, truncate(res)), exc_info=True)         
+            raise RemoteException(u'NOT_FOUND : %s' % res, 404)
         
         # METHOD_NOT_ALLOWED     405     HTTP/1.1, RFC 2616, Section 10.4.6
         elif response.status == 405:
             res = response.read()
-            self.logger.error('Response data: %s' % truncate(res), exc_info=True)            
-            raise RemoteException('METHOD_NOT_ALLOWED : %s' % res, 405)
+            self.logger.error(u'Response [content-type=%s] [data=%s]' % 
+                              (content_type, truncate(res)), exc_info=True)       
+            raise RemoteException(u'METHOD_NOT_ALLOWED : %s' % res, 405)
         
         # NOT_ACCEPTABLE         406     HTTP/1.1, RFC 2616, Section 10.4.7
         elif response.status == 406:
             res = response.read()
-            self.logger.error('Response data: %s' % truncate(res), exc_info=True)            
-            raise RemoteException('NOT_ACCEPTABLE : %s' % res, 405)        
+            self.logger.error(u'Response [content-type=%s] [data=%s]' % 
+                              (content_type, truncate(res)), exc_info=True)           
+            raise RemoteException(u'NOT_ACCEPTABLE : %s' % res, 405)        
         
         # PROXY_AUTHENTICATION_REQUIRED     407     HTTP/1.1, RFC 2616, Section 10.4.8
         
         # REQUEST_TIMEOUT        408
         elif response.status == 408:
-            self.logger.error('REQUEST_TIMEOUT - 408', exc_info=True)
-            raise RemoteException('REQUEST_TIMEOUT', 408)
+            self.logger.error(u'REQUEST_TIMEOUT - 408', exc_info=True)
+            raise RemoteException(u'REQUEST_TIMEOUT', 408)
         
         # CONFLICT               409
         elif response.status == 409:
             res = response.read()
-            self.logger.error('Response data: %s' % truncate(res), exc_info=True)            
-            raise RemoteException('CONFLICT : %s' % res, 409)
+            self.logger.error(u'Response [content-type=%s] [data=%s]' % 
+                              (content_type, truncate(res)), exc_info=True)      
+            raise RemoteException(u'CONFLICT : %s' % res, 409)
         
         # UNSUPPORTED_MEDIA_TYPE 415
         elif response.status == 415:
             res = response.read()
-            self.logger.error('Response data: %s' % truncate(res), exc_info=True)            
-            raise RemoteException('UNSUPPORTED_MEDIA_TYPE : %s' % res, 415)    
+            self.logger.error(u'Response [content-type=%s] [data=%s]' % 
+                              (content_type, truncate(res)), exc_info=True)          
+            raise RemoteException(u'UNSUPPORTED_MEDIA_TYPE : %s' % res, 415)    
         
         # INTERNAL SERVER ERROR  500
         elif response.status == 500:
-            self.logger.error('SERVER_ERROR - 500', exc_info=True)
-            raise RemoteException('SERVER_ERROR', 500)        
+            self.logger.error(u'SERVER_ERROR - 500', exc_info=True)
+            raise RemoteException(u'SERVER_ERROR', 500)        
         
         # NO_CONTENT             204    HTTP/1.1, RFC 2616, Section 10.2.5            
         elif response.status == 204:
@@ -363,8 +304,9 @@ class RemoteClient(object):
         # MULTI_STATUS           207    WEBDAV RFC 2518, Section 10.2
         elif re.match('20[0-9]+', str(response.status)):
             res = response.read()
-            self.logger.debug('Response data: %s' % truncate(res))
-            if content_type == 'application/json':
+            self.logger.debug(u'Response [content-type=%s] [data=%s]' % 
+                              (content_type, truncate(res)))
+            if content_type == u'application/json':
                 res_dict = json.loads(res)
                 conn.close()
                 return res_dict
@@ -373,103 +315,6 @@ class RemoteClient(object):
                 return res
         
         return None
-    
-    def run_http_request3(self, path, method, data='', headers={}, timeout=30):
-        """Http client. Usage:
-            res = http_client2('https', 'host1', '/api', 'POST',
-                                port=443, data='', headers={})        
-        
-        :param proto: Request proto. Ex. http, https
-        :param host: Request host. Ex. 10.102.90.30
-        :param port: Request port. [default=80]
-        :param path: Request path. Ex. /api/
-        :param method: Request method. Ex. GET, POST, PUT, DELETE
-        :param headers: Request headers. [default={}]. Ex. 
-                        {"Content-type": "application/x-www-form-urlencoded",
-                         "Accept": "text/plain"}
-        :param data: Request data. [default={}]. Ex. 
-                       {'@number': 12524, '@type': 'issue', '@action': 'show'}
-        :param timeout: Request timeout. [default=30s]
-        :raise RemoteException:
-        """
-        start = time()
-        path = self.conn['path'] + path
-        proto = self.conn['proto']
-        host = self.conn['host']
-        if 'port' not in self.conn:
-            if proto == 'http':
-                port = 80
-            else:
-                port = 443
-        else:
-            port = self.conn['port']
-        
-        # set simple autheniticatin
-        auth = base64.encodestring('%s:%s' % (self.user, self.pwd)).replace('\n', '')
-        headers["Authorization"] = "Basic %s" % auth
-        
-        self.logger.debug('Send http %s request to %s://%s:%s%s' % 
-                          (method, proto, host, port, path))
-        self.logger.debug('Send headers: %s' % headers)
-        if data.lower().find('password') < 0:
-            self.logger.debug('Send data: %s' % data)
-        else:
-            self.logger.debug('Send data: XXXXXXXXX')
-        try:
-            url = "%s://%s:%s%s" % (proto, host, port, path)
-                        
-            if self.proxy is None: 
-                conn = urllib3.PoolManager(timeout=timeout)
-            else:
-                conn = urllib3.ProxyManager(self.proxy, timeout=timeout)
-            response = conn.urlopen(method, url, body=data, headers=headers)
-        except Exception as ex:
-            raise RemoteException(ex, 400)            
-
-        # evaluate response status
-        # BAD_REQUEST     400     HTTP/1.1, RFC 2616, Section 10.4.1
-        if response.status == 400:
-            raise RemoteException('BAD_REQUEST', 400)
-  
-        # UNAUTHORIZED           401     HTTP/1.1, RFC 2616, Section 10.4.2
-        elif response.status == 401:
-            raise RemoteException('UNAUTHORIZED', 401)
-        
-        # PAYMENT_REQUIRED       402     HTTP/1.1, RFC 2616, Section 10.4.3
-        
-        # FORBIDDEN              403     HTTP/1.1, RFC 2616, Section 10.4.4
-        elif response.status == 403:
-            raise RemoteException('FORBIDDEN', 403)
-        
-        # NOT_FOUND              404     HTTP/1.1, RFC 2616, Section 10.4.5
-        
-        # METHOD_NOT_ALLOWED     405     HTTP/1.1, RFC 2616, Section 10.4.6
-        elif response.status == 405:
-            raise RemoteException('METHOD_NOT_ALLOWED', 405)
-        # NOT_ACCEPTABLE         406     HTTP/1.1, RFC 2616, Section 10.4.7
-        
-        # PROXY_AUTHENTICATION_REQUIRED     407     HTTP/1.1, RFC 2616, Section 10.4.8
-        
-        # REQUEST_TIMEOUT        408
-        elif response.status == 408:
-            raise RemoteException('REQUEST_TIMEOUT', 408)
-        
-        # INTERNAL SERVER ERROR  500
-        elif response.status == 500:
-            raise RemoteException('CLOUDAPI_SERVER_ERROR', 500)        
-        
-        # OK                     200     HTTP/1.1, RFC 2616, Section 10.2.1
-        elif response.status == 200:
-            res = response.data
-            self.logger.debug('Response data: %s' % truncate(res))
-            if headers['Accept'] == 'json':
-                res_dict = json.loads(res)
-                #conn.close()
-                return res_dict
-            else:
-                #conn.close()
-                return res
-        return None            
         
 class RemoteManager(object):
     '''
