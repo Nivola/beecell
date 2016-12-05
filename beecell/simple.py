@@ -220,3 +220,15 @@ def truncate(msg, size=400):
         return msg[0:size] + '...'
     else:
         return msg
+    
+def set_dict_item(in_dict, key, value):
+    """Set item in input dictionary if item is not None
+    
+    :param in_dict: input dictionary
+    :param value: key value to add
+    :param key: dictionary key to add
+    """
+    if value is not None:
+        in_dict[key] = value
+    return in_dict
+    
