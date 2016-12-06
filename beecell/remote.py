@@ -35,12 +35,55 @@ class Urllib2MethodRequest(urllib2.Request):
         return urllib2.Request.get_method(self, *args, **kwargs)
 
 class RemoteException(Exception):
-    def __init__(self, value, code=0):
-        self.value = value
+    def __init__(self, value, code=400):
+        try:
+            self.value = json.loads(value)
+        except:
+            self.value = value
         self.code = code
     
     def __str__(self):
-        return "<RemoteException 'value':'%s', 'code':%s>" % (self.value, self.code)
+        return u'[%s] %s' % (self.code, self.value)
+    
+class BadRequestException(RemoteException):
+    def __init__(self, value):
+        RemoteException.__init__(self, value, 400)
+        
+class UnauthorizedException(RemoteException):
+    def __init__(self, value):
+        RemoteException.__init__(self, value, 401)
+
+class ForbiddenException(RemoteException):
+    def __init__(self, value):
+        RemoteException.__init__(self, value, 403)
+        
+class NotFoundException(RemoteException):
+    def __init__(self, value):
+        RemoteException.__init__(self, value, 404)        
+
+class MethodNotAllowedException(RemoteException):
+    def __init__(self, value):
+        RemoteException.__init__(self, value, 405)
+
+class NotAcceptableException(RemoteException):
+    def __init__(self, value):
+        RemoteException.__init__(self, value, 406)
+
+class TimeoutException(RemoteException):
+    def __init__(self, value):
+        RemoteException.__init__(self, value, 408)
+
+class ConflictException(RemoteException):
+    def __init__(self, value):
+        RemoteException.__init__(self, value, 409)
+
+class UnsupporteMediaTypeException(RemoteException):
+    def __init__(self, value):
+        RemoteException.__init__(self, value, 415)
+
+class ServerErrorException(RemoteException):
+    def __init__(self, value):
+        RemoteException.__init__(self, value, 500)
 
 class RemoteClient(object):
     def __init__(self, conn, user=None, pwd=None, proxy=None, keyfile=None,
@@ -202,7 +245,7 @@ class RemoteClient(object):
                                                cert_file=self.certfile)
             if self.proxy is not None:
                 conn.set_tunnel(host, port=port, headers=headers)
-                self.logger.debug("set proxy %s" % self.proxy)
+                self.logger.debug(u'set proxy %s' % self.proxy)
                 headers = None
             
             conn.request(method, path, data, _headers)
@@ -213,10 +256,10 @@ class RemoteClient(object):
             
         except httplib.HTTPException as ex:
             self.logger.error(ex, exc_info=True)
-            raise RemoteException(ex, 400)
+            raise BadRequestException(ex)
         except Exception as ex:
             self.logger.error(ex, exc_info=True)
-            raise RemoteException(ex, 400)
+            raise BadRequestException(ex)
 
         # evaluate response status
         # BAD_REQUEST     400     HTTP/1.1, RFC 2616, Section 10.4.1
@@ -224,14 +267,14 @@ class RemoteClient(object):
             res = response.read()
             self.logger.error(u'Response [content-type=%s] [data=%s]' % 
                               (content_type, truncate(res)), exc_info=True)
-            raise RemoteException(u'BAD_REQUEST : %s' % res, 400)
+            raise BadRequestException(res)
   
         # UNAUTHORIZED           401     HTTP/1.1, RFC 2616, Section 10.4.2
         elif response.status == 401:
             res = response.read()
             self.logger.error(u'Response [content-type=%s] [data=%s]' % 
                               (content_type, truncate(res)), exc_info=True)    
-            raise RemoteException(u'UNAUTHORIZED : %s' % res, 401)
+            raise UnauthorizedException(res)
         
         # PAYMENT_REQUIRED       402     HTTP/1.1, RFC 2616, Section 10.4.3
         
@@ -240,54 +283,54 @@ class RemoteClient(object):
             res = response.read()
             self.logger.error(u'Response [content-type=%s] [data=%s]' % 
                               (content_type, truncate(res)), exc_info=True)         
-            raise RemoteException(u'FORBIDDEN : %s' % res, 403)
+            raise ForbiddenException(res)
         
         # NOT_FOUND              404     HTTP/1.1, RFC 2616, Section 10.4.5
         elif response.status == 404:
             res = response.read()
             self.logger.error(u'Response [content-type=%s] [data=%s]' % 
                               (content_type, truncate(res)), exc_info=True)         
-            raise RemoteException(u'NOT_FOUND : %s' % res, 404)
+            raise NotFoundException(res)
         
         # METHOD_NOT_ALLOWED     405     HTTP/1.1, RFC 2616, Section 10.4.6
         elif response.status == 405:
             res = response.read()
             self.logger.error(u'Response [content-type=%s] [data=%s]' % 
                               (content_type, truncate(res)), exc_info=True)       
-            raise RemoteException(u'METHOD_NOT_ALLOWED : %s' % res, 405)
+            raise MethodNotAllowedException(res)
         
         # NOT_ACCEPTABLE         406     HTTP/1.1, RFC 2616, Section 10.4.7
         elif response.status == 406:
             res = response.read()
             self.logger.error(u'Response [content-type=%s] [data=%s]' % 
                               (content_type, truncate(res)), exc_info=True)           
-            raise RemoteException(u'NOT_ACCEPTABLE : %s' % res, 405)        
+            raise NotAcceptableException(res)
         
         # PROXY_AUTHENTICATION_REQUIRED     407     HTTP/1.1, RFC 2616, Section 10.4.8
         
         # REQUEST_TIMEOUT        408
         elif response.status == 408:
             self.logger.error(u'REQUEST_TIMEOUT - 408', exc_info=True)
-            raise RemoteException(u'REQUEST_TIMEOUT', 408)
+            raise TimeoutException(u'Timeout')
         
         # CONFLICT               409
         elif response.status == 409:
             res = response.read()
             self.logger.error(u'Response [content-type=%s] [data=%s]' % 
                               (content_type, truncate(res)), exc_info=True)      
-            raise RemoteException(u'CONFLICT : %s' % res, 409)
+            raise ConflictException(res)
         
         # UNSUPPORTED_MEDIA_TYPE 415
         elif response.status == 415:
             res = response.read()
             self.logger.error(u'Response [content-type=%s] [data=%s]' % 
                               (content_type, truncate(res)), exc_info=True)          
-            raise RemoteException(u'UNSUPPORTED_MEDIA_TYPE : %s' % res, 415)    
+            raise UnsupporteMediaTypeException(res)
         
         # INTERNAL SERVER ERROR  500
         elif response.status == 500:
             self.logger.error(u'SERVER_ERROR - 500', exc_info=True)
-            raise RemoteException(u'SERVER_ERROR', 500)        
+            raise ServerErrorException(u'Internal server error')
         
         # NO_CONTENT             204    HTTP/1.1, RFC 2616, Section 10.2.5            
         elif response.status == 204:
@@ -302,7 +345,7 @@ class RemoteClient(object):
         # RESET_CONTENT          205    HTTP/1.1, RFC 2616, Section 10.2.6
         # PARTIAL_CONTENT        206    HTTP/1.1, RFC 2616, Section 10.2.7
         # MULTI_STATUS           207    WEBDAV RFC 2518, Section 10.2
-        elif re.match('20[0-9]+', str(response.status)):
+        elif re.match(u'20[0-9]+', str(response.status)):
             res = response.read()
             self.logger.debug(u'Response [content-type=%s] [data=%s]' % 
                               (content_type, truncate(res)))

@@ -27,9 +27,9 @@ class RedisSessionInterface(SessionInterface):
     session_class = RedisSession
     session_duration = 1800
 
-    def __init__(self, redis=None, prefix='session:'):
+    def __init__(self, redis=None, prefix=u'session:'):
         self.logger = logging.getLogger(self.__class__.__module__+ \
-                                        '.'+self.__class__.__name__)        
+                                        u'.'+self.__class__.__name__)        
         
         if redis is None:
             redis = Redis()
@@ -74,7 +74,7 @@ class RedisSessionInterface(SessionInterface):
         response.set_cookie(app.session_cookie_name, session.sid,
                             expires=cookie_exp, httponly=True,
                             domain=domain)
-        self.logger.debug("Save flask session: %s" % truncate(dict(session)))
+        #self.logger.debug("Save flask session: %s" % truncate(dict(session)))
 
     def save_session2(self, app, session, response):
         domain = self.get_cookie_domain(app)
@@ -94,7 +94,7 @@ class RedisSessionInterface(SessionInterface):
         response.set_cookie(app.session_cookie_name, val,
                             expires=expires, httponly=httponly,
                             domain=domain, path=path, secure=secure)
-        self.logger.debug("Save flask session: %s" % truncate(dict(session)))
+        #self.logger.debug("Save flask session: %s" % truncate(dict(session)))
 
     def remove_session(self, session, sid=None):
         if session is None:
