@@ -231,4 +231,21 @@ def set_dict_item(in_dict, key, value):
     if value is not None:
         in_dict[key] = value
     return in_dict
+
+def parse_redis_uri(uri):
+    """Parse redis uri.
+    
+    :param uri: can be redis://localhost:6379/1 or localhost;6379;1
+    :return: (host, port, db)
+    :rtype: tupla
+    """
+    # parse redis uri
+    if uri.find('redis') >= 0:
+        redis_uri = uri.lstrip('redis://')
+        host, port = redis_uri.split(':')
+        port, db = port.split('/')
+    else:
+        host, port, db = uri.split(";")
+        
+    return host, port, db
     

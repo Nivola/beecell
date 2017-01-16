@@ -133,7 +133,7 @@ class LoggerHelper(object):
             #ch1.setFormatter(Formatter)
             logger.addHandler(ch1)
             logger.setLevel(logging_level)
-            logger.propagate = False      
+            logger.propagate = False  
     
     @staticmethod
     def rotatingfile_handler(loggers, logging_level, file_name, 
