@@ -26,9 +26,9 @@ def watch(func):
             
         # log start
         #classname = get_method_class(func)
-        info = "%s:%s - %s:%s.%s - START" % (cp.ident, ct.ident, 
-                                             func.__module__+'.'+get_member_class(args), 
-                                             func.func_name, task_id)
+        info = u'%s:%s - START -  %s:%s - %s' % (
+            cp.ident, ct.ident, func.__module__+u'.'+get_member_class(args), 
+            func.func_name, task_id)
         logger.info(info)
         
         # get start time
@@ -41,9 +41,10 @@ def watch(func):
         elapsed = round(time() - start, 5)
         
         # log execution info in watch logger
-        info = "%s:%s - %s:%s.%s - STOP - %s" % (cp.ident, ct.ident, 
-                                                 func.__module__+'.'+get_member_class(args), 
-                                                 func.func_name, task_id, elapsed)
+        info = u'%s:%s - STOP -  %s:%s - %s - %s' % (
+            cp.ident, ct.ident, func.__module__+u'.'+get_member_class(args), 
+            func.func_name, task_id, elapsed)
+
         logger.info(info)
         return ret
     return inner
