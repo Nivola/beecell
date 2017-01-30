@@ -1,6 +1,5 @@
 *.py[co]
-build/
+_build/
 *.so
 .project
 .pydevproject
-*.pyc
