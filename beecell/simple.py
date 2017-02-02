@@ -24,7 +24,6 @@ def merge_dicts(*dict_args):
         result.update(dictionary)
     return result
 
-
 def random_password(length=10):
     chars = string.ascii_uppercase + string.digits + string.ascii_lowercase
     password = ''
@@ -188,7 +187,8 @@ def id_gen(length = 10):
     return str(int(round(random.random()*num, 0)))
     #return binascii.b2a_hex(os.urandom(length))
     '''
-    oid = str(uuid4())
+    #oid = str(uuid4())
+    oid = binascii.hexlify(os.urandom(length))
     return oid
 
 def transaction_id_generator(length = 20):
@@ -198,7 +198,7 @@ def transaction_id_generator(length = 20):
     '''
     chars = string.ascii_letters + string.digits
     random.seed = (os.urandom(1024)) 
-    return ''.join(random.choice(chars) for i in range(length))
+    return u''.join(random.choice(chars) for i in range(length))
 
 def get_remote_ip(request):
     try:
