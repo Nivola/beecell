@@ -95,8 +95,8 @@ def test_suite():
              #'test_redis_info',
              #'test_redis_size',
              #'test_redis_config',
-             'test_redis_cleandb',
-             #'test_redis_inspect',
+             #'test_redis_cleandb',
+             'test_redis_inspect',
              #'test_redis_list',
              
              #'test_mysql_ping',
