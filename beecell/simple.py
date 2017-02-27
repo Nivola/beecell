@@ -75,17 +75,29 @@ def get_attrib(value_dict, key, default_value, exception=False):
 
     return value
 
-def get_value(value_dict, key, default_value, exception=False):
-    """ """
+def get_value(value_dict, key, default_value, exception=False, vtype=None):
+    """Get value from dictionary and apply some controls.
+    
+    :param value_dict: dictionary to query
+    :param key: key to search
+    :param default_value: value to return if key was not found and exception is 
+            False
+    :param exception: if True raise exceptione whne key was not foud [default=False]
+    :param vtype: if not None verify value is of type 'vtype'
+    """
     if exception is True:
         try:
             value = value_dict[key]
         except:
-            raise AttribException("Attribute %s is missing" % key)
+            raise AttribException(u'Attribute %s is missing' % key)
     else:
         value = default_value
         if key in value_dict:
             value = value_dict[key]
+
+    # check type
+    if not isinstance(value, vtype):
+        raise AttribException(u'Attribute type is wrong')
 
     return value
 
