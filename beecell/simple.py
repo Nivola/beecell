@@ -96,8 +96,9 @@ def get_value(value_dict, key, default_value, exception=False, vtype=None):
             value = value_dict[key]
 
     # check type
-    if not isinstance(value, vtype):
-        raise AttribException(u'Attribute type is wrong')
+    if vtype is not None:
+        if not isinstance(value, vtype):
+            raise AttribException(u'Attribute type is wrong')
 
     return value
 
