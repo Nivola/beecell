@@ -222,7 +222,7 @@ def get_remote_ip(request):
     
     return ipaddr
 
-def truncate(msg, size=400):
+def truncate(msg, size=200):
     """Truncate message to fixed size.
     
     :param str msg: message to truncate
