@@ -137,19 +137,23 @@ class LoggerHelper(object):
     
     @staticmethod
     def rotatingfile_handler(loggers, logging_level, file_name, 
-                             maxBytes=104857600, backupCount=10, frmt=None):
+                             maxBytes=104857600, backupCount=10, frmt=None,
+                             formatter=None):
         if frmt is None:
             frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] " \
                    "%(name)s:%(funcName)s:%(lineno)d - %(message)s"
-        ch1 = logging.handlers.RotatingFileHandler(file_name, mode='a', 
-                                                   maxBytes=maxBytes, 
-                                                   backupCount=backupCount)
-        ch1.setLevel(logging_level)
-        Formatter = logging.Formatter(frmt)
-        ch1.setFormatter(Formatter)
+        handler = logging.handlers.RotatingFileHandler(file_name, mode='a', 
+                                                       maxBytes=maxBytes, 
+                                                       backupCount=backupCount)
+        handler.setLevel(logging_level)
+        if formatter is None:
+            handler.setFormatter(logging.Formatter(frmt))
+        else:
+            handler.setFormatter(formatter(frmt))
+        
         for logger in loggers:
             #logger.setFormatter(CustomFormatter)
-            logger.addHandler(ch1)
+            logger.addHandler(handler)
             logger.setLevel(logging_level)
             logger.propagate = False
             
