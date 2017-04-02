@@ -155,6 +155,11 @@ class RedisManager(ConnectionManager):
                 data[kname] = get_value(items, kttl)
             elif ktype == 'string':
                 data[kname] = get_value(self.server.get(kname), kttl)
+            elif ktype == 'set':
+                items = []
+                for item in self.server.sscan_iter(kname):
+                    items.append(item)
+                data[kname] = get_value(items, kttl)
             else:
                 try:
                     data[kname] = get_value(self.server.get(kname), kttl)
