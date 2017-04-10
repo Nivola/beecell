@@ -262,4 +262,13 @@ def parse_redis_uri(uri):
         host, port, db = uri.split(";")
         
     return host, port, db
+
+def str2bool(value):
+    """Convert value from string to bool"""
+    res = None
+    if value in [u'False', u'false', 0, u'no']:
+        res = False
+    elif value in [u'True', u'true', 1, u'yes', u'si']:
+        res = True
+    return res
     

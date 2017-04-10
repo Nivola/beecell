@@ -106,6 +106,7 @@ class RedisManager(ConnectionManager):
         """
         #pipe = self.server.pipeline(transaction=False)
         keys = self.server.keys(pattern)
+
         data = []
         for key in keys:
             if debug is True:
@@ -123,9 +124,11 @@ class RedisManager(ConnectionManager):
         """
         #pipe = self.server.pipeline(transaction=True)
         keys = self.server.keys(pattern)
-        res = self.server.delete(*keys)
-        #pipe.execute()
-        return res
+        if len(keys) > 0:
+            res = self.server.delete(*keys)
+            #pipe.execute()
+            return res
+        return None
     
     def query(self, keys, ttl=False):
         """Query key list value.
