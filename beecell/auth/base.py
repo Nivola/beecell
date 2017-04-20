@@ -153,3 +153,17 @@ class AbstractAuth(object):
         :raises AuthError: raise :class:`AuthError`          
         """
         raise NotImplementedError()
+    
+    def refresh(self, username, uid):
+        """Refresh login
+        
+        :param username: user name
+        :param uid: login uid
+        :return: System user
+        :rtype: :class:`SystemUser`
+        :raises AuthError: raise :class:`AuthError`        
+        """
+        # create final user object
+        user = self.user_class(uid, username, None, True)
+        self.logger.debug(u'Refresh %s successfully' % (user))        
+        return user        

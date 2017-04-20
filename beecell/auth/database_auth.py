@@ -42,7 +42,7 @@ class DatabaseAuth(AbstractAuth):
         
         # verify that user exists in the db
         try:
-            db_user = auth_manager.get_user(name=username)[0]
+            db_user = auth_manager.get_user(name=username)[0][0]
         except (IndexError, QueryError) as ex:
             self.logger.error(ex)
             # release database session
