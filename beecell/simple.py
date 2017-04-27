@@ -266,9 +266,9 @@ def parse_redis_uri(uri):
 def str2bool(value):
     """Convert value from string to bool"""
     res = None
-    if value in [u'False', u'false', 0, u'no']:
+    if value in [u'False', u'false', 0, u'no', False]:
         res = False
-    elif value in [u'True', u'true', 1, u'yes', u'si']:
+    elif value in [u'True', u'true', 1, u'yes', u'si', True]:
         res = True
     return res
     
