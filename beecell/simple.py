@@ -216,9 +216,9 @@ def transaction_id_generator(length = 20):
 def get_remote_ip(request):
     try:
         # get remote ip when use nginx as balancer
-        ipaddr = request.environ['HTTP_X_REAL_IP']
+        ipaddr = request.environ[u'HTTP_X_REAL_IP']
     except:
-        ipaddr = request.environ['REMOTE_ADDR']
+        ipaddr = request.environ[u'REMOTE_ADDR']
     
     return ipaddr
 

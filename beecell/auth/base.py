@@ -96,8 +96,11 @@ class AuthError(Exception):
             1 - Invalid credentials
             2 - User is disabled
             3 - Password is expired
-            7 - Connection error         
+            4 - Wrong password
+            5 - User does not exist
+            7 - Connection error
             9 - Undefined
+            10 - Domain error
         
             wrong password, wrong user:
                 info: 80090308: LdapErr: DSID-0C0903C5, comment: AcceptSecurityContext error, data 52e, v23f0, desc: Invalid credentials

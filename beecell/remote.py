@@ -204,8 +204,10 @@ class RemoteClient(object):
                 port = self.conn[u'port']
             
             # set simple authentication
-            auth = base64.encodestring(u'%s:%s' % (self.user, self.pwd)).replace(u'\n', u'')
-            headers[u'Authorization'] = u'Basic %s' % auth
+            if self.user is not None:
+                auth = base64.encodestring(u'%s:%s' % (self.user, self.pwd))\
+                             .replace(u'\n', u'')
+                headers[u'Authorization'] = u'Basic %s' % auth
             
             self.logger.info(u'Send http %s api request to %s://%s:%s%s' % 
                              (method, proto, host, port, path))

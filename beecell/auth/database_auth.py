@@ -47,19 +47,19 @@ class DatabaseAuth(AbstractAuth):
             self.logger.error(ex)
             # release database session
             self.conn_manager.release_session(session)
-            raise AuthError("", "User %s was not found" % username, code=404) 
+            raise AuthError("", "User %s was not found" % username, code=5) 
             
         if db_user == None:
             self.logger.error("Invalid credentials")
             # release database session
             self.conn_manager.release_session(session)
-            raise AuthError("", "Invalid credentials", code=400)
+            raise AuthError("", "Invalid credentials", code=1)
         
         if db_user.active is not True:
             self.logger.error("User is disabled")
             # release database session
             self.conn_manager.release_session(session)
-            raise AuthError("", "User is disabled", code=400)            
+            raise AuthError("", "User is disabled", code=2)            
 
         # authenticate user
         try:     
@@ -68,13 +68,13 @@ class DatabaseAuth(AbstractAuth):
             self.logger.error(ex)
             # release database session
             self.conn_manager.release_session(session)
-            raise AuthError("", "Invalid credentials", code=400)    
+            raise AuthError("", "Invalid credentials", code=1)    
             
         if not res:
             self.logger.error("Wrong password")
             # release database session
             self.conn_manager.release_session(session)
-            raise AuthError("", "Invalid credentials", code=400)
+            raise AuthError("", "Wrong password", code=4)
             
         # create final user object
         uid = id_gen()
