@@ -14,6 +14,7 @@ import re
 from beecell.simple import truncate
 from urllib3.util.ssl_ import create_urllib3_context
 from sys import version_info
+from urlparse import urlparse
 
 urllib3.disable_warnings()
 
@@ -108,6 +109,41 @@ class RemoteClient(object):
         
         self.keyfile = keyfile
         self.certfile = certfile
+        
+        if isinstance(conn, dict):
+            self.conn = conn
+        elif isinstance(conn, str) or isinstance(conn, unicode):
+            c = urlparse(conn)
+            host, port = c.netloc.split(u':')
+            self.conn = {
+                u'proto':c.scheme, 
+                u'host':host,  
+                u'port':int(port),
+                u'path':c.path
+            }
+
+    def __parse_connection(self, conn_uri):
+        """Parse connection http://10.102.160.240:6060/path
+        
+        :param conn_uri: http://10.102.160.240:6060/path
+        :return: {u'proto':.., u'host':.., u'port':.., u'path':..}
+        :rtype: dict
+        """
+        try:
+            t1 = conn_uri.split(u'://')
+            t2 = t1[1].split(u'/')
+            t3 = t2[0].split(u':')
+            res = {
+                u'proto':t1[0], 
+                u'host':t3[0],  
+                u'port':int(t3[1]),
+                u'path':t3[1]
+            }
+            self.logger.debug(u'Get connection %s' % res)
+        except Exception as ex:
+            self.logger.error(u'Error parsing connection %s: %s' % 
+                              (conn_uri, ex))
+        return res
 
     def run_ssh_command(self, cmd, user, pwd, port=22):
         '''
@@ -173,7 +209,7 @@ class RemoteClient(object):
         except Exception as ex:
             raise RemoteException(ex) 
         
-    def run_http_request2(self, path, method, data='', headers={}, timeout=30):
+    def run_http_request2(self, path, method, data=u'', headers={}, timeout=30):
         """Http client. Usage:
             res = http_client2('https', '/api', 'POST',
                                 port=443, data='', headers={})        
@@ -225,7 +261,7 @@ class RemoteClient(object):
                 _host = self.proxy[0]
                 _port = self.proxy[1]
                 _headers = {}
-                path = "%s://%s:%s%s" % (proto, host, port, path)
+                path = u'%s://%s:%s%s' % (proto, host, port, path)
             
             if proto == u'http':       
                 conn = httplib.HTTPConnection(_host, _port, timeout=timeout)
