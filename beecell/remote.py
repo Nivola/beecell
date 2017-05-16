@@ -90,10 +90,9 @@ class RemoteClient(object):
     def __init__(self, conn, user=None, pwd=None, proxy=None, keyfile=None,
                  certfile=None):
         """
-        :param conn: Request connection. Ex. {'host':'10.102.90.30', 
-                                              'port':80,
-                                              'path':'/api',
-                                              'proto':'http'} 
+        :param conn: Request connection. 
+            Ex. {'host':'10.102.90.30', 'port':80, 'path':'/api', 'proto':'http'} 
+            Ex. http://10.102.90.30:80/api
         :param proxy: proxy server. Ex. ('proxy.it', 3128) [default=None]
         """
         self.logger = getLogger(self.__class__.__module__+ \
