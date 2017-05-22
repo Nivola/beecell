@@ -42,6 +42,8 @@ class TextTestRunner(object):
 
     def run(self, test):
         tests = test._tests
+        #tests = test 
+        print tests
         
         "Run the given test case or test suite."
         result = self._makeResult()
