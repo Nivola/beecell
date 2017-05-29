@@ -7,7 +7,7 @@ class AuthDbManagerError(Exception): pass
 class AbstractAuthDbManager(object):
     """
     """   
-    def __init__(self, session):
+    def __init__(self, session=None):
         """ """
         self._session = session
 
