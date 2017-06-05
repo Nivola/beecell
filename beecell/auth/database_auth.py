@@ -77,8 +77,8 @@ class DatabaseAuth(AbstractAuth):
             raise AuthError("", "Wrong password", code=4)
             
         # create final user object
-        uid = id_gen()
-        user = self.user_class(uid, username, password, True)
+        #uid = id_gen()
+        user = self.user_class(db_user.uuid, username, password, True)
         #attrib = {a.name:(a.value, a.desc) for a in db_user.attrib}
         #groups = []
         #user.set_attributes(attrib)
