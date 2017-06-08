@@ -8,7 +8,7 @@ import logging
 from multiprocessing import current_process
 from threading import current_thread
 from functools import wraps
-from beecell.simple import id_gen, get_member_class
+from beecell.simple import id_gen, get_member_class, nround
 
 def watch(func):
     """Decorator function used to capture elapsed time.
@@ -26,9 +26,9 @@ def watch(func):
             
         # log start
         #classname = get_method_class(func)
-        info = u'%s:%s - START -  %s:%s - %s' % (
-            cp.ident, ct.ident, func.__module__+u'.'+get_member_class(args), 
-            func.func_name, task_id)
+        info = u'%s:%s - %s - START -  %s:%s' % (
+            cp.ident, ct.ident, task_id, 
+            func.__module__+u'.'+get_member_class(args), func.func_name)
         logger.info(info)
         
         # get start time
@@ -38,12 +38,13 @@ def watch(func):
         ret = func(*args, **kwargs) #2
         
         # calculate elasped time
-        elapsed = round(time() - start, 5)
+        elapsed = nround(time() - start, 5)
         
         # log execution info in watch logger
-        info = u'%s:%s - STOP -  %s:%s - %s - %s' % (
-            cp.ident, ct.ident, func.__module__+u'.'+get_member_class(args), 
-            func.func_name, task_id, elapsed)
+        info = u'%s:%s - %s - STOP  -  %s:%s - %s' % (
+            cp.ident, ct.ident, task_id, 
+            func.__module__+u'.'+get_member_class(args), 
+            func.func_name, elapsed)
 
         logger.info(info)
         return ret
@@ -58,7 +59,7 @@ def watch_test(func):
                                        (func.func_name))
         start = time()
         ret = func(*args, **kwargs) #2
-        elapsed = round(time() - start, 4)
+        elapsed = nround(time() - start, 4)
         logging.getLogger('gibbon.test').info("========== %s ========== : %ss\n" % 
                                        (func.func_name, elapsed))
         return ret
@@ -77,7 +78,7 @@ class Timer(object):
     
     def elapsed(self):
         temp = time()
-        #stop = round(temp - self.startTime, 3)
+        #stop = nround(temp - self.startTime, 3)
         stop = temp - self.startTime
         self.startTime = temp
         return stop

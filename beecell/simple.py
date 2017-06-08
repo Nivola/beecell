@@ -13,6 +13,14 @@ from prettytable import PrettyTable
 import string
 import binascii
 from uuid import uuid4
+from math import ceil
+
+def nround(number, decimal=4):
+    """
+    """
+    factor = 10*decimal
+    convert = u'%.'+str(decimal)+u'f'
+    return convert % (ceil(number * factor) / factor)
 
 def merge_dicts(*dict_args):
     '''
@@ -203,6 +211,9 @@ def id_gen(length = 10):
     #oid = str(uuid4())
     oid = binascii.hexlify(os.urandom(length))
     return oid
+
+def token_gen(args=None):
+    return str(uuid4())
 
 def transaction_id_generator(length = 20):
     '''
