@@ -38,13 +38,16 @@ def watch(func):
         ret = func(*args, **kwargs) #2
         
         # calculate elasped time
-        elapsed = nround(time() - start, 5)
+        elapsed = round(time() - start, 5)
         
         # log execution info in watch logger
         info = u'%s:%s - %s - STOP  -  %s:%s - %s' % (
             cp.ident, ct.ident, task_id, 
             func.__module__+u'.'+get_member_class(args), 
             func.func_name, elapsed)
+        
+        #print func.func_name, args, kwargs
+        #ApiObjectCommand()
 
         logger.info(info)
         return ret
