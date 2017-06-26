@@ -90,7 +90,8 @@ class RemoteClient(object):
     def __init__(self, conn, user=None, pwd=None, proxy=None, keyfile=None,
                  certfile=None):
         """
-        :param conn: Request connection. 
+        :param conn: Request connection.
+            Ex. {'host':'10.102.90.30', 'port':22} for ssh request
             Ex. {'host':'10.102.90.30', 'port':80, 'path':'/api', 'proto':'http'} 
             Ex. http://10.102.90.30:80/api
         :param proxy: proxy server. Ex. ('proxy.it', 3128) [default=None]
@@ -170,8 +171,8 @@ class RemoteClient(object):
             #client.set_missing_host_key_policy(paramiko.WarningPolicy)
             #client.load_system_host_keys()
             
-            client.connect(self.conn, 
-                           port, 
+            client.connect(self.conn.get(u'host'), 
+                           self.conn.get(u'port', port), 
                            username=user, 
                            password=pwd,
                            #timeout=None, 
@@ -179,9 +180,9 @@ class RemoteClient(object):
                            look_for_keys=False, 
                            compress=False)
             stdin, stdout, stderr = client.exec_command(cmd)
-            res = {'stdout':[], 'stderr':stderr.read()}
+            res = {u'stdout':[], u'stderr':stderr.read()}
             for line in stdout:
-                res['stdout'].append(line.strip('\n'))         
+                res[u'stdout'].append(line.strip(u'\n'))         
             '''if len(stderr.read()) != 0:
               print 'ERROR:'
               print stderr.read()
