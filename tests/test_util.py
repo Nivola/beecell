@@ -41,7 +41,8 @@ class UtilTestCase(unittest.TestCase):
         self.start = time.time()
         
         # db server
-        self.db_uri = "mysql+pymysql://cloudapi:cloudapi@172.16.0.19:3308/cloudapi"
+        #self.db_uri = "mysql+pymysql://cloudapi:cloudapi@172.16.0.19:3308/cloudapi"
+        self.db_uri = "mysql+pymysql://auth:auth@10.102.184.57:3306/auth"
         #db_uri = "mysql+pymysql://cloudapi:cloudapi@10.102.90.203:3308/cloudapi"
         #self.auth_manager = AuthDbManager
         #self.conn_manager = MysqlManager('db_manager01', db_uri, connect_timeout=5)

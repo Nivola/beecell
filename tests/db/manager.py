@@ -88,6 +88,13 @@ class RedisManagerTestCase(UtilTestCase):
         res = self.mysql_manager.query_table('task')
         for item in res:
             self.logger.debug(item)
+            
+    def test_temporary_table(self):
+        session = self.mysql_manager.get_session()
+        conn = session.database
+        sql = u'CREATE TEMPORARY TABLE IF NOT EXISTS perms (tag VARCHAR(100) INDEX(tag) ) ENGINE=MEMORY'
+        result = conn.execute(sql)
+        self.mysql_manager.release_session(session)
 
 def test_suite():
     tests = [
@@ -96,11 +103,11 @@ def test_suite():
              #'test_redis_size',
              #'test_redis_config',
              #'test_redis_cleandb',
-             'test_redis_inspect',
+             #'test_redis_inspect',
              #'test_redis_list',
              
              #'test_mysql_ping',
-             #'test_get_tables_names',
+             'test_get_tables_names',
              #'test_count_table_rows',
              #'test_query_table',
             ]
