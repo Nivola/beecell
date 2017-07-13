@@ -91,26 +91,47 @@ class RedisManagerTestCase(UtilTestCase):
             
     def test_temporary_table(self):
         session = self.mysql_manager.get_session()
-        conn = session.database
-        sql = u'CREATE TEMPORARY TABLE IF NOT EXISTS perms (tag VARCHAR(100) INDEX(tag) ) ENGINE=MEMORY'
+        conn = session.connection()
+        # show engine type
+        #sql = u'SHOW ENGINES'
+        #result = conn.execute(sql)
+        #for item in result:
+        #    self.logger.info(item)
+        # create temporary table
+        sql = u'create temporary table perms (tag varchar(100) primary key) engine=MEMORY default charset latin1'
         result = conn.execute(sql)
+        self.logger.info(result)
+        # insert data
+        values = []
+        for i in xrange(0, 100):
+            values.append(u'(\'tag-%s\')' % i)
+        sql = u'INSERT INTO perms (tag) values %s;' % u','.join(values)
+        result = conn.execute(sql)
+        self.logger.info(result)    
+        # query data
+        result = conn.execute(u'SELECT count(tag) FROM perms')
+        #result = conn.execute(u'SELECT tag FROM perms')
+        for item in result:
+            self.logger.info(item)
         self.mysql_manager.release_session(session)
 
 def test_suite():
     tests = [
-             #'test_redis_ping',
-             #'test_redis_info',
-             #'test_redis_size',
-             #'test_redis_config',
-             #'test_redis_cleandb',
-             #'test_redis_inspect',
-             #'test_redis_list',
-             
-             #'test_mysql_ping',
-             'test_get_tables_names',
-             #'test_count_table_rows',
-             #'test_query_table',
-            ]
+        #'test_redis_ping',
+        #'test_redis_info',
+        #'test_redis_size',
+        #'test_redis_config',
+        #'test_redis_cleandb',
+        #'test_redis_inspect',
+        #'test_redis_list',
+        
+        #'test_mysql_ping',
+        #'test_get_tables_names',
+        #'test_count_table_rows',
+        #'test_query_table',
+        
+        'test_temporary_table',
+    ]
     return unittest.TestSuite(map(RedisManagerTestCase, tests))
 
 if __name__ == '__main__':
