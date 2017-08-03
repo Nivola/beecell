@@ -103,7 +103,7 @@ class RedisManagerTestCase(UtilTestCase):
         self.logger.info(result)
         # insert data
         values = []
-        for i in xrange(0, 100):
+        for i in xrange(0, 1000):
             values.append(u'(\'tag-%s\')' % i)
         sql = u'INSERT INTO perms (tag) values %s;' % u','.join(values)
         result = conn.execute(sql)
