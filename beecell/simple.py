@@ -282,4 +282,14 @@ def str2bool(value):
     elif value in [u'True', u'true', 1, u'yes', u'si', True]:
         res = True
     return res
+
+def format_date(date):
+    """Format date as rfc3339.
+    
+    Ref. https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html
+    
+    :param date: datetime object
+    """ 
+    res = str2uni(date.strftime(u'%Y-%m-%dT%H:%M:%SZ'))
+    return res
     

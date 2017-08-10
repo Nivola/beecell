@@ -13,7 +13,7 @@ class DatabaseAuth(AbstractAuth):
         """
         :param auth_manager: authentication manager. A class that extend 
                              beecell.auth.model.AuthManager and implement at 
-                             least two method 'get_users' and 'verify_user_password'
+                             least two method 'get_user' and 'verify_user_password'
         :param conn_manager: database connection manager. Instance of a class 
                              that extend 'beecell.db.manager.ConnectionManager'
                              and implement at least two method 'get_session' and 
@@ -42,7 +42,7 @@ class DatabaseAuth(AbstractAuth):
         
         # verify that user exists in the db
         try:
-            db_user = auth_manager.get_users(name=username)[0][0]
+            db_user = auth_manager.get_user(username)
         except (IndexError, QueryError) as ex:
             self.logger.error(ex)
             # release database session
