@@ -37,6 +37,7 @@ class Urllib2MethodRequest(urllib2.Request):
 
 class RemoteException(Exception):
     def __init__(self, value, code=400):
+        Exception.__init__(self, value)
         try:
             self.value = json.loads(value)
         except:
