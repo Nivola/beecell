@@ -226,12 +226,15 @@ def transaction_id_generator(length = 20):
 
 def get_remote_ip(request):
     try:
-        # get remote ip when use nginx as balancer
-        ipaddr = request.environ[u'HTTP_X_REAL_IP']
-    except:
-        ipaddr = request.environ[u'REMOTE_ADDR']
-    
-    return ipaddr
+        try:
+            # get remote ip when use nginx as balancer
+            ipaddr = request.environ[u'HTTP_X_REAL_IP']
+        except:
+            ipaddr = request.environ[u'REMOTE_ADDR']
+        
+        return ipaddr
+    except RuntimeError:
+        return None
 
 def truncate(msg, size=200):
     """Truncate message to fixed size.

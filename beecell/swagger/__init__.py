@@ -19,17 +19,19 @@ class ApiValidator():
         self.get_schema()
         
     def get_keys(self, data, parent=None):
-        for key,value in data.items():
-            if parent is not None:
-                self.keys.append(u'%s.%s' % (parent, key))
-            else:
-                self.keys.append(u'%s' % (key))
-            
-            if isinstance(value, dict):
-                self.get_keys(value, key)
-            if isinstance(value, list):
-                self.get_keys(value[0], key)                
-        return self.keys
+        if isinstance(data, dict):
+            for key,value in data.items():
+                if parent is not None:
+                    self.keys.append(u'%s.%s' % (parent, key))
+                else:
+                    self.keys.append(u'%s' % (key))
+                
+                if isinstance(value, dict):
+                    self.get_keys(value, key)
+                if isinstance(value, list):
+                    if len(value) > 0:
+                        self.get_keys(value[0], key)                
+            return self.keys
     
     def parse_data(self):
         self.get_keys(self.data)
@@ -89,8 +91,8 @@ class ApiValidator():
     def validate(self, response):
         validate_api_call(self.master_schema, raw_request=response.request, raw_response=response)
         self.code = str(response.status_code)
-        self.data = response.json()
-        #self.check_status()
-        self.compare()
-        self.logger.debug(u'Api request %s is valid' % self.uri)
+        if response.content != u'':
+            self.data = response.json()
+            self.compare()
+            self.logger.debug(u'Api request %s is valid' % self.uri)
         return True

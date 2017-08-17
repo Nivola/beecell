@@ -42,7 +42,6 @@ class SystemUser(UserMixin):
     def get_dict(self):
         return {u'id':self.id,
                 u'name':self.email,
-                u'attribute':self._attrib,
                 u'active':self.active,
                 u'roles':self._roles,
                 u'perms':self._perms}
