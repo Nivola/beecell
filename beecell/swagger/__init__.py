@@ -1,5 +1,74 @@
 from flex.core import load, validate_api_call, validate
 from logging import getLogger
+from marshmallow.schema import Schema
+from marshmallow import fields, missing
+
+from apispec import APISpec
+from marshmallow.validate import Range, OneOf
+from copy import deepcopy
+
+class SwaggerHelper(object):
+    def __init__(self):
+        self.spec = APISpec(
+            title=u'',
+            version=u'',
+            plugins=[
+                u'apispec.ext.flask',
+                u'apispec.ext.marshmallow'
+            ]
+        )
+
+    @staticmethod
+    def responses(orig, data):
+        new = deepcopy(orig)
+        new.update(data)
+        return new
+
+    def get_parameters(self, schema):
+        """Get swagger query parameters from schema
+        
+        :param schema: marshmallow schema
+        :param where: can be path or query
+        """
+        fields = schema.__dict__.get(u'_declared_fields', [])
+        res = []
+        for field, value in fields.items():
+            if value.load_from is not None:
+                field = value.load_from
+            
+            context = value.metadata.get(u'context', None)
+            if context is not None:
+                if context == u'body':
+                    kvargs = {
+                        u'in':u'body',
+                        u'name':u'body',
+                        u'schema':{u'$ref':u'#/definitions/%s' % 
+                                   value.nested.__name__}
+                    }
+                else:
+                    kvargs = {
+                        u'in':context,
+                        u'name':field,
+                        u'required':value.required, 
+                        u'description':value.metadata.get(u'description', u''),
+                    }                    
+                      
+                    field_type = value.__class__.__name__.lower()
+                    if field_type == u'date':
+                        kvargs[u'type'] = u'string'
+                        kvargs[u'format'] = u'date'
+                    else:
+                        kvargs[u'type'] = field_type
+                    if bool(value.default) is not False:
+                        kvargs[u'default'] = value.default
+                    if value.validate is not None and isinstance(value.validate, OneOf):
+                        kvargs[u'enum'] = value.validate.choices
+        
+            res.append(kvargs)
+            #self.spec.add_parameter(field, u'query', **kvargs)
+        
+        #return self.spec._parameters.values()
+        return res
 
 class ApiValidator():
     def __init__(self, schema, uri, method):
@@ -53,7 +122,7 @@ class ApiValidator():
             self.get_schema_keys(data, parent)
         elif u'properties' in data: 
             data = data[u'properties']
-            for key,value in data.items():
+            for key,value in data.items():                
                 if parent is not None:
                     self.schema_keys.append(u'%s.%s' % (parent, key))
                 else:
