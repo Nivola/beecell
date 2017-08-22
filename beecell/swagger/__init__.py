@@ -57,6 +57,9 @@ class SwaggerHelper(object):
                     if field_type == u'date':
                         kvargs[u'type'] = u'string'
                         kvargs[u'format'] = u'date'
+                    if field_type == u'datetime':
+                        kvargs[u'type'] = u'string'
+                        kvargs[u'format'] = u'datetime'                        
                     else:
                         kvargs[u'type'] = field_type
                     if bool(value.default) is not False:
@@ -105,7 +108,7 @@ class ApiValidator():
     def parse_data(self):
         self.get_keys(self.data)
         self.logger.debug(u'Get all response keys: %s' % self.keys)
-        return self.keys    
+        return self.keys
     
     def get_schema_keys(self, data, parent=None):
         if u'$ref' in data:
