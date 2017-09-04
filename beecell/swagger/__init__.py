@@ -136,7 +136,7 @@ class ApiValidator():
                     self.schema_keys[u'%s' % (key)] = \
                         [str(value[u'type']), value.get(u'required', [])]
                 
-                if value[u'type'] == u'object':
+                if value[u'type'] == u'object' and len(value.get(u'required', [])) > 0:
                     self.get_schema_keys(value, key)
                 elif value[u'type'] == u'array':
                     self.get_schema_keys(value, key)                    
