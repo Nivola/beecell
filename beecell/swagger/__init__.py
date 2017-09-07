@@ -90,29 +90,29 @@ class ApiValidator():
         
         self.get_schema()
         
-    def get_keys(self, s, data, parent=None):
+    def get_keys(self, s, data, parent=None, required=None):
         if isinstance(data, dict):
             for key,value in data.items():
-                if parent is not None:
-                    key = u'%s.%s' % (parent, key)
-                else:
-                    key = key
-                self.keys.append(key)
-                
-                if isinstance(value, dict):
-                    if len(s[key][1]) > 0:
-                        self.get_keys(s, value, key)
-                if isinstance(value, list):
-                    if len(value) > 0:
-                        self.get_keys(s, value[0], key)                
-            return self.keys
-    
+                if required is None or key in required:
+                    if parent is not None:
+                        key = u'%s.%s' % (parent, key)
+                    else:
+                        key = key
+                    self.keys.append(key)
+                    if isinstance(value, dict):
+                        self.get_keys(s, value, key, s[key][1])
+                    if isinstance(value, list):
+                        if len(value) > 0:
+                            self.get_keys(s, value[0], key, s[key][1]) 
+        return self.keys
+        
     def parse_data(self, s):
+        #for k,v in s.items(): print k,v
         self.get_keys(s, self.data)
         self.logger.debug(u'Get all response keys: %s' % self.keys)
         return self.keys
     
-    def get_schema_keys(self, data, parent=None):
+    def get_schema_keys(self, data, parent=None, required=[]):
         if u'$ref' in data:
             # #/responses/NotFound
             data = data[u'$ref']
@@ -125,25 +125,31 @@ class ApiValidator():
         elif u'items' in data: 
             data = data[u'items']
             self.get_schema_keys(data, parent)
-        elif u'properties' in data: 
+        elif u'properties' in data:
+            required = data.get(u'required', [])
             data = data[u'properties']
             for key,value in data.items():
-                if parent is not None:
-                    self.schema_keys[u'%s.%s' % (parent, key)] = \
-                        [str(value[u'type']), value.get(u'required', [])]
-                    key = u'%s.%s' % (parent, key)
-                else:
-                    self.schema_keys[u'%s' % (key)] = \
-                        [str(value[u'type']), value.get(u'required', [])]
-                
-                if value[u'type'] == u'object' and len(value.get(u'required', [])) > 0:
-                    self.get_schema_keys(value, key)
-                elif value[u'type'] == u'array':
-                    self.get_schema_keys(value, key)                    
+                if key in required:
+                    next_required = value.get(u'required', [])
+                    if value[u'type'] == u'array':
+                        next_required = value.get(u'items').get(u'required', [])
+                    
+                    if parent is not None:
+                        self.schema_keys[u'%s.%s' % (parent, key)] = \
+                            [str(value[u'type']), next_required]
+                        key = u'%s.%s' % (parent, key)
+                    else:
+                        self.schema_keys[u'%s' % (key)] = \
+                            [str(value[u'type']), next_required]
+                    
+                    if value[u'type'] == u'object':
+                        self.get_schema_keys(value, key)
+                    elif value[u'type'] == u'array':
+                        self.get_schema_keys(value, key)                    
     
     def parse_schema(self):
         self.get_schema_keys(self.schema[self.code])
-        self.logger.debug(u'Get all schema keys: %s' % self.schema_keys)
+        self.logger.debug(u'Get all schema keys: %s' % self.schema_keys)   
         return self.schema_keys
     
     def get_schema(self):
