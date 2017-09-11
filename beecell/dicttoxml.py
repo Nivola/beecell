@@ -210,16 +210,18 @@ def convert_dict(obj, ids, parent, attr_type, item_func, cdata):
         )
 
         attr = {} if not ids else {'id': '%s' % (get_unique_id(parent)) }
-        
-        # ----------- added by me -----------
-        # add new attribute from special key of dict
-        for key,value in obj.items():
-            if key.find(u'__') == 0:
-                attr[key[2:]] = value
-        # ----------- added by me -----------
 
         key, attr = make_valid_xml_name(key, attr)
-
+        print key, val, attr
+        # ----------- added by me -----------
+        # add new attribute from special key of dict
+        if isinstance(val, dict):
+            for k,v in val.items():
+                if k.find(u'$') == 0:
+                    val.pop(k)
+                    attr[k[1:]] = v
+        # ----------- added by me -----------        
+        print key, val, attr
         if isinstance(val, numbers.Number) or type(val) in (str, unicode):
             addline(convert_kv(key, val, attr_type, attr, cdata))
 
