@@ -293,6 +293,8 @@ def format_date(date):
     
     :param date: datetime object
     """ 
-    res = str2uni(date.strftime(u'%Y-%m-%dT%H:%M:%SZ'))
+    res = None
+    if date is not None:
+        res = str2uni(date.strftime(u'%Y-%m-%dT%H:%M:%SZ'))
     return res
     
