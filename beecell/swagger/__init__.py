@@ -107,10 +107,11 @@ class ApiValidator():
         return self.keys
         
     def parse_data(self, s):
-        #for k,v in s.items(): print k,v
-        self.get_keys(s, self.data)
-        self.logger.debug(u'Get all response keys: %s' % self.keys)
-        return self.keys
+        if s != {}:
+            self.get_keys(s, self.data)
+            self.logger.debug(u'Get all response keys: %s' % self.keys)
+            return self.keys
+        return []
     
     def get_schema_keys(self, data, parent=None, required=[]):
         if u'$ref' in data:
