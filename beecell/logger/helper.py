@@ -5,7 +5,7 @@ Created on Jan 23, 2013
 '''
 import sys
 import logging.handlers
-from .amqp.handlers import AMQPHandler
+#from .amqp.handlers import AMQPHandler
 from celery.utils.log import ColorFormatter as CeleryColorFormatter
 from celery.utils.term import colored
 
@@ -30,16 +30,17 @@ class ColorFormatter(CeleryColorFormatter):
     }  
 
 class LoggerHelper(object):
+    '''
     @staticmethod
     def setup_amqp_logger(logger, logging_level, amqp_params):
-        '''Setup logger to an amqp exchange
+        """Setup logger to an amqp exchange
         
         :param str amqp_params: The AMQP connection params. Dict like: 
                                 {'host':'172.16.0.8', 'port':5672, 'vhost':'/', 
                                 'user':'guest', 'pwd':'testlab', 
                                 'exchange':'message', 'durable':False}
         :return: None
-        '''
+        """
         ch1 = AMQPHandler(host=amqp_params['host'],
                           port=amqp_params['port'], 
                           userid=amqp_params['user'],
@@ -53,7 +54,7 @@ class LoggerHelper(object):
         ch1.setFormatter(Formatter)
         logger.addHandler(ch1)
         logger.setLevel(logging_level)
-        logger.propagate = False    
+        logger.propagate = False'''
     
     @staticmethod
     def setup_socket_handler(logger, logging_level, host, port):
