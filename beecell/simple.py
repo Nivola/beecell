@@ -196,7 +196,8 @@ def get_class_name(classref):
     name = str(classref).split('.')[-1].rstrip("'>").lower()
     return "%s.%s" % (classref.__module__, name)
 
-def id_gen(length = 10):
+
+def id_gen(length = 10, parent_id=None):
     """Generate unique uuid according to RFC 4122
     """
     '''
@@ -210,6 +211,8 @@ def id_gen(length = 10):
     '''
     #oid = str(uuid4())
     oid = binascii.hexlify(os.urandom(length))
+    if parent_id is not None:
+        oid = u'%s//%s' % (parent_id, oid)
     return oid
 
 def token_gen(args=None):
