@@ -9,6 +9,31 @@ from cement.core.foundation import CementApp, LOG
 from cement.core.controller import CementBaseController, expose
 from gettext import gettext as _
 
+class ColoredText:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    
+    WHITEonBLACK = '\033[1;37;40m'
+    GREENonBLACK = '\033[1;32;40m'
+    BLUEonBLACK = '\033[1;34;40m'
+    REDonBLACK = '\033[1;31;40m'
+    YELLOWonBLACK = '\033[1;33;40m'
+    PURPLEonBLACK = '\033[1;35;40m'
+    CYANonBLACK = '\033[1;36;40m'
+    
+    def output(self, data, color):
+        return getattr(self, color) + data + self.ENDC
+    
+    def error(self, data):
+        return self.FAIL + u' ERROR : ' + self.ENDC +\
+            self.FAIL + self.BOLD + str(data) + self.ENDC
+
 class CementCmdBaseController(CementBaseController):
     def _dispatch(self):
         """
@@ -59,13 +84,17 @@ class CementCmd(cmd.Cmd, CementApp):
         label = 'myapp'
         base_controller = 'base'
         prompt = u'cmd> '
+        color = True
     
     def __init__(self, *args, **kwargs):
         cmd.Cmd.__init__(self, completekey='tab', stdin=None, stdout=None)
         #CementApp.__init__(self, *args, **kwargs)
-        self.__init_cement__(*args, **kwargs)
+        self.__init_cement__(*args, **kwargs)    
         
         self.prompt = self.Meta.prompt
+        
+        self.colored_text = ColoredText()
+        self._colorize_prompt()
     
     def __init_cement__(self, label=None, **kw):
         super(CementApp, self).__init__(**kw)
@@ -104,21 +133,22 @@ class CementCmd(cmd.Cmd, CementApp):
         self.output = None
         self.controller = None
         self.cache = None
-        self.mail = None 
+        self.mail = None
+
+    def _colorize_prompt(self):
+        if self._meta.color is True:
+            self.prompt = self.colored_text.BOLD + self.prompt + \
+                self.colored_text.ENDC
+
+    def print_output(self, data, color):
+        if self._meta.color is True:
+            data = self.colored_text.output(data, color)
+        print(data)
     
-    def do_greet(self, person):
-        """greet [person]
-        Greet the named person"""
-        if person:
-            print "hi,", person
-        else:
-            print 'hi'
-    
-    def do_exit(self, line):
-        return True    
-    
-    def do_EOF(self, line):
-        return True
+    def print_error(self, data):
+        if self._meta.color is True:
+            data = self.colored_text.error(data)
+        print(data)    
     
     #
     # custom
@@ -171,10 +201,10 @@ class CementCmd(cmd.Cmd, CementApp):
     def _internal_parse_args(self, args=None, namespace=None):
         args, argv = self.args.parse_known_args(args, namespace)
         if argv:
-            msg = _('unrecognized arguments: %s')
+            msg = _(u'unrecognized arguments: %s')
+            msg = msg % u' '.join(argv)
             self.error = True
-            print(msg % ' '.join(argv))
-            #self.error(msg % ' '.join(argv))
+            self.print_error(msg)
         return args    
     
     def _parse_args(self):
@@ -266,6 +296,9 @@ class CementCmd(cmd.Cmd, CementApp):
         self.loop = True
         
         # setup argv... this has to happen before lay_cement()
+        #print line
+        #self._meta.argv = []
+        #if line is not None and line != u'':
         self._meta.argv = list(line.split(u' '))
         
         # setup the cement framework
@@ -283,7 +316,7 @@ class CementCmd(cmd.Cmd, CementApp):
         LOG.debug('running post_run hook')
         for res in self.hook.run('post_run', self):
             pass
-        
+
         self.close()
         return stop    
     
@@ -308,7 +341,8 @@ class CementCmd(cmd.Cmd, CementApp):
         """
         cmd, arg, line = self.parseline(line)
         if not line:
-            return self.emptyline()
+            return
+            #return self.emptyline()
         if cmd is None:
             return self.default(line)
         self.lastcmd = line
