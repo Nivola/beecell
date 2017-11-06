@@ -134,6 +134,8 @@ class CementCmd(cmd.Cmd, CementApp):
         self.controller = None
         self.cache = None
         self.mail = None
+        
+        self.has_setup = False # use to set single setup when loop is True
 
     def _colorize_prompt(self):
         if self._meta.color is True:
@@ -278,11 +280,19 @@ class CementCmd(cmd.Cmd, CementApp):
             # setup the cement framework
             self._lay_cement()
             self.setup()
+            self.setup_once()
             CementApp.run(self)
             #InteractiveOrCommandLine().onecmd(' '.join(sys.argv[1:]))
         else:
             self.cmdloop()
             #InteractiveOrCommandLine().cmdloop()
+    
+    def setup_once(self):
+        """Exetend this when loop is True and you want to run only the first time
+        """
+        if self.has_setup is True:
+            return
+        self.has_setup = True
     
     #
     # cmd extension
@@ -303,7 +313,8 @@ class CementCmd(cmd.Cmd, CementApp):
         
         # setup the cement framework
         self._lay_cement()
-        self.setup()        
+        self.setup()
+        self.setup_once()
         
         LOG.debug('running pre_run hook')
         for res in self.hook.run('pre_run', self):
