@@ -8,6 +8,10 @@ import sys, os, re
 from cement.core.foundation import CementApp, LOG
 from cement.core.controller import CementBaseController, expose
 from gettext import gettext as _
+import logging
+import time
+
+logger = logging.getLogger(__name__)
 
 class ColoredText:
     HEADER = '\033[95m'
@@ -273,6 +277,8 @@ class CementCmd(cmd.Cmd, CementApp):
     
     def run(self):
         if len(sys.argv) > 1:
+            self.start = time.time()
+            logger.debug(u'Run command: %s - START' % sys.argv)
             # setup argv... this has to happen before lay_cement()
             if self._meta.argv is None:
                 self._meta.argv = list(sys.argv[1:])
@@ -283,6 +289,7 @@ class CementCmd(cmd.Cmd, CementApp):
             self.setup_once()
             CementApp.run(self)
             #InteractiveOrCommandLine().onecmd(' '.join(sys.argv[1:]))
+            logger.debug(u'Run command: %s - STOP [%s]' % (sys.argv, time.time()-self.start))
         else:
             self.cmdloop()
             #InteractiveOrCommandLine().cmdloop()
@@ -302,6 +309,9 @@ class CementCmd(cmd.Cmd, CementApp):
         interpreted, but after the input prompt is generated and issued.
 
         """
+        self.start = time.time()
+        logger.debug(u'Run command: %s - START' % line)
+        
         # set loop
         self.loop = True
         
@@ -329,6 +339,7 @@ class CementCmd(cmd.Cmd, CementApp):
             pass
 
         self.close()
+        logger.debug(u'Run command: %s - STOP [%s]' % (line, time.time()-self.start))
         return stop    
     
     def default(self, line):
