@@ -10,6 +10,7 @@ from cement.core.controller import CementBaseController, expose
 from gettext import gettext as _
 import logging
 import time
+import traceback
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ class CementCmdBaseController(CementBaseController):
             if self._dispatch_command['func_name'] == '_dispatch':
                 func = getattr(self._dispatch_command['controller'],
                                '_dispatch')
-                return func()
+                #return func()
             else:
                 self._process_arguments()
                 self._parse_args()
@@ -66,10 +67,13 @@ class CementCmdBaseController(CementBaseController):
                     return
                 func = getattr(self._dispatch_command['controller'],
                                self._dispatch_command['func_name'])
-                return func()
+                #return func()
         else:
             self._process_arguments()
-            self._parse_args()    
+            self._parse_args()
+            func = None
+            
+        return func()
     
     @expose(hide=True)
     def default(self):
@@ -152,9 +156,11 @@ class CementCmd(cmd.Cmd, CementApp):
         print(data)
     
     def print_error(self, data):
+        logger.error(traceback.format_exc())
         if self._meta.color is True:
             data = self.colored_text.error(data)
-        print(data)    
+        print(data)
+        self.error = True
     
     #
     # custom
