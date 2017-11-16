@@ -150,7 +150,7 @@ class CementCmd(cmd.Cmd, CementApp):
             self.prompt = self.colored_text.BOLD + self.prompt + \
                 self.colored_text.ENDC
 
-    def print_output(self, data, color):
+    def print_output(self, data, color=u'WHITEonBLACK'):
         if self._meta.color is True:
             data = self.colored_text.output(data, color)
         print(data)
