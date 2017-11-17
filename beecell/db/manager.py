@@ -11,6 +11,7 @@ from sqlalchemy import create_engine, exc, event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import Pool
 from datetime import datetime
+from beecell.simple import truncate
 
 class SqlManagerError(Exception): pass
 class RedisManagerError(Exception): pass
@@ -304,9 +305,52 @@ class SqlManager(ConnectionManager):
             if connection is not None:
                 connection.close()
                 
-    
     def invalidate_connection_pool(self):
         self.engine.dispose()
+    
+    def get_schemas(self):
+        """Get schemas list
+        """
+        connection = None
+        res = []
+        try:
+            connection = self.engine.connect()
+            result = connection.execute(u'select table_schema, count(table_name) '\
+                u'from information_schema.tables group by table_schema')
+            for row in result:
+                res.append({
+                    u'schema':row[0],
+                    u'tables':row[1]
+                })
+            self.logger.debug(u'Get schema list: %s' % res)
+            
+        except Exception as ex:
+            self.logger.error(ex, exc_info=1)
+            raise
+        finally:
+            if connection is not None:
+                connection.close()
+        return res
+    
+    def get_users(self):
+        """Get users list
+        """
+        connection = None
+        res = []
+        try:
+            connection = self.engine.connect()
+            result = connection.execute(u'select Host, User from mysql.user')
+            for row in result:
+                res.append({u'host':row[0], u'user':row[1]})
+            self.logger.debug(u'Get users list: %s' % res)
+            
+        except Exception as ex:
+            self.logger.error(ex, exc_info=1)
+            raise
+        finally:
+            if connection is not None:
+                connection.close()
+        return res    
         
     def get_tables_names(self):
         """Get list of tables name """
@@ -314,6 +358,46 @@ class SqlManager(ConnectionManager):
         self.logger.debug("Get table list: %s" % tables)
         return tables
     
+    def get_schema_tables(self, schema):
+        """Get schema table list
+        
+        **Parameters:**
+        
+            * **schema** (:py:class:`str`): schema name
+            
+        **Returns:**
+        
+            entity instance
+            
+        **Raise:** :class:`Exception` 
+        """
+        connection = None
+        res = []
+        try:
+            connection = self.engine.connect()
+            sql = u"select table_name, table_rows, data_length, index_length, "\
+                  u"auto_increment from information_schema.tables where "\
+                  u"table_schema='%s'"
+            result = connection.execute(sql % schema)
+            for row in result:
+                res.append({
+                    u'table_name':row[0], 
+                    u'table_rows':row[1],
+                    u'data_length':row[2],
+                    u'index_length':row[3],
+                    u'auto_increment':row[4]
+                })
+            self.logger.debug(u'Get tables for schema %s: %s' % (schema, res))
+            
+        except Exception as ex:
+            self.logger.error(ex, exc_info=1)
+            raise
+        finally:
+            if connection is not None:
+                connection.close()
+        return res      
+    
+   
     def get_table_description(self, table_name):
         """Describe a table.
         
@@ -327,37 +411,17 @@ class SqlManager(ConnectionManager):
         table_obj = Table(table_name, metadata, autoload=True, 
                           autoload_with=self.engine)
         self.logger.debug("Get description for table %s" % (table_name))
-        return [(c.name, str(c.type), c.default, c.index, c.nullable, 
-                 c.primary_key, c.unique) for c in table_obj.columns]
-    
-    def count_table_rows(self, table_name, where=None):
-        """Count table rows
-        
-        :param table_name: name of the table to query [optional]
-        :param where: query filter [optional]
-        :return: rows count
-        :raise SqlManagerError:
-        """
-        query = "SELECT COUNT(*) FROM %s" % (table_name)
-        if where is not None:
-            query = "%s WHERE %s" % (query, where)
-        
-        try:
-            # get total number of table rows
-            connection = self.engine.connect()
-            result = connection.execute(query)
-            count = result.fetchone()[0]
-            self.logger.debug("Table %s rows count: %s" % (table_name, count))
-            connection.close()
-            
-            return count
-        except Exception as ex:
-            err = 'Mysql query %s error: %s' % (query, ex)
-            self.logger.error(err)
-            raise SqlManagerError(err)
+        return [{
+            u'name':c.name, 
+            u'type':str(c.type), 
+            u'default':c.default, 
+            u'index':c.index, 
+            u'is_nullable':c.nullable, 
+            u'is_primary_key':c.primary_key, 
+            u'is_unique':c.unique} for c in table_obj.columns]
     
     def query_table(self, table_name, where=None, fields="*", 
-                          rows=100, offset=0):
+                          rows=20, offset=0):
         """Query a table
         
         :param table_name: name of the table to query [optional]
@@ -368,6 +432,8 @@ class SqlManager(ConnectionManager):
         :return: query rows
         :raise SqlManagerError:
         """
+        res = []
+        
         if fields is not None:
             fields = ",".join(fields)
         
@@ -378,10 +444,9 @@ class SqlManager(ConnectionManager):
         query = "%s LIMIT %s OFFSET %s" % (query, rows, offset)    
         
         # get columns name
-        col_names = [c[0] for c in self.get_table_description(table_name)]
+        col_names = [c[u'name'] for c in self.get_table_description(table_name)]
         
         try:
-            rows = []
             # query tables
             connection = self.engine.connect()
             result = connection.execute(query)
@@ -395,14 +460,17 @@ class SqlManager(ConnectionManager):
                         col = str(json.loads(col))
                     cols[col_names[i]] = col
                     i += 1
-                rows.append(cols)
-            connection.close()
-            self.logger.debug("Execute query %s: %s" % (query, len(rows)))
-            return rows
+                res.append(cols)
+            self.logger.debug("Execute query %s: %s" % (query, truncate(res)))
+            
         except Exception as ex:
             err = 'Mysql query %s error: %s' % (query, ex)
             self.logger.error(err)
             raise SqlManagerError(err)
+        finally:
+            if connection is not None:
+                connection.close()
+        return res   
     
     def get_connection(self):
         try:
