@@ -286,7 +286,11 @@ try:
             iterations : How many times to raise the signal. 0 (the default) means infinity.
             '''
             return uwsgi.add_rb_timer(signum, seconds, iterations=0)
-    
+        
+        def chunked_read(self, timeout):
+            """chunked read
+            """
+            return uwsgi.chunked_read(timeout)
     
         '''
         RPC
