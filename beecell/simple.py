@@ -296,8 +296,8 @@ def parse_redis_uri(uri):
         res = {u'type':u'cluster', u'nodes':cluster_nodes}
         
     # single redis node
-    elif redis_uri.find(u'redis') >= 0:
-        redis_uri = redis_uri.lstrip(u'redis://')
+    elif uri.find(u'redis') >= 0:
+        redis_uri = uri.lstrip(u'redis://')
         host, port = redis_uri.split(u':')
         port, db = port.split(u'/')
         res = {u'type':u'single', u'host':host, u'port':int(port), u'db':int(db)}
