@@ -329,4 +329,15 @@ def format_date(date):
     if date is not None:
         res = str2uni(date.strftime(u'%Y-%m-%dT%H:%M:%SZ'))
     return res
+
+def compat(data):
+    if isinstance(data, list):
+        for item in data:
+            item = compat(item)
+    if isinstance(data, dict):
+        for k,v in data.items():
+            data[k] = compat(v)
+    else:
+        data = truncate(data, 30)
+    return data
     
