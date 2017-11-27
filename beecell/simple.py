@@ -266,19 +266,48 @@ def set_dict_item(in_dict, key, value):
 def parse_redis_uri(uri):
     """Parse redis uri.
     
-    :param uri: can be redis://localhost:6379/1 or localhost;6379;1
-    :return: (host, port, db)
-    :rtype: tupla
+    **Parameters**:
+    
+        * **uri**: redis connection uri. Ex 
+            * ``redis://localhost:6379/1``
+            * ``localhost:6379:1``
+            * ``redis-cluster://localhost:6379,localhost:6380``
+
+    **Return**:
+        
+        {u'type':u'single', u'host':host, u'port':port, u'db':db}
+        
+        or
+        
+        {u'type':u'cluster', u'nodes':[
+            {u'host': u'10.102.184.121', u'port': u'6379'},
+            {u'host': u'10.102.91.23', u'port': u'6379'}
+        ]}
+    
     """
-    # parse redis uri
-    if uri.find('redis') >= 0:
-        redis_uri = uri.lstrip('redis://')
-        host, port = redis_uri.split(':')
-        port, db = port.split('/')
+    # redis cluster
+    if uri.find(u'redis-cluster') >= 0:
+        redis_uri = uri.lstrip(u'redis-cluster://')
+        host_ports = redis_uri.split(u',')
+        cluster_nodes = []
+        for host_port in host_ports:
+            host, port = host_port.split(u':')
+            cluster_nodes.append({u'host':host, u'port':port})
+        res = {u'type':u'cluster', u'nodes':cluster_nodes}
+        
+    # single redis node
+    elif redis_uri.find(u'redis') >= 0:
+        redis_uri = redis_uri.lstrip(u'redis://')
+        host, port = redis_uri.split(u':')
+        port, db = port.split(u'/')
+        res = {u'type':u'single', u'host':host, u'port':int(port), u'db':int(db)}
+
+    # single redis node
     else:
         host, port, db = uri.split(";")
-        
-    return host, port, db
+        res = {u'type':u'single', u'host':host, u'port':int(port), u'db':int(db)}
+    
+    return res
 
 def str2bool(value):
     """Convert value from string to bool"""

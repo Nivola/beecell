@@ -12,6 +12,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import Pool
 from datetime import datetime
 from beecell.simple import truncate
+from rediscluster.client import StrictRedisCluster
 
 class SqlManagerError(Exception): pass
 class RedisManagerError(Exception): pass
@@ -41,22 +42,51 @@ class ConnectionManager(object):
 class RedisManager(ConnectionManager):
     """Manager for redis instance.
     
-    :param: redis_uri: redis connection uri. Ex ``redis://localhost:6379/1``
+    **Parameters**:
+    
+        * **redis_uri**: redis connection uri. Ex 
+            * ``redis://localhost:6379/1``
+            * ``localhost:6379:1``
+            * ``redis-cluster://localhost:6379,localhost:6380``
+        * **timeout**: redis connection timeout [defualt=2]
+        * **cluster_nodes**: redis cluster nodes. Ex.
+        
+            [{"host": "10.102.184.121", "port": "6379"},
+             {"host": "10.102.91.23", "port": "6379"}]
     """
     
     def __init__(self, redis_uri, timeout=2):
         ConnectionManager.__init__(self)
         
-        if redis_uri.find('redis') >= 0:
-            redis_uri = redis_uri.lstrip('redis://')
-            host, port = redis_uri.split(':')
-            port, db = port.split('/')
+        # redis cluster
+        if redis_uri.find(u'redis-cluster') >= 0:
+            redis_uri = redis_uri.lstrip(u'redis-cluster://')
+            host_ports = redis_uri.split(u',')
+            cluster_nodes = []
+            for host_port in host_ports:
+                host, port = host_port.split(u':')
+                cluster_nodes.append({u'host':host, u'port':port})
+            self.server = StrictRedisCluster(startup_nodes=cluster_nodes, 
+                                             decode_responses=True,
+                                             socket_timeout=timeout)
+            
+        # single redis node
+        elif redis_uri.find(u'redis') >= 0:
+            redis_uri = redis_uri.lstrip(u'redis://')
+            host, port = redis_uri.split(u':')
+            port, db = port.split(u'/')
+            self.server = redis.StrictRedis(host=host, port=int(port), db=int(db),
+                                            password=None, socket_timeout=timeout, 
+                                            connection_pool=None)            
+
+        # single redis node
         else:
-            host, port, db = redis_uri.split(";")
-        self.server = redis.StrictRedis(host=host, port=int(port), db=int(db),
-                                        password=None, socket_timeout=timeout, 
-                                        connection_pool=None)
-        self.logger.debug('Setup redis: %s' % self.conn)
+            host, port, db = redis_uri.split(u';')
+            self.server = redis.StrictRedis(host=host, port=int(port), db=int(db),
+                                            password=None, socket_timeout=timeout, 
+                                            connection_pool=None)
+
+        self.logger.debug(u'Setup redis: %s' % self.server)
     
     @property
     def conn(self):
@@ -312,16 +342,25 @@ class SqlManager(ConnectionManager):
         """Get schemas list
         """
         connection = None
-        res = []
+        res = {}
         try:
             connection = self.engine.connect()
             result = connection.execute(u'select table_schema, count(table_name) '\
                 u'from information_schema.tables group by table_schema')
             for row in result:
-                res.append({
+                res[row[0]] = {
                     u'schema':row[0],
                     u'tables':row[1]
-                })
+                }
+            # add empty schema
+            result = connection.execute(u'show databases')
+            for row in result:
+                if row[0] not in res.keys():
+                    res[row[0]] = {
+                        u'schema':row[0],
+                        u'tables':0
+                    }
+            res = res.values()
             self.logger.debug(u'Get schema list: %s' % res)
             
         except Exception as ex:

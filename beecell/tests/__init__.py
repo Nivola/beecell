@@ -82,8 +82,9 @@ class BeecellTestCase(unittest.TestCase):
         self.mysql = config.get(u'mysql')
         
         # redis
-        self.redis_uri = config.get(u'redis').get(u'uri')
-        
+        self.redis_uri = config.get(u'redis').get(u'uri', u'')
+        self.redis_cluster = config.get(u'redis').get(u'cluster', u'')
+
         # ldap server
         ldap = config.get(u'ldap')
         ldap_domain = u'ad.provincia.torino.it'

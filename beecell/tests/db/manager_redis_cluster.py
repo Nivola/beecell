@@ -13,11 +13,13 @@ from beecell.tests import BeecellTestCase, runtest
 
 tests = [
 'test_redis_ping',
-#'test_redis_info',
-#'test_redis_size',
-#'test_redis_config',
+# 'test_redis_info',
+# 'test_redis_size',
+# 'test_redis_config',
+# 'test_redis_inspect',
+
 #'test_redis_cleandb',
-#'test_redis_inspect',
+
 #'test_redis_list',
 ]
 
@@ -26,7 +28,7 @@ class RedisManagerTestCase(BeecellTestCase):
     """
     def setUp(self):
         BeecellTestCase.setUp(self)
-        self.manager = RedisManager(self.redis_uri)
+        self.manager = RedisManager(self.redis_cluster)
         
     def tearDown(self):
         BeecellTestCase.tearDown(self)
@@ -38,26 +40,28 @@ class RedisManagerTestCase(BeecellTestCase):
         res = self.manager.ping()
         
     def test_redis_info(self):
-        pprint.pprint(self.manager.info())
+        res = self.manager.info()
+        self.logger.info(pprint.pformat(res))
         
     def test_redis_size(self):
-        self.manager.size()
+        res = self.manager.size()
+        self.logger.info(pprint.pformat(res))
         
     def test_redis_config(self):
-        pprint.pprint(self.manager.config(pattern='*mem*'))     
+        res = self.manager.config()#(pattern='*mem*')
+        self.logger.info(pprint.pformat(res))
         
     def test_redis_cleandb(self):
         self.manager.cleandb()
     
     def test_redis_inspect(self):
         keys = self.manager.inspect(pattern='*', debug=False)
-        #pprint.pprint(keys)
-        #pprint.pprint(keys)
-        pprint.pprint(self.manager.query(keys, ttl=True))
-        #self.manager.delete(pattern='celery-schedule')
-        
-        schedule = redis_collections.Dict(key='celery-schedule', redis=self.manager.conn)
-        print schedule.keys()
+        self.logger.info(pprint.pformat(keys))
+        res = self.manager.query(keys, ttl=True)
+        self.logger.info(pprint.pformat(res))
+        #self.manager.delete(pattern='celery-schedule')        
+        #schedule = redis_collections.Dict(key='celery-schedule', redis=self.manager.conn)
+        #print schedule.keys()
         
     def test_redis_list(self):
         keys = self.manager.inspect(pattern=u'prova_list', debug=False)
