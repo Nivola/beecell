@@ -68,7 +68,8 @@ class RedisManager(ConnectionManager):
                 cluster_nodes.append({u'host':host, u'port':port})
             self.server = StrictRedisCluster(startup_nodes=cluster_nodes, 
                                              decode_responses=True,
-                                             socket_timeout=timeout)
+                                             socket_timeout=timeout,
+                                             retry_on_timeout=False)
             
         # single redis node
         elif redis_uri.find(u'redis') >= 0:
@@ -76,14 +77,16 @@ class RedisManager(ConnectionManager):
             host, port = redis_uri.split(u':')
             port, db = port.split(u'/')
             self.server = redis.StrictRedis(host=host, port=int(port), db=int(db),
-                                            password=None, socket_timeout=timeout, 
+                                            password=None, socket_timeout=timeout,
+                                            retry_on_timeout=False,
                                             connection_pool=None)            
 
         # single redis node
         else:
             host, port, db = redis_uri.split(u';')
             self.server = redis.StrictRedis(host=host, port=int(port), db=int(db),
-                                            password=None, socket_timeout=timeout, 
+                                            password=None, socket_timeout=timeout,
+                                            retry_on_timeout=False,
                                             connection_pool=None)
 
         self.logger.debug(u'Setup redis: %s' % self.server)

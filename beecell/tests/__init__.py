@@ -68,7 +68,7 @@ class BeecellTestCase(unittest.TestCase):
             #config = self.load_config(u'%s/params.json' % path)
             home = os.path.expanduser(u'~')
             config = self.load_config(u'%s/beecell.json' % home)
-            logger.info(u'get beehive test configuraztion')
+            logger.info(u'get beehive test configuration')
         except Exception:
             logger.error(u'Config file beecell.json was not find in user '\
                             u'home or is malformed', exc_info=1)

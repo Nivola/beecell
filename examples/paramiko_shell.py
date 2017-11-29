@@ -21,8 +21,7 @@ client.connect(ipaddress, port, username=user, password=pwd,
 #timeout=None, #allow_agent=True,
 
 channel = client.get_transport().open_session()
-channel.get_pty(term=u'vt100', width=0, height=0, 
-            width_pixels=0, height_pixels=0)
+channel.get_pty(term=u'vt100', width=0, height=0, width_pixels=0, height_pixels=0)
 
 channel.invoke_shell()
 interactive.interactive_shell(channel)
