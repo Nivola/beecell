@@ -12,6 +12,7 @@ class ModelError(Exception):
     def __str__(self):
         return self.desc
 
+
 class TransactionError(Exception):
     def __init__(self, desc, code=0):
         """
@@ -25,7 +26,8 @@ class TransactionError(Exception):
 
     def __str__(self):
         return self.desc
-    
+
+
 class QueryError(Exception):
     def __init__(self, desc, code=0):
         """
@@ -39,5 +41,6 @@ class QueryError(Exception):
 
     def __str__(self):
         return self.desc
+
 
 from .manager import MysqlManager
