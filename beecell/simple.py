@@ -309,6 +309,7 @@ def parse_redis_uri(uri):
     
     return res
 
+
 def str2bool(value):
     """Convert value from string to bool"""
     res = None
@@ -317,6 +318,7 @@ def str2bool(value):
     elif value in [u'True', u'true', 1, u'yes', u'si', True]:
         res = True
     return res
+
 
 def format_date(date):
     """Format date as rfc3339.
@@ -330,14 +332,14 @@ def format_date(date):
         res = str2uni(date.strftime(u'%Y-%m-%dT%H:%M:%SZ'))
     return res
 
+
 def compat(data):
     if isinstance(data, list):
         for item in data:
             item = compat(item)
     if isinstance(data, dict):
-        for k,v in data.items():
+        for k, v in data.items():
             data[k] = compat(v)
     else:
         data = truncate(data, 30)
     return data
-    
