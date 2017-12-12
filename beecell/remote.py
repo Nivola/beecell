@@ -181,7 +181,7 @@ class RemoteClient(object):
                            look_for_keys=False, 
                            compress=False)
             stdin, stdout, stderr = client.exec_command(cmd)
-            res = {u'stdout':[], u'stderr':stderr.read()}
+            res = {u'stdout': [], u'stderr':stderr.read()}
             for line in stdout:
                 res[u'stdout'].append(line.strip(u'\n'))         
             '''if len(stderr.read()) != 0:
