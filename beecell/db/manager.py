@@ -1,8 +1,8 @@
-'''
+"""
 Created on Apr 24, 2014
 
 @author: darkbk
-'''
+"""
 import logging
 import redis
 import os
@@ -15,8 +15,13 @@ from beecell.simple import truncate
 from rediscluster.client import StrictRedisCluster
 
 class SqlManagerError(Exception): pass
+
+
 class RedisManagerError(Exception): pass
+
+
 class MysqlManagerError(Exception): pass
+
 
 class ConnectionManager(object):
     """Abstract Connection manager
@@ -38,6 +43,7 @@ class ConnectionManager(object):
         :param session: active session to close
         """        
         return NotImplemented
+
 
 class RedisManager(ConnectionManager):
     """Manager for redis instance.
@@ -65,10 +71,8 @@ class RedisManager(ConnectionManager):
             cluster_nodes = []
             for host_port in host_ports:
                 host, port = host_port.split(u':')
-                cluster_nodes.append({u'host':host, u'port':port})
-            self.server = StrictRedisCluster(startup_nodes=cluster_nodes, 
-                                             decode_responses=True,
-                                             socket_timeout=timeout,
+                cluster_nodes.append({u'host': host, u'port': port})
+            self.server = StrictRedisCluster(startup_nodes=cluster_nodes, decode_responses=True, socket_timeout=timeout,
                                              retry_on_timeout=False)
             
         # single redis node
@@ -76,18 +80,14 @@ class RedisManager(ConnectionManager):
             redis_uri = redis_uri.lstrip(u'redis://')
             host, port = redis_uri.split(u':')
             port, db = port.split(u'/')
-            self.server = redis.StrictRedis(host=host, port=int(port), db=int(db),
-                                            password=None, socket_timeout=timeout,
-                                            retry_on_timeout=False,
-                                            connection_pool=None)            
+            self.server = redis.StrictRedis(host=host, port=int(port), db=int(db), password=None,
+                                            socket_timeout=timeout, retry_on_timeout=False, connection_pool=None)
 
         # single redis node
         else:
             host, port, db = redis_uri.split(u';')
-            self.server = redis.StrictRedis(host=host, port=int(port), db=int(db),
-                                            password=None, socket_timeout=timeout,
-                                            retry_on_timeout=False,
-                                            connection_pool=None)
+            self.server = redis.StrictRedis(host=host, port=int(port), db=int(db), password=None,
+                                            socket_timeout=timeout, retry_on_timeout=False, connection_pool=None)
 
         self.logger.debug(u'Setup redis: %s' % self.server)
     
@@ -138,7 +138,6 @@ class RedisManager(ConnectionManager):
         :param pattern: key search pattern [default='*']
         :return: list of tuple (key, type, ttl)
         """
-        #pipe = self.server.pipeline(transaction=False)
         keys = self.server.keys(pattern)
 
         data = []
@@ -156,11 +155,9 @@ class RedisManager(ConnectionManager):
         :param pattern: key search pattern [default='*']
         :return: list of tuple (key, type, ttl)
         """
-        #pipe = self.server.pipeline(transaction=True)
         keys = self.server.keys(pattern)
         if len(keys) > 0:
             res = self.server.delete(*keys)
-            #pipe.execute()
             return res
         return None
     
@@ -223,6 +220,7 @@ def ping_connection(dbapi_connection, connection_record, connection_proxy):
         raise exc.DisconnectionError()
     cursor.close()
 '''
+
 
 class SqlManager(ConnectionManager):
     """
@@ -438,8 +436,7 @@ class SqlManager(ConnectionManager):
             if connection is not None:
                 connection.close()
         return res      
-    
-   
+
     def get_table_description(self, table_name):
         """Describe a table.
         
@@ -526,12 +523,10 @@ class SqlManager(ConnectionManager):
             # pool will be refresh
             if e.connection_invalidated:
                 self.logger1.warning("Connection was invalidated!")
-                #raise SqlManagerError("Connection was invalidated! Try to reconnect")
                 self.engine.connect()
     
     def release_connection(self, conn):
         conn.close()
-        #self.logger1.debug("Release connection %s to poll %s." % (conn, self.engine))
         
     def get_session(self):
         """Open a database session.
@@ -565,6 +560,7 @@ class SqlManager(ConnectionManager):
             session.close()
             self.logger1.debug("Release session: %s" % (session))
 
+
 class MysqlManager(SqlManager):
     def __init__(self, mysql_id, db_uri, connect_timeout=5):
         """
@@ -576,7 +572,8 @@ class MysqlManager(SqlManager):
         SqlManager.__init__(self, mysql_id, db_uri, connect_timeout)
         
         self.ping_query = "SELECT 1"
-        
+
+
 class PostgresManager(SqlManager):
     def __init__(self, mysql_id, db_uri, connect_timeout=5):
         """
