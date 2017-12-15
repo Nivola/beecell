@@ -163,8 +163,7 @@ class LoggerHelper(object):
             logger.propagate = False
     
     @staticmethod
-    def simple_handler(loggers, logging_level, frmt=None, 
-                       formatter=ColorFormatter):
+    def simple_handler(loggers, logging_level, frmt=None, formatter=ColorFormatter):
         if frmt is None:
             frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] " \
                    "%(name)s:%(funcName)s:%(lineno)d - %(message)s"
