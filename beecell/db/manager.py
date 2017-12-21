@@ -459,8 +459,7 @@ class SqlManager(ConnectionManager):
             u'is_primary_key':c.primary_key, 
             u'is_unique':c.unique} for c in table_obj.columns]
     
-    def query_table(self, table_name, where=None, fields="*", 
-                          rows=20, offset=0):
+    def query_table(self, table_name, where=None, fields="*", rows=20, offset=0):
         """Query a table
         
         :param table_name: name of the table to query [optional]
@@ -572,6 +571,37 @@ class MysqlManager(SqlManager):
         SqlManager.__init__(self, mysql_id, db_uri, connect_timeout)
         
         self.ping_query = "SELECT 1"
+
+    def drop_all_tables(self, schema):
+        """Query a table
+
+        :param schema: schema
+        :return: True
+        :raise SqlManagerError:
+        """
+        stmp = ["SET FOREIGN_KEY_CHECKS = 0;",
+                "SET @tables = NULL;",
+                "SELECT GROUP_CONCAT(table_schema, '.', table_name) INTO @tables FROM information_schema.tables WHERE table_schema = '%s';" % schema,
+                "SET @tables = CONCAT('DROP TABLE ', @tables);",
+                "PREPARE stmt FROM @tables;",
+                "EXECUTE stmt;",
+                "DEALLOCATE PREPARE stmt;",
+                "SET FOREIGN_KEY_CHECKS = 1"]
+
+        try:
+            connection = self.engine.connect()
+            trans = connection.begin()
+            for item in stmp:
+                connection.execute(item)
+            trans.commit()
+        except:
+            trans.rollback()
+            self.logger.error(u'Error during drop all', exc_info=1)
+            raise SqlManagerError(u'Error during drop all')
+        finally:
+            if connection is not None:
+                connection.close()
+        return None
 
 
 class PostgresManager(SqlManager):
