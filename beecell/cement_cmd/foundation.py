@@ -151,9 +151,10 @@ class CementCmd(cmd.Cmd, CementApp):
                 self.colored_text.ENDC
 
     def print_output(self, data, color=u'WHITEonBLACK'):
-        if self._meta.color is True:
-            data = self.colored_text.output(data, color)
-        print(data)
+        if self.error is False:
+            if self._meta.color is True:
+                data = self.colored_text.output(data, color)
+            print(data)
     
     def print_error(self, data):
         logger.error(traceback.format_exc())
