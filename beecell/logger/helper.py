@@ -1,13 +1,31 @@
-'''
+"""
 Created on Jan 23, 2013
 
 @author: darkbk
-'''
+"""
 import sys
-import logging.handlers
-#from .amqp.handlers import AMQPHandler
+import logging
 from celery.utils.log import ColorFormatter as CeleryColorFormatter
 from celery.utils.term import colored
+
+DEBUG2 = -10
+DEBUG3 = -20
+
+
+class ExtendedLogger(logging.Logger):
+    def debug2(self, msg, *args, **kwargs):
+        if DEBUG2 >= self.getEffectiveLevel():
+            self._log(DEBUG2, msg, args, **kwargs)
+
+    def debug3(self, msg, *args, **kwargs):
+        if DEBUG3 >= self.getEffectiveLevel():
+            self._log(DEBUG3, msg, args, **kwargs)
+
+
+logging.setLoggerClass(ExtendedLogger)
+logging.addLevelName(DEBUG2, u'DEBUG2')
+logging.addLevelName(DEBUG3, u'DEBUG3')
+
 
 class CustomFormatter(logging.Formatter):
     def __init__(self, default):
@@ -15,7 +33,8 @@ class CustomFormatter(logging.Formatter):
         
     def format(self, record):
         return self._default_formatter.format(record)
-    
+
+
 class ColorFormatter(CeleryColorFormatter):
     """Logging formatter that adds colors based on severity."""
 
@@ -26,10 +45,24 @@ class ColorFormatter(CeleryColorFormatter):
         u'WARNING': COLORS[u'yellow'],
         u'WARN': COLORS[u'yellow'],
         u'ERROR': COLORS[u'red'], 
-        u'CRITICAL': COLORS[u'magenta']
+        u'CRITICAL': COLORS[u'magenta'],
+        u'DEBUG2': COLORS[u'green'],
+        u'DEBUG3': COLORS[u'cyan']
     }  
 
+
 class LoggerHelper(object):
+    CRITICAL = 50
+    FATAL = CRITICAL
+    ERROR = 40
+    WARNING = 30
+    WARN = WARNING
+    INFO = 20
+    DEBUG = 10
+    NOTSET = 0
+    DEBUG2 = DEBUG2
+    DEBUG3 = DEBUG3
+
     '''
     @staticmethod
     def setup_amqp_logger(logger, logging_level, amqp_params):
@@ -54,13 +87,13 @@ class LoggerHelper(object):
         ch1.setFormatter(Formatter)
         logger.addHandler(ch1)
         logger.setLevel(logging_level)
-        logger.propagate = False'''
+        logger.propagate = False
     
     @staticmethod
     def setup_socket_handler(logger, logging_level, host, port):
-        '''Setup logger 'portal2' to a socket portal2
+        """Setup logger 'portal2' to a socket portal2
         This logger requires first an active socket portal2
-        '''
+        """
         #rootLogger = logging.getLogger('')
         #severLogger.setLevel(logging_level)
         socketHandler = logging.handlers.SocketHandler(host, port)
@@ -69,12 +102,6 @@ class LoggerHelper(object):
         logger.addHandler(socketHandler)
         
         #severLogger.info('Started logger portal2')
-        '''
-        logger1.debug('Quick zephyrs blow, vexing daft Jim.')
-        logger1.info('How quickly daft jumping zebras vex.')
-        logger2.warning('Jail zesty vixen who grabbed pay from quack.')
-        logger2.error('The five boxing wizards jump quickly.')
-        '''
     
     @staticmethod
     def setup_simple_handler(logger, logging_level, frmt=None):
@@ -136,17 +163,16 @@ class LoggerHelper(object):
         logger.addHandler(ch1)
         logger.setLevel(logging_level)
         logger.propagate = False
+    '''
         
     #
     # new methods. Correct the problem with loggers that use the same file. Use 
     # rotatingfile_handler passing all the logger.
     #
     @staticmethod
-    def memory_handler(loggers, logging_level, target, frmt=None,
-                       formatter=ColorFormatter):
+    def memory_handler(loggers, logging_level, target, frmt=None, formatter=ColorFormatter):
         if frmt is None:
-            frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] " \
-                   "%(name)s:%(funcName)s:%(lineno)d - %(message)s"
+            frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] %(name)s:%(funcName)s:%(lineno)d - %(message)s"
 
         handler = logging.handlers.MemoryHandler(capacity=1000, target=target)
         handler.setLevel(logging_level)
@@ -156,8 +182,6 @@ class LoggerHelper(object):
             handler.setFormatter(formatter(frmt))
             
         for logger in loggers:
-            #Formatter = logging.Formatter(frmt)
-            #ch1.setFormatter(Formatter)
             logger.addHandler(handler)
             logger.setLevel(logging_level)
             logger.propagate = False
@@ -165,8 +189,7 @@ class LoggerHelper(object):
     @staticmethod
     def simple_handler(loggers, logging_level, frmt=None, formatter=ColorFormatter):
         if frmt is None:
-            frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] " \
-                   "%(name)s:%(funcName)s:%(lineno)d - %(message)s"
+            frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] %(name)s:%(funcName)s:%(lineno)d - %(message)s"
 
         handler = logging.StreamHandler(sys.stdout)
         handler.setLevel(logging_level)
@@ -176,22 +199,16 @@ class LoggerHelper(object):
             handler.setFormatter(formatter(frmt))
 
         for logger in loggers:
-            #Formatter = logging.Formatter(frmt)
-            #ch1.setFormatter(Formatter)
             logger.addHandler(handler)
             logger.setLevel(logging_level)
             logger.propagate = False  
     
     @staticmethod
-    def rotatingfile_handler(loggers, logging_level, file_name, 
-                             maxBytes=104857600, backupCount=10, frmt=None,
+    def rotatingfile_handler(loggers, logging_level, file_name, maxBytes=104857600, backupCount=10, frmt=None,
                              formatter=ColorFormatter):
         if frmt is None:
-            frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] " \
-                   "%(name)s:%(funcName)s:%(lineno)d - %(message)s"
-        handler = logging.handlers.RotatingFileHandler(file_name, mode=u'a', 
-                                                       maxBytes=maxBytes, 
-                                                       backupCount=backupCount)
+            frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] %(name)s:%(funcName)s:%(lineno)d - %(message)s"
+        handler = logging.handlers.RotatingFileHandler(file_name, mode=u'a', maxBytes=maxBytes, backupCount=backupCount)
         handler.setLevel(logging_level)
         if formatter is None:
             handler.setFormatter(logging.Formatter(frmt))
@@ -199,17 +216,14 @@ class LoggerHelper(object):
             handler.setFormatter(formatter(frmt))
         
         for logger in loggers:
-            #logger.setFormatter(CustomFormatter)
             logger.addHandler(handler)
             logger.setLevel(logging_level)
             logger.propagate = False
             
     @staticmethod
-    def file_handler(loggers, logging_level, file_name, frmt=None, 
-                     formatter=ColorFormatter):
+    def file_handler(loggers, logging_level, file_name, frmt=None, formatter=ColorFormatter):
         if frmt is None:
-            frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] " \
-                   "%(name)s:%(funcName)s:%(lineno)d - %(message)s"
+            frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] %(name)s:%(funcName)s:%(lineno)d - %(message)s"
         handler = logging.FileHandler(file_name, mode=u'a')
         handler.setLevel(logging_level)
         if formatter is None:
@@ -218,7 +232,6 @@ class LoggerHelper(object):
             handler.setFormatter(formatter(frmt))        
         
         for logger in loggers:
-            #logger.setFormatter(CustomFormatter)
             logger.addHandler(handler)
             logger.setLevel(logging_level)
             logger.propagate = False
