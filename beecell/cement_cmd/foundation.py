@@ -39,6 +39,7 @@ class ColoredText:
         return self.FAIL + u' ERROR : ' + self.ENDC +\
             self.FAIL + self.BOLD + str(data) + self.ENDC
 
+
 class CementCmdBaseController(CementBaseController):
     def _dispatch(self):
         """
@@ -56,25 +57,31 @@ class CementCmdBaseController(CementBaseController):
         
         if self._dispatch_command:
             if self._dispatch_command['func_name'] == '_dispatch':
-                func = getattr(self._dispatch_command['controller'],
-                               '_dispatch')
-                #return func()
+                func = getattr(self._dispatch_command['controller'], '_dispatch')
             else:
                 self._process_arguments()
                 self._parse_args()
-                if self.app.error is True:
-                    self.app.error = False
-                    return
-                func = getattr(self._dispatch_command['controller'],
-                               self._dispatch_command['func_name'])
-                #return func()
+                if not self._dispatch_command['func_name'] == 'default':
+                    self._ext_parse_args()
+                func = getattr(self._dispatch_command['controller'], self._dispatch_command['func_name'])
         else:
             self._process_arguments()
             self._parse_args()
             func = None
-            
-        return func()
-    
+
+        try:
+            res = func()
+        except Exception as ex:
+            logger.error(ex, exc_info=1)
+            res = None
+
+        return res
+
+    def _ext_parse_args(self):
+        """
+        """
+        pass
+
     @expose(hide=True)
     def default(self):
         self.app.print_help()
@@ -87,6 +94,7 @@ class CementCmdBaseController(CementBaseController):
     def exit(self):
         return True      
 
+
 class CementCmd(cmd.Cmd, CementApp):
     class Meta:
         label = 'myapp'
@@ -96,7 +104,6 @@ class CementCmd(cmd.Cmd, CementApp):
     
     def __init__(self, *args, **kwargs):
         cmd.Cmd.__init__(self, completekey='tab', stdin=None, stdout=None)
-        #CementApp.__init__(self, *args, **kwargs)
         self.__init_cement__(*args, **kwargs)    
         
         self.prompt = self.Meta.prompt
@@ -263,12 +270,8 @@ class CementCmd(cmd.Cmd, CementApp):
         self.args.prog = self._meta.label
 
         if self.loop is False:
-            self.args.add_argument('--debug', dest='debug',
-                                   action='store_true',
-                                   help='toggle debug output')
-            self.args.add_argument('--quiet', dest='suppress_output',
-                                   action='store_true',
-                                   help='suppress all output')
+            self.args.add_argument('--debug', dest='debug', action='store_true', help='toggle debug output')
+            self.args.add_argument('--quiet', dest='suppress_output', action='store_true', help='suppress all output')
         else:
             self.remove_options(self.args, ['-h', '--help'],)
         
@@ -295,11 +298,9 @@ class CementCmd(cmd.Cmd, CementApp):
             self.setup()
             self.setup_once()
             CementApp.run(self)
-            #InteractiveOrCommandLine().onecmd(' '.join(sys.argv[1:]))
             logger.debug(u'Run command: %s - STOP [%s]' % (sys.argv, time.time()-self.start))
         else:
             self.cmdloop()
-            #InteractiveOrCommandLine().cmdloop()
     
     def setup_once(self):
         """Exetend this when loop is True and you want to run only the first time
@@ -332,8 +333,8 @@ class CementCmd(cmd.Cmd, CementApp):
         self._lay_cement()
         self.setup()
         self.setup_once()
-        
-        LOG.debug('running pre_run hook')
+
+        logger.debug('running pre_run hook')
         for res in self.hook.run('pre_run', self):
             pass        
 
@@ -341,7 +342,7 @@ class CementCmd(cmd.Cmd, CementApp):
 
     def postcmd(self, stop, line):
         """Hook method executed just after a command dispatch is finished."""
-        LOG.debug('running post_run hook')
+        logger.debug('running post_run hook')
         for res in self.hook.run('post_run', self):
             pass
 
@@ -356,7 +357,7 @@ class CementCmd(cmd.Cmd, CementApp):
         returns.
 
         """
-        self.stdout.write('*** Unknown syntax: %s\n'%line)    
+        self.stdout.write('*** Unknown syntax: %s\n' % line)
 
     def onecmd(self, line):
         """Interpret the argument as though it had been typed in response
@@ -375,7 +376,7 @@ class CementCmd(cmd.Cmd, CementApp):
         if cmd is None:
             return self.default(line)
         self.lastcmd = line
-        if line == 'EOF' :
+        if line == 'EOF':
             self.lastcmd = ''
         if cmd == '':
             return self.default(line)
