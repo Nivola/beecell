@@ -344,3 +344,12 @@ def compat(data):
     else:
         data = truncate(data, 30)
     return data
+
+
+def isBlank (myString):
+    return not (myString and myString.strip())
+
+def isNotBlank (myString):
+    return bool(myString and myString.strip())
+
+
