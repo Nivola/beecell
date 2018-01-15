@@ -1,19 +1,16 @@
-'''
+"""
 Created on Jul 18, 2012
 
 @author: darkbk
-'''
-import sys
+"""
 import os, string, random
-import time
-import logging
 import subprocess
 from prettytable import PrettyTable
-#import M2Crypto
 import string
 import binascii
 from uuid import uuid4
 from math import ceil
+
 
 def nround(number, decimal=4):
     """
@@ -22,24 +19,26 @@ def nround(number, decimal=4):
     convert = u'%.'+str(decimal)+u'f'
     return convert % (ceil(number * factor) / factor)
 
+
 def merge_dicts(*dict_args):
-    '''
-    Given any number of dicts, shallow copy and merge into a new dict,
-    precedence goes to key value pairs in latter dicts.
-    '''
+    """Given any number of dicts, shallow copy and merge into a new dict, precedence goes to key value pairs in latter
+    dicts.
+    """
     result = {}
     for dictionary in dict_args:
         result.update(dictionary)
     return result
 
+
 def random_password(length=10):
     chars = string.ascii_uppercase + string.digits + string.ascii_lowercase
     password = ''
     for i in range(length):
-        #password += chars[ord(M2Crypto.m2.rand_bytes(1)) % len(chars)]
+        # password += chars[ord(M2Crypto.m2.rand_bytes(1)) % len(chars)]
         password += chars[ord(os.urandom(1)) % len(chars)]
         
     return password
+
 
 def run_command(command):
     """Run a shell command as an external process and return response or error.
@@ -49,9 +48,10 @@ def run_command(command):
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
     if p.returncode == 0:
-        return (0, out)
+        return 0, out
     else:
-        return (p.returncode, err)
+        return p.returncode, err
+
 
 def str2uni(value):
     if type(value) is str:
@@ -67,7 +67,9 @@ def get_attrib(value_dict, key, default_value):
 
     return value'''
 
+
 class AttribException(Exception): pass
+
 
 def get_attrib(value_dict, key, default_value, exception=False):
     """ """
@@ -82,6 +84,7 @@ def get_attrib(value_dict, key, default_value, exception=False):
             value = value_dict[key]
 
     return value
+
 
 def get_value(value_dict, key, default_value, exception=False, vtype=None):
     """Get value from dictionary and apply some controls.
@@ -110,6 +113,7 @@ def get_value(value_dict, key, default_value, exception=False, vtype=None):
 
     return value
 
+
 def get_attrib2(inst, key, default_value=None):
     """ """
     value = default_value
@@ -117,6 +121,7 @@ def get_attrib2(inst, key, default_value=None):
         value = inst.__dict__[key]
 
     return value
+
 
 def getmembers(obj, predicate=None):
     """Return all members of an object as (name, value) pairs sorted by name.
@@ -133,6 +138,7 @@ def getmembers(obj, predicate=None):
     results.sort()
     return results
 
+
 def print_table(fields, data):
     """
     :param fields:list like ["City name", "Area", "Population", "Annual Rainfall"]
@@ -144,6 +150,7 @@ def print_table(fields, data):
     for item in data:
         tab.add_row(item)
     return tab
+
 
 def print_table_from_dict(list, order_field=None):
     if len(list) > 0:
@@ -160,6 +167,7 @@ def print_table_from_dict(list, order_field=None):
     else:
         return None
 
+
 def query_python_object(obj):
     """ """
     import pprint
@@ -168,12 +176,14 @@ def query_python_object(obj):
     pp = pprint.PrettyPrinter(indent=2)
     pp.pprint(inspect.getmembers(obj))
 
+
 def dynamic_import(name):
     mod = __import__(name)
     components = name.split('.')
     for comp in components[1:]:
         mod = getattr(mod, comp)
     return mod
+
 
 def import_class(cl):
     cl = str(cl)
@@ -182,14 +192,17 @@ def import_class(cl):
     m = __import__(cl[0:d], globals(), locals(), [classname])
     return getattr(m, classname)
 
+
 def get_class_props(cls):
     return [i for i in cls.__dict__.keys() if i[:1] != '_']    
+
 
 def get_member_class(args):
     """"""
     try: classname = args[0].__class__.__name__
     except: classname = ''
     return classname
+
 
 def get_class_name(classref):
     """"""
@@ -209,23 +222,25 @@ def id_gen(length = 10, parent_id=None):
     return str(int(round(random.random()*num, 0)))
     #return binascii.b2a_hex(os.urandom(length))
     '''
-    #oid = str(uuid4())
+    # oid = str(uuid4())
     oid = binascii.hexlify(os.urandom(length))
     if parent_id is not None:
         oid = u'%s//%s' % (parent_id, oid)
     return oid
 
+
 def token_gen(args=None):
     return str(uuid4())
 
+
 def transaction_id_generator(length = 20):
-    '''
-    Generate random string to use as transaction id
+    """Generate random string to use as transaction id
     return : random string
-    '''
+    """
     chars = string.ascii_letters + string.digits
     random.seed = (os.urandom(1024)) 
     return u''.join(random.choice(chars) for i in range(length))
+
 
 def get_remote_ip(request):
     try:
@@ -238,6 +253,7 @@ def get_remote_ip(request):
         return ipaddr
     except RuntimeError:
         return None
+
 
 def truncate(msg, size=200):
     """Truncate message to fixed size.
@@ -252,7 +268,8 @@ def truncate(msg, size=200):
         return msg[0:size] + '...'
     else:
         return msg
-    
+
+
 def set_dict_item(in_dict, key, value):
     """Set item in input dictionary if item is not None
     
@@ -263,6 +280,7 @@ def set_dict_item(in_dict, key, value):
     if value is not None:
         in_dict[key] = value
     return in_dict
+
 
 def parse_redis_uri(uri):
     """Parse redis uri.
@@ -346,10 +364,11 @@ def compat(data):
     return data
 
 
-def isBlank (myString):
+def isBlank(myString):
     return not (myString and myString.strip())
 
-def isNotBlank (myString):
+
+def isNotBlank(myString):
     return bool(myString and myString.strip())
 
 
