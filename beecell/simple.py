@@ -3,6 +3,7 @@ Created on Jul 18, 2012
 
 @author: darkbk
 """
+import ujson as json
 import os, string, random
 import subprocess
 from prettytable import PrettyTable
@@ -12,8 +13,44 @@ from uuid import uuid4
 from math import ceil
 
 
+def getkey(data, key, separator=u'.'):
+    """Get key value from a complex data (dict with child dict and list) using a string key.
+
+    Ex.
+
+    a = {u'k1':[{u'k2':..}]}
+    b = getkey(a, u'k1.0.k2')
+
+    :param data: complex object. Dict with nested list and dict
+    :param key: complex key to search. Ex key1.0.key2
+    :param separator: [default=.] key1 / list index separator
+    :return: value that meet nested key
+    """
+    keys = key.split(separator)
+    res = data
+    for k in keys:
+        if isinstance(res, list):
+            try:
+                res = res[int(k)]
+            except:
+                res = {}
+        else:
+            res = res.get(k, {})
+    if isinstance(res, list):
+        res = json.dumps(res)
+        # res = u','.join(str(res))
+    if res is None or res == {}:
+        res = u'-'
+
+    return res
+
+
 def nround(number, decimal=4):
     """
+
+    :param number:
+    :param decimal:
+    :return:
     """
     factor = 10*decimal
     convert = u'%.'+str(decimal)+u'f'

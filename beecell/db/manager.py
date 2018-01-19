@@ -14,13 +14,17 @@ from datetime import datetime
 from beecell.simple import truncate
 from rediscluster.client import StrictRedisCluster
 
-class SqlManagerError(Exception): pass
+
+class SqlManagerError(Exception):
+    pass
 
 
-class RedisManagerError(Exception): pass
+class RedisManagerError(Exception):
+    pass
 
 
-class MysqlManagerError(Exception): pass
+class MysqlManagerError(Exception):
+    pass
 
 
 class ConnectionManager(object):
@@ -47,20 +51,17 @@ class ConnectionManager(object):
 
 class RedisManager(ConnectionManager):
     """Manager for redis instance.
-    
-    **Parameters**:
-    
-        * **redis_uri**: redis connection uri. Ex 
-            * ``redis://localhost:6379/1``
-            * ``localhost:6379:1``
-            * ``redis-cluster://localhost:6379,localhost:6380``
-        * **timeout**: redis connection timeout [defualt=2]
-        * **cluster_nodes**: redis cluster nodes. Ex.
-        
-            [{"host": "10.102.184.121", "port": "6379"},
-             {"host": "10.102.91.23", "port": "6379"}]
+
+    :param str redis_uri: redis connection uri.
+    :param int timeout: redis connection timeout [default=2]
+    :return: RedisManager instance
+
+    :Example:
+    - redis_uri:
+        - ``redis://localhost:6379/1``
+        - ``localhost:6379:1``
+        - ``redis-cluster://localhost:6379,localhost:6380``
     """
-    
     def __init__(self, redis_uri, timeout=2):
         ConnectionManager.__init__(self)
         
