@@ -85,6 +85,7 @@ class ApiValidator():
         self.uri = uri
         self.method = method
         self.keys = []
+        self.remove_keys=[]
         self.schema_keys = {}
         self.code = None
         
@@ -98,12 +99,18 @@ class ApiValidator():
                         key = u'%s.%s' % (parent, key)
                     else:
                         key = key
+                    
                     self.keys.append(key)
                     if isinstance(value, dict):
                         self.get_keys(s, value, key, s[key][1])
                     if isinstance(value, list):
                         if len(value) > 0:
-                            self.get_keys(s, value[0], key, s[key][1]) 
+                            self.get_keys(s, value[0], key, s[key][1][0]) 
+                        elif len(value) == 0:
+                            if s[key][1][1]==True and s[key][0]==u'array':
+                                self.logger.debug(u'this is not valid key:%s' %key)
+                                self.remove_keys.append(key)
+                            
         return self.keys
         
     def parse_data(self, s):
@@ -133,7 +140,8 @@ class ApiValidator():
                 if key in required:
                     next_required = value.get(u'required', [])
                     if value[u'type'] == u'array':
-                        next_required = value.get(u'items').get(u'required', [])
+                        next_required = [value.get(u'items').get(u'required', []), value.get(u'x-nullable')] 
+                        allow_empty = value.get(u'x-nullable')
                     
                     if parent is not None:
                         self.schema_keys[u'%s.%s' % (parent, key)] = \
@@ -147,7 +155,7 @@ class ApiValidator():
                         self.get_schema_keys(value, key)
                     elif value[u'type'] == u'array':
                         self.get_schema_keys(value, key)                    
-    
+                    
     def parse_schema(self):
         self.get_schema_keys(self.schema[self.code])
         self.logger.debug(u'Get all schema keys: %s' % self.schema_keys)   
@@ -164,8 +172,16 @@ class ApiValidator():
     def compare(self):
         s = self.parse_schema()
         t = set(self.parse_data(s))
-        s = set(s.keys())
-        res = s.symmetric_difference(t)
+        s = set(s.keys())  
+        
+        #inspect keys nullable in a subtree
+        key = set()
+        for k in s:
+            for r in self.remove_keys: 
+                if k.startswith(u'%s.' %r):
+                    key.add(k)
+        
+        res = s.symmetric_difference(t).symmetric_difference(key)
         if len(res) > 0:
             self.logger.error(u'Schema and data does not superimpose for'\
                               u' keys: %s' % u', '.join(res))
