@@ -85,7 +85,7 @@ class ApiValidator():
         self.uri = uri
         self.method = method
         self.keys = []
-        self.remove_keys=[]
+        self.removed_keys=[]
         self.schema_keys = {}
         self.code = None
         
@@ -109,7 +109,7 @@ class ApiValidator():
                         elif len(value) == 0:
                             if s[key][1][1]==True and s[key][0]==u'array':
                                 self.logger.debug(u'this is not valid key:%s' %key)
-                                self.remove_keys.append(key)
+                                self.removed_keys.append(key)
                             
         return self.keys
         
@@ -177,7 +177,7 @@ class ApiValidator():
         #inspect keys nullable in a subtree
         key = set()
         for k in s:
-            for r in self.remove_keys: 
+            for r in self.removed_keys: 
                 if k.startswith(u'%s.' %r):
                     key.add(k)
         
