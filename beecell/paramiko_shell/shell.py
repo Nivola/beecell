@@ -36,7 +36,7 @@ class ParamikoShell(object):
         """Run interactive shell
         """
         channel = self.client.get_transport().open_session()
-        channel.get_pty(term=u'vt100', width=0, height=0, width_pixels=0, height_pixels=0)
+        channel.get_pty(term=u'vt100', width=300, height=0, width_pixels=0, height_pixels=0)
         channel.invoke_shell()
         interactive.interactive_shell(channel)
         self.client.close()
