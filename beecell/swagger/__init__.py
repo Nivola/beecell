@@ -7,6 +7,8 @@ from apispec import APISpec
 from marshmallow.validate import Range, OneOf
 from copy import deepcopy
 
+logger = getLogger(__name__)
+
 class SwaggerHelper(object):
     def __init__(self):
         self.spec = APISpec(
@@ -54,12 +56,28 @@ class SwaggerHelper(object):
                     }                    
                       
                     field_type = value.__class__.__name__.lower()
+                    # logger.warn(value)
+                    # logger.warn(field_type)
                     if field_type == u'date':
                         kvargs[u'type'] = u'string'
                         kvargs[u'format'] = u'date'
-                    if field_type == u'datetime':
+                    elif field_type == u'datetime':
                         kvargs[u'type'] = u'string'
-                        kvargs[u'format'] = u'datetime'                        
+                        kvargs[u'format'] = u'datetime'
+                    elif field_type == u'list':
+                        try:
+                            kvargs[u'type'] = u'array'
+                            kvargs[u'collectionFormat'] = value.metadata.get(u'collection_format', u'')
+                            subfield_type = value.container.__class__.__name__.lower()
+                            kvargs[u'items'] = {u'type': subfield_type}
+                            # TODO sistemare replace per solo occorrenze in fondo alla stringa
+                            kvargs[u'name'] = kvargs[u'name'].replace(u'_N', u'.N')
+                            # logger.warn(value)
+                            # logger.warn(value.__dict__)
+                            # kvargs[u'format'] = u'date'
+                            logger.warn(kvargs)
+                        except:
+                            logger.warn(u'', exc_info=1)
                     else:
                         kvargs[u'type'] = field_type
                     if bool(value.default) is not False:
