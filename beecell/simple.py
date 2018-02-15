@@ -12,6 +12,35 @@ import binascii
 from uuid import uuid4
 from math import ceil
 
+def flatten_dict(d, delimiter=":", loopArray=True ):
+    """ 
+        Flat dictionary conversion
+        :param loopArray: If True execute loop unrolling array items in keys. False otherwise
+        :param delimiter: delimiter char 
+    
+    """
+    def items():
+        for key, value in d.items():
+            if isinstance(value, dict):
+                for subkey, subvalue in flatten_dict(value, delimiter=delimiter, loopArray=loopArray).items():
+                    yield key + delimiter + subkey, subvalue
+            elif isinstance(value, list):
+                if loopArray:
+                    x=0
+                    for itemArray in value:
+                        if isinstance(itemArray, dict):
+                            for subkey, subvalue in flatten_dict(itemArray, delimiter=delimiter, loopArray=loopArray).items():
+                                yield key + delimiter + str(x) + delimiter + subkey, subvalue
+                        else:
+                            yield key + delimiter + str(x), itemArray
+                        x+=1
+                else:
+                    for itemArray in value:
+                        yield key, [flatten_dict(itemArray, delimiter=delimiter, loopArray=loopArray)]
+            else:
+                yield key, value
+
+    return dict(items())
 
 def getkey(data, key, separator=u'.'):
     """Get key value from a complex data (dict with child dict and list) using a string key.
