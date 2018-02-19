@@ -35,8 +35,10 @@ def flatten_dict(d, delimiter=":", loopArray=True ):
                             yield key + delimiter + str(x), itemArray
                         x+=1
                 else:
+                    res = []
                     for itemArray in value:
-                        yield key, [flatten_dict(itemArray, delimiter=delimiter, loopArray=loopArray)]
+                        res.append(flatten_dict(itemArray, delimiter=delimiter, loopArray=loopArray))
+                    yield key, res
             else:
                 yield key, value
 
