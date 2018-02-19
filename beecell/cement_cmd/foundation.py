@@ -142,6 +142,7 @@ class CementCmd(cmd.Cmd, CementApp):
 
         self.ext = None
         self.config = None
+        self.fernet = None
         self.log = None
         self.plugin = None
         self.args = None

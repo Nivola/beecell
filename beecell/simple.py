@@ -11,8 +11,26 @@ import string
 import binascii
 from uuid import uuid4
 from math import ceil
+from cryptography.fernet import Fernet
 
-def flatten_dict(d, delimiter=":", loopArray=True ):
+
+def check_vault(data, key):
+    """Check if data is encrypted with fernet token and AES128
+
+    :param data: data to verify. If encrypted token '$BEEHIVE_VAULT;AES128 | ' is in head of data
+    :param key: fernet key
+    :return:
+    """
+    if data.find(u'$BEEHIVE_VAULT;AES128 | ') == 0:
+        if key is None:
+            raise Exception(u'Fernet key must be provided')
+        cipher_suite = Fernet(key)
+        data = str(data.replace(u'$BEEHIVE_VAULT;AES128 | ', u''))
+        data = cipher_suite.decrypt(data)
+    return data
+
+
+def flatten_dict(d, delimiter=":", loopArray=True):
     """ 
         Flat dictionary conversion
         :param loopArray: If True execute loop unrolling array items in keys. False otherwise
@@ -41,6 +59,7 @@ def flatten_dict(d, delimiter=":", loopArray=True ):
                 yield key, value
 
     return dict(items())
+
 
 def getkey(data, key, separator=u'.'):
     """Get key value from a complex data (dict with child dict and list) using a string key.
