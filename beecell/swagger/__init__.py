@@ -75,7 +75,7 @@ class SwaggerHelper(object):
                             # logger.warn(value)
                             # logger.warn(value.__dict__)
                             # kvargs[u'format'] = u'date'
-                            logger.warn(kvargs)
+                            # logger.warn(kvargs)
                         except:
                             logger.warn(u'', exc_info=1)
                     else:
