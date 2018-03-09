@@ -67,7 +67,7 @@ class RedisManager(ConnectionManager):
         
         # redis cluster
         if redis_uri.find(u'redis-cluster') >= 0:
-            redis_uri = redis_uri.lstrip(u'redis-cluster://')
+            redis_uri = redis_uri.replace(u'redis-cluster://', u'')
             host_ports = redis_uri.split(u',')
             cluster_nodes = []
             for host_port in host_ports:
@@ -78,7 +78,7 @@ class RedisManager(ConnectionManager):
             
         # single redis node
         elif redis_uri.find(u'redis') >= 0:
-            redis_uri = redis_uri.lstrip(u'redis://')
+            redis_uri = redis_uri.replace(u'redis://', u'')
             host, port = redis_uri.split(u':')
             port, db = port.split(u'/')
             self.server = redis.StrictRedis(host=host, port=int(port), db=int(db), password=None,

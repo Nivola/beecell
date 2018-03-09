@@ -393,25 +393,25 @@ def parse_redis_uri(uri):
     """
     # redis cluster
     if uri.find(u'redis-cluster') >= 0:
-        redis_uri = uri.lstrip(u'redis-cluster://')
+        redis_uri = uri.replace(u'redis-cluster://', u'')
         host_ports = redis_uri.split(u',')
         cluster_nodes = []
         for host_port in host_ports:
             host, port = host_port.split(u':')
-            cluster_nodes.append({u'host':host, u'port':port})
-        res = {u'type':u'cluster', u'nodes':cluster_nodes}
+            cluster_nodes.append({u'host': host, u'port': port})
+        res = {u'type': u'cluster', u'nodes': cluster_nodes}
         
     # single redis node
     elif uri.find(u'redis') >= 0:
-        redis_uri = uri.lstrip(u'redis://')
+        redis_uri = uri.replace(u'redis://', u'')
         host, port = redis_uri.split(u':')
         port, db = port.split(u'/')
-        res = {u'type':u'single', u'host':host, u'port':int(port), u'db':int(db)}
+        res = {u'type': u'single', u'host': host, u'port': int(port), u'db': int(db)}
 
     # single redis node
     else:
         host, port, db = uri.split(";")
-        res = {u'type':u'single', u'host':host, u'port':int(port), u'db':int(db)}
+        res = {u'type': u'single', u'host': host, u'port': int(port), u'db': int(db)}
     
     return res
 
