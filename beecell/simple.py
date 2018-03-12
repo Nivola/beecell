@@ -350,7 +350,8 @@ def truncate(msg, size=200):
     :return: truncated Message
     """
     msg = str(msg)
-    msg = msg.replace(u'\n', u' | ')
+    msg = msg.replace('\n', ' | ')
+
     if len(msg) > size:
         return msg[0:size] + '...'
     else:
