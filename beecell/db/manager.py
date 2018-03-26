@@ -202,6 +202,23 @@ class RedisManager(ConnectionManager):
                     data[kname] = None
         return data
 
+    def get(self, key):
+        """Query key list value.
+
+        :param ttl: if True return for every key (value, ttl)
+        :param keys: keys list from inspect
+        :return: lists of keys with value
+        """
+        return self.server.get(key)
+
+    def gets(self, keys):
+        """Query key list value.
+
+        :param ttl: if True return for every key (value, ttl)
+        :param keys: keys list from inspect
+        :return: lists of keys with value
+        """
+        return self.server.mget(keys)
 
 '''
 @event.listens_for(Pool, "checkout")
@@ -347,8 +364,8 @@ class SqlManager(ConnectionManager):
         res = {}
         try:
             connection = self.engine.connect()
-            result = connection.execute(u'select table_schema, count(table_name) '\
-                u'from information_schema.tables group by table_schema')
+            result = connection.execute(u'select table_schema, count(table_name) '
+                                        u'from information_schema.tables group by table_schema')
             for row in result:
                 res[row[0]] = {
                     u'schema':row[0],
@@ -603,6 +620,31 @@ class MysqlManager(SqlManager):
             if connection is not None:
                 connection.close()
         return None
+
+    def get_cluster_status(self):
+        """Get cluster status
+        """
+        connection = None
+        res = {}
+        try:
+            connection = self.engine.connect()
+            result = connection.execute(u'select MEMBER_HOST, MEMBER_PORT, MEMBER_STATE '
+                                        u'from performance_schema.replication_group_members;')
+            for row in result:
+                res[row[0]] = {
+                    u'MEMBER_HOST': row[0],
+                    u'MEMBER_PORT': row[1],
+                    u'MEMBER_STATE': row[2]
+                }
+            self.logger.debug(u'Get mysql cluster status: %s' % res)
+
+        except Exception as ex:
+            self.logger.error(ex, exc_info=1)
+            raise
+        finally:
+            if connection is not None:
+                connection.close()
+        return res
 
 
 class PostgresManager(SqlManager):
