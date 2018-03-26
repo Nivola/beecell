@@ -427,16 +427,21 @@ def str2bool(value):
     return res
 
 
-def format_date(date):
+def format_date(date, format=None):
     """Format date as rfc3339.
     
     Ref. https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html
     
     :param date: datetime object
     """ 
+    
+    if format is None:
+        time_format = u'%Y-%m-%dT%H:%M:%SZ'
+    else:
+        time_format = format
     res = None
     if date is not None:
-        res = str2uni(date.strftime(u'%Y-%m-%dT%H:%M:%SZ'))
+        res = str2uni(date.strftime(time_format))
     return res
 
 
