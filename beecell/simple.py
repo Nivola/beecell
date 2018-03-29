@@ -297,7 +297,7 @@ def get_class_name(classref):
     return "%s.%s" % (classref.__module__, name)
 
 
-def id_gen(length = 10, parent_id=None):
+def id_gen(length=10, parent_id=None):
     """Generate unique uuid according to RFC 4122
     """
     '''
