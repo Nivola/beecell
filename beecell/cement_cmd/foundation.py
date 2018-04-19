@@ -83,14 +83,18 @@ class CementCmdBaseController(CementBaseController):
         """
         pass
 
-    @expose(hide=True)
-    def default(self):
-        self.app.print_help()
+    # @expose(hide=True)
+    # def default(self):
+    #     self.app.print_help()
         
     @expose(hide=True)
     def help(self):
         self.app.print_help()
-    
+    #
+    # @expose(hide=True)
+    # def cmd_list(self):
+    #     self.app.print_cmd_list()
+
     @expose(hide=True)
     def exit(self):
         return True      
@@ -215,7 +219,11 @@ class CementCmd(cmd.Cmd, CementApp):
             format_help = self.format_help
         else:
             format_help = self.args.format_help
-        self.args._print_message(format_help(), file)    
+        self.args._print_message(format_help(), file)
+
+    def print_cmd_list(self, file=None):
+        print u' '.join(self.args.cmd_list)
+
     
     #
     # cement extension
@@ -253,22 +261,19 @@ class CementCmd(cmd.Cmd, CementApp):
 
                 for section in self.config.get_sections():
                     if member in self.config.keys(section):
-                        self.config.set(section, member,
-                                        getattr(self._parsed_args, member))
+                        self.config.set(section, member, getattr(self._parsed_args, member))
 
         for member in self._meta.override_arguments:
             for section in self.config.get_sections():
                 if member in self.config.keys(section):
-                    self.config.set(section, member,
-                                    getattr(self._parsed_args, member))
+                    self.config.set(section, member, getattr(self._parsed_args, member))
 
         for res in self.hook.run('post_argument_parsing', self):
             pass
     
     def _setup_arg_handler(self):
         LOG.debug("setting up %s.arg handler" % self._meta.label)
-        self.args = self._resolve_handler('argument',
-                                          self._meta.argument_handler)
+        self.args = self._resolve_handler('argument', self._meta.argument_handler)
         self.args.prog = self._meta.label
 
         if self.loop is False:
