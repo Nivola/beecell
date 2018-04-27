@@ -310,7 +310,7 @@ def id_gen(length=10, parent_id=None):
     #return binascii.b2a_hex(os.urandom(length))
     '''
     # oid = str(uuid4())
-    oid = binascii.hexlify(os.urandom(length))
+    oid = binascii.hexlify(os.urandom(length/2))
     if parent_id is not None:
         oid = u'%s//%s' % (parent_id, oid)
     return oid
