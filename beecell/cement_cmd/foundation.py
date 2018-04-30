@@ -42,6 +42,16 @@ class ColoredText:
 
 
 class CementCmdBaseController(CementBaseController):
+    @property
+    def _help_cmd_list(self):
+        """Returns the help visible command list."""
+        return self._visible_commands
+
+    def _parse_args(self):
+        self.app.args.cmd_list = self._help_cmd_list
+
+        CementBaseController._parse_args(self)
+
     def _dispatch(self):
         """
         Takes the remaining arguments from self.app.argv and parses for a
@@ -55,7 +65,7 @@ class CementCmdBaseController(CementBaseController):
         self._arguments, self._commands = self._collect()
         self._process_commands()
         self._get_dispatch_command()
-        
+
         if self._dispatch_command:
             if self._dispatch_command['func_name'] == '_dispatch':
                 func = getattr(self._dispatch_command['controller'], '_dispatch')
@@ -65,13 +75,22 @@ class CementCmdBaseController(CementBaseController):
                 if not self._dispatch_command['func_name'] == 'default':
                     self._ext_parse_args()
                 func = getattr(self._dispatch_command['controller'], self._dispatch_command['func_name'])
+            #print func
         else:
             self._process_arguments()
             self._parse_args()
             func = None
 
+        # check cmds is active
+        if self.app.pargs is not None and self.app.pargs.cmds is True:
+            self.app.print_cmd_list()
+            return None
+
         try:
-            res = func()
+            if func is not None:
+                res = func()
+            else:
+                res = None
         except Exception as ex:
             logger.error(ex, exc_info=1)
             res = None
@@ -83,9 +102,13 @@ class CementCmdBaseController(CementBaseController):
         """
         pass
 
-    # @expose(hide=True)
-    # def default(self):
-    #     self.app.print_help()
+    @expose(hide=True)
+    def default(self):
+        # if self.app.pargs.cmds is True:
+        #     self.app.print_cmd_list()
+        # else:
+        #     self.app.print_help()
+        self.app.print_help()
         
     @expose(hide=True)
     def help(self):
@@ -222,7 +245,7 @@ class CementCmd(cmd.Cmd, CementApp):
         self.args._print_message(format_help(), file)
 
     def print_cmd_list(self, file=None):
-        print u' '.join(self.args.cmd_list)
+        print u' '.join(map(lambda x: x.split(u'.')[-1], self.args.cmd_list))
 
     
     #
