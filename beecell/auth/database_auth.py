@@ -7,7 +7,8 @@ from beecell.simple import id_gen
 from beecell.perf import watch
 from .base import AuthError, AbstractAuth
 from beecell.db import TransactionError, QueryError
-    
+
+
 class DatabaseAuth(AbstractAuth):
     def __init__(self, auth_manager, conn_manager, user_class):
         """

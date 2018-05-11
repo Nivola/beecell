@@ -6,6 +6,8 @@ Created on Jan 25, 2014
 import logging
 from flask_login import UserMixin
 from beecell.perf import watch
+from beecell.db import TransactionError, QueryError
+
 
 class SystemUser(UserMixin):
     """System user returned after authentication. Use this with flask_login. 
@@ -18,8 +20,7 @@ class SystemUser(UserMixin):
     login_count = None
     
     def __init__(self, uid, email, password, active, login_ip=None):
-        self.logger = logging.getLogger(self.__class__.__module__+ \
-                                        '.'+self.__class__.__name__)
+        self.logger = logging.getLogger(self.__class__.__module__+ '.'+self.__class__.__name__)
         
         self.id = uid
         self.email = email
@@ -86,6 +87,7 @@ class SystemUser(UserMixin):
     def get_profile(self):
         return self._profile
 
+
 class AuthError(Exception):
     """Authentication provider exception.
     """
@@ -131,7 +133,8 @@ class AuthError(Exception):
     
     def __str__(self):
         return "code: %s, info: %s, desc: %s" % (self.code, self.info, self.desc)
-    
+
+
 class AbstractAuth(object):
     """Abstract auhtentication provider.
     
@@ -141,8 +144,7 @@ class AbstractAuth(object):
     """
     
     def __init__(self, user_class):
-        self.logger = logging.getLogger(self.__class__.__module__+ \
-                                        '.'+self.__class__.__name__)        
+        self.logger = logging.getLogger(self.__class__.__module__+ '.'+self.__class__.__name__)
         
         self.user_class = user_class
 
@@ -155,7 +157,52 @@ class AbstractAuth(object):
         :raises AuthError: raise :class:`AuthError`          
         """
         raise NotImplementedError()
-    
+
+    def check(self, username):
+        """
+        :param username: user name
+        :return: System user
+        :rtype: :class:`SystemUser`
+        :raises AuthError: raise :class:`AuthError`
+        """
+        self.logger.debug('Login user: %s' % username)
+
+        # open database session
+        session = self.conn_manager.get_session()
+        auth_manager = self.auth_manager_class(session=session)
+        self.logger.debug('Authentication manager: %s' % auth_manager.__module__)
+
+        # verify that user exists in the db
+        try:
+            db_user = auth_manager.get_user(username)
+        except (IndexError, QueryError) as ex:
+            self.logger.error(ex)
+            # release database session
+            self.conn_manager.release_session(session)
+            raise AuthError("", "User %s was not found" % username, code=5)
+
+        if db_user == None:
+            self.logger.error("Invalid credentials")
+            # release database session
+            self.conn_manager.release_session(session)
+            raise AuthError("", "Invalid credentials", code=1)
+
+        if db_user.active is not True:
+            self.logger.error("User is disabled")
+            # release database session
+            self.conn_manager.release_session(session)
+            raise AuthError("", "User is disabled", code=2)
+
+        # create final user object
+        user = self.user_class(db_user.uuid, username, None, True)
+
+        # release database session
+        self.conn_manager.release_session(session)
+
+        self.logger.debug('Login succesfully: %s' % user)
+
+        return user
+
     def refresh(self, username, uid):
         """Refresh login
         
