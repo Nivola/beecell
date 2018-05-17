@@ -2,7 +2,7 @@ class ModelError(Exception):
     def __init__(self, desc, code=404):
         """
         """
-        self.desc = desc
+        self.desc = str(desc)
         self.code = code
         Exception.__init__(self, desc)
         
@@ -17,7 +17,7 @@ class TransactionError(Exception):
     def __init__(self, desc, code=0):
         """
         """
-        self.desc = desc
+        self.desc = str(desc)
         self.code = code
         Exception.__init__(self, desc)
         
@@ -32,7 +32,7 @@ class QueryError(Exception):
     def __init__(self, desc, code=0):
         """
         """
-        self.desc = desc
+        self.desc = str(desc)
         self.code = code
         Exception.__init__(self, desc)
         
