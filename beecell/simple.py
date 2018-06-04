@@ -427,6 +427,16 @@ def str2bool(value):
     return res
 
 
+def bool2str(value):
+    """Convert value from bool to string"""
+    res = None
+    if value in [False, 0, u'no']:
+        res = u'false'
+    elif value in [True, 1, u'yes', u'si']:
+        res = u'true'
+    return res
+
+
 def format_date(date, format=None):
     """Format date as rfc3339.
     
