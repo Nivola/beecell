@@ -158,48 +158,50 @@ class AbstractAuth(object):
         """
         raise NotImplementedError()
 
-    def check(self, username):
-        """
+    def check(self, user_uuid, username):
+        """Check user
+
+        :param user_uuid: user uuid
         :param username: user name
         :return: System user
         :rtype: :class:`SystemUser`
         :raises AuthError: raise :class:`AuthError`
         """
-        self.logger.debug('Login user: %s' % username)
+        self.logger.debug('Check user: %s' % username)
 
-        # open database session
-        session = self.conn_manager.get_session()
-        auth_manager = self.auth_manager_class(session=session)
-        self.logger.debug('Authentication manager: %s' % auth_manager.__module__)
-
-        # verify that user exists in the db
-        try:
-            db_user = auth_manager.get_user(username)
-        except (IndexError, QueryError) as ex:
-            self.logger.error(ex)
-            # release database session
-            self.conn_manager.release_session(session)
-            raise AuthError("", "User %s was not found" % username, code=5)
-
-        if db_user == None:
-            self.logger.error("Invalid credentials")
-            # release database session
-            self.conn_manager.release_session(session)
-            raise AuthError("", "Invalid credentials", code=1)
-
-        if db_user.active is not True:
-            self.logger.error("User is disabled")
-            # release database session
-            self.conn_manager.release_session(session)
-            raise AuthError("", "User is disabled", code=2)
+        # # open database session
+        # session = self.conn_manager.get_session()
+        # auth_manager = self.auth_manager_class(session=session)
+        # self.logger.debug('Authentication manager: %s' % auth_manager.__module__)
+        #
+        # # verify that user exists in the db
+        # try:
+        #     db_user = auth_manager.get_user(username)
+        # except (IndexError, QueryError) as ex:
+        #     self.logger.error(ex)
+        #     # release database session
+        #     self.conn_manager.release_session(session)
+        #     raise AuthError("", "User %s was not found" % username, code=5)
+        #
+        # if db_user == None:
+        #     self.logger.error("Invalid credentials")
+        #     # release database session
+        #     self.conn_manager.release_session(session)
+        #     raise AuthError("", "Invalid credentials", code=1)
+        #
+        # if db_user.active is not True:
+        #     self.logger.error("User is disabled")
+        #     # release database session
+        #     self.conn_manager.release_session(session)
+        #     raise AuthError("", "User is disabled", code=2)
 
         # create final user object
-        user = self.user_class(db_user.uuid, username, None, True)
+        user = self.user_class(user_uuid, username, None, True)
 
         # release database session
-        self.conn_manager.release_session(session)
+        # self.conn_manager.release_session(session)
 
-        self.logger.debug('Login succesfully: %s' % user)
+        self.logger.debug(u'Login succesfully: %s' % user)
 
         return user
 

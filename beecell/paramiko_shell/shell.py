@@ -17,7 +17,9 @@ logger = getLogger(__name__)
 
 
 class ParamikoShell(object):
-    def __init__(self, host, user, port=22, pwd=None, keyfile=None, keystring=None):
+    def __init__(self, host, user, port=22, pwd=None, keyfile=None, keystring=None, pre_login=None, post_logout=None):
+        self.post_logout = post_logout
+
         self.client = SSHClient()
         self.client.set_missing_host_key_policy(MissingHostKeyPolicy())
 
@@ -28,6 +30,8 @@ class ParamikoShell(object):
         else:
             pkey = None
 
+        if pre_login is not None:
+            pre_login()
         self.client.connect(host, port, username=user, password=pwd, key_filename=keyfile, pkey=pkey,
                             look_for_keys=False, compress=True)
         # timeout=None, #allow_agent=True,
@@ -40,3 +44,5 @@ class ParamikoShell(object):
         channel.invoke_shell()
         interactive.interactive_shell(channel)
         self.client.close()
+        if self.post_logout is not None:
+            self.post_logout()
