@@ -1,8 +1,8 @@
-'''
+"""
 Created on Nov 3, 2017
 
 @author: darkbk
-'''
+"""
 import cmd
 import sys, os, re
 from cement.core.foundation import CementApp, LOG
@@ -11,6 +11,7 @@ from gettext import gettext as _
 import logging
 import time
 import traceback
+import textwrap
 
 logger = logging.getLogger(__name__)
 
@@ -47,9 +48,86 @@ class CementCmdBaseController(CementBaseController):
         """Returns the help visible command list."""
         return self._visible_commands
 
+    @property
+    def _help_text(self):
+        """Returns the help text displayed when '--help' is passed."""
+
+        cmd_txt = ''
+        for label in self._visible_commands:
+            cmd = self._dispatch_map[label]
+            if len(cmd['aliases']) > 0 and cmd['aliases_only']:
+                if len(cmd['aliases']) > 1:
+                    first = cmd['aliases'].pop(0)
+                    cmd_txt = cmd_txt + "  %s (aliases: %s)\n" % \
+                              (first, ', '.join(cmd['aliases']))
+                else:
+                    cmd_txt = cmd_txt + "  %s\n" % cmd['aliases'][0]
+            elif len(cmd['aliases']) > 0:
+                cmd_txt = cmd_txt + "  %s (aliases: %s)\n" % \
+                          (label, ', '.join(cmd['aliases']))
+            else:
+                cmd_txt = cmd_txt + "  %s\n" % label
+
+            if cmd['help']:
+                cmd_txt = cmd_txt + "    %s\n\n" % cmd['help']
+            else:
+                cmd_txt = cmd_txt + "\n"
+
+        if len(cmd_txt) > 0:
+            txt = '''%s
+
+commands: 
+
+%s
+
+
+        ''' % (self._meta.description, cmd_txt)
+        else:
+            txt = self._meta.description
+
+        return textwrap.dedent(txt)
+
+    @property
+    def _help_text_cmd(self):
+        """Returns the help text displayed when '--help' is passed."""
+
+        cmd_txt = ''
+        for label in self._visible_commands:
+            cmd = self._dispatch_map[label]
+            if len(cmd['aliases']) > 0 and cmd['aliases_only']:
+                if len(cmd['aliases']) > 1:
+                    first = cmd['aliases'].pop(0)
+                    cmd_txt = cmd_txt + "  %s (aliases: %s)\n" % \
+                              (first, ', '.join(cmd['aliases']))
+                else:
+                    cmd_txt = cmd_txt + "  %s\n" % cmd['aliases'][0]
+            elif len(cmd['aliases']) > 0:
+                cmd_txt = cmd_txt + "  %s (aliases: %s)\n" % \
+                          (label, ', '.join(cmd['aliases']))
+            else:
+                cmd_txt = cmd_txt + "  %s\n" % label
+
+            if cmd['help']:
+                cmd_txt = cmd_txt + "    %s\n\n" % cmd['help']
+            else:
+                cmd_txt = cmd_txt + "\n"
+
+        if len(cmd_txt) > 0:
+            txt = '''%s
+
+commands: 
+
+%s
+
+
+        ''' % (self._meta.description, cmd_txt)
+        else:
+            txt = self._meta.description
+
+        return textwrap.dedent(txt)
+
     def _parse_args(self):
         self.app.args.cmd_list = self._help_cmd_list
-
         CementBaseController._parse_args(self)
 
     def _dispatch(self):
@@ -65,17 +143,23 @@ class CementCmdBaseController(CementBaseController):
         self._arguments, self._commands = self._collect()
         self._process_commands()
         self._get_dispatch_command()
+        command = self._dispatch_command['func_name']
 
         if self._dispatch_command:
             if self._dispatch_command['func_name'] == '_dispatch':
                 func = getattr(self._dispatch_command['controller'], '_dispatch')
             else:
                 self._process_arguments()
-                self._parse_args()
-                if not self._dispatch_command['func_name'] == 'default':
-                    self._ext_parse_args()
+                if command == u'default':
+                    self._parse_args()
+                elif not self._dispatch_command['func_name'] == 'default':
+                    self._visible_commands = [command]
+                    self.app.args.description = self._help_text_cmd
+                    self.app.args.usage = self._usage_text
+                    self.app.args.formatter_class = self._meta.argument_formatter
+                    self.app._parse_args()
+                self._ext_parse_args()
                 func = getattr(self._dispatch_command['controller'], self._dispatch_command['func_name'])
-            #print func
         else:
             self._process_arguments()
             self._parse_args()
@@ -267,6 +351,7 @@ class CementCmd(cmd.Cmd, CementApp):
         # --- remove to avoid exit if loop is True
         if self.loop is False:
             self._parsed_args = self.args.parse(self.argv)
+
         # --- use if loop is True
         else:
             args = self._internal_parse_args(self.argv)
