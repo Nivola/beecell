@@ -40,9 +40,11 @@ class ParamikoShell(object):
         """Run interactive shell
         """
         channel = self.client.get_transport().open_session()
-        channel.get_pty(term=u'vt100', width=300, height=0, width_pixels=0, height_pixels=0)
+        # channel.get_pty(term=u'vt100', width=300, height=0, width_pixels=0, height_pixels=0)
+        channel.get_pty(term=u'xterm')
         channel.invoke_shell()
         interactive.interactive_shell(channel)
+        channel.close()
         self.client.close()
         if self.post_logout is not None:
             self.post_logout()

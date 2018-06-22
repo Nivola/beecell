@@ -1,27 +1,12 @@
-# Copyright (C) 2003-2007  Robey Pointer <robeypointer@gmail.com>
-#
-# This file is part of paramiko.
-#
-# Paramiko is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation; either version 2.1 of the License, or (at your option)
-# any later version.
-#
-# Paramiko is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-# A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
-# details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with Paramiko; if not, write to the Free Software Foundation, Inc.,
-# 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
+from gevent.monkey import patch_all
+patch_all(os=True, select=True)
 
-
-import socket
-import sys
 from logging import getLogger
-from collections import deque
-# from paramiko.py3compat import u
+import sys
+from gevent import spawn, joinall, sleep, socket
+from gevent.os import make_nonblocking, nb_read, nb_write
+from paramiko.py3compat import u
+
 
 logger = getLogger(__name__)
 
@@ -34,88 +19,62 @@ except ImportError:
     has_termios = False
 
 
-def interactive_shell(chan):
+def interactive_shell(chan, log=False):
     if has_termios:
-        posix_shell(chan)
+        posix_shell(chan, log)
     else:
-        windows_shell(chan)
+        windows_shell(chan, log)
 
 
-def posix_shell(chan):
-    import select
-    
-    oldtty = termios.tcgetattr(sys.stdin)
-    try:
-        tty.setraw(sys.stdin.fileno())
-        tty.setcbreak(sys.stdin.fileno())
-        chan.settimeout(0.0)
+def posix_shell(chan, log):
+    logger.info(u'Run shell to ssh channel: %s' % chan)
+    old_stdin = termios.tcgetattr(sys.stdin.fileno())
+    tty.setraw(sys.stdin.fileno())
+    tty.setcbreak(sys.stdin.fileno())
+    chan.settimeout(0.0)
+    chan.setblocking(0)
+    make_nonblocking(sys.stdin.fileno())
 
-        input_queue = deque([u'', u'', u''])
-        while True:
-            r, w, e = select.select([chan, sys.stdin], [], [])
-            # logger.debug('%s - %s' % (input_queue, r))
-            if chan in r:
+    def write_output():
+        while chan.closed is False:
+            if chan is not None:
                 try:
-                    # x = u(chan.recv(1024))
-                    x = chan.recv(1024)
-                    if len(x) == 0:
-                        sys.stdout.write('\r\n*** EOF\r\n')
-                        break
-                    # logger.debug(u'stdout: %s' % x)
-                    sys.stdout.write(x)
-                    sys.stdout.flush()
+                    if chan.recv_ready():
+                        x = u(chan.recv(4096))
+                        if log is True:
+                            logger.debug(u'OUT: %s' % x)
+                        # if len(x) == 0:
+                        #     nb_write(sys.stdout.fileno(), "\r\n*** EOF\r\n")
+                        #     #sys.stdout.write("\r\n*** EOF\r\n")
+                        #     break
+                        nb_write(sys.stdout.fileno(), x)
+                    #sys.stdout.write(x)
+                    #sys.stdout.flush()
                 except socket.timeout:
-                    pass
-            if sys.stdin in r:
-                indata = sys.stdin.read(1)
-                input_queue.append(indata)
-                input_queue.popleft()
-                # logger.debug(u'stdin: %s' % indata)
-                if len(indata) == 0:
-                    break
-                # logger.warn(input_queue)
-                # logger.warn(input_queue == deque(['[', 'A', '[']))
-                ## correct behavior when use up arrow to scroll history
-                if input_queue == deque(['[', 'A', '[']) or input_queue == deque(['A', '[', 'A']):
-                    pass
-                else:
-                    chan.send(indata)
-                if ord(indata) == 27:
-                    chan.send('[')
-                    chan.send('A')
-                    input_queue.append('[')
-                    input_queue.append('A')
-                    input_queue.popleft()
-                    input_queue.popleft()
-    finally:
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
+                    logger.error(u'', exc_info=1)
+                sleep(0.01)
 
-    
-# thanks to Mike Looijmans for this code
-def windows_shell(chan):
-    import threading
+    def get_input():
+        while chan.closed is False:
+            try:
+                x = nb_read(sys.stdin.fileno(), 1024)
+                if log is True:
+                    logger.debug(u'IN : %s' % x)
+                chan.send(x)
+            except socket.timeout:
+                logger.error(u'', exc_info=1)
+                break
+            sleep(0.01)
 
-    sys.stdout.write("Line-buffered terminal emulation. Press F6 or ^Z to send EOF.\r\n\r\n")
-        
-    def writeall(sock):
-        while True:
-            data = sock.recv(256)
-            if not data:
-                sys.stdout.write('\r\n*** EOF ***\r\n\r\n')
-                sys.stdout.flush()
-                break
-            sys.stdout.write(data)
-            sys.stdout.flush()
-        
-    writer = threading.Thread(target=writeall, args=(chan,))
-    writer.start()
-        
-    try:
-        while True:
-            d = sys.stdin.read(1)
-            if not d:
-                break
-            chan.send(d)
-    except EOFError:
-        # user hit ^Z or F6
-        pass
+    joinall([
+        spawn(get_input),
+        spawn(write_output)
+    ])
+
+    termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old_stdin)
+    nb_write(sys.stdout.fileno(), u'\n')
+    logger.info(u'Close shell to ssh channel: %s' % chan)
+
+
+def windows_shell(chan, log):
+    raise NotImplementedError()
