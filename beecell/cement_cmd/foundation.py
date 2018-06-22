@@ -136,30 +136,32 @@ commands:
         command to dispatch, and if so... dispatches it.
 
         """
-        if hasattr(self._meta, 'epilog'):
+        if hasattr(self._meta, u'epilog'):
             if self._meta.epilog is not None:
                 self.app.args.epilog = self._meta.epilog
 
         self._arguments, self._commands = self._collect()
         self._process_commands()
         self._get_dispatch_command()
-        command = self._dispatch_command['func_name']
+        command = self._dispatch_command[u'func_name']
+        command = command.replace(u'_', u'-')
 
         if self._dispatch_command:
-            if self._dispatch_command['func_name'] == '_dispatch':
-                func = getattr(self._dispatch_command['controller'], '_dispatch')
+            if self._dispatch_command[u'func_name'] == u'_dispatch':
+                func = getattr(self._dispatch_command[u'controller'], u'_dispatch')
             else:
                 self._process_arguments()
                 if command == u'default':
                     self._parse_args()
-                elif not self._dispatch_command['func_name'] == 'default':
+                elif not self._dispatch_command[u'func_name'] == u'default':
                     self._visible_commands = [command]
                     self.app.args.description = self._help_text_cmd
                     self.app.args.usage = self._usage_text
                     self.app.args.formatter_class = self._meta.argument_formatter
                     self.app._parse_args()
+                self._parse_args()
                 self._ext_parse_args()
-                func = getattr(self._dispatch_command['controller'], self._dispatch_command['func_name'])
+                func = getattr(self._dispatch_command[u'controller'], self._dispatch_command[u'func_name'])
         else:
             self._process_arguments()
             self._parse_args()
