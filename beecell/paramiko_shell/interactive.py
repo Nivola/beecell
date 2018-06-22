@@ -1,5 +1,5 @@
 from gevent.monkey import patch_all
-patch_all(os=True, select=True)
+#patch_all(os=True, select=True)
 
 from logging import getLogger
 import sys
