@@ -40,17 +40,20 @@ def posix_shell(chan, log):
             if chan is not None:
                 try:
                     if chan.recv_ready():
-                        x = u(chan.recv(4096))
+                        x = chan.recv(4096)
                         if log is True:
                             logger.debug(u'OUT: %s' % x)
                         # if len(x) == 0:
                         #     nb_write(sys.stdout.fileno(), "\r\n*** EOF\r\n")
                         #     #sys.stdout.write("\r\n*** EOF\r\n")
                         #     break
+                        # x = x.encode(u'ascii', u'ignore')
                         nb_write(sys.stdout.fileno(), x)
                     #sys.stdout.write(x)
                     #sys.stdout.flush()
                 except socket.timeout:
+                    logger.error(u'', exc_info=1)
+                except Exception:
                     logger.error(u'', exc_info=1)
                 sleep(0.01)
 
@@ -60,8 +63,11 @@ def posix_shell(chan, log):
                 x = nb_read(sys.stdin.fileno(), 1024)
                 if log is True:
                     logger.debug(u'IN : %s' % x)
-                chan.send(x)
+                if chan.send_ready():
+                    chan.send(x)
             except socket.timeout:
+                logger.error(u'', exc_info=1)
+            except Exception:
                 logger.error(u'', exc_info=1)
                 break
             sleep(0.01)
