@@ -475,3 +475,17 @@ def isNotBlank(myString):
     return bool(myString and myString.strip())
 
 
+def obscure_data(data, fields=[u'password', u'pwd', u'passwd']):
+    """Obscure some fields in data, fields can be password.
+
+    :param data: data to check
+    :param fields: list of fields to obfuscate. default=[u'password', u'pwd', u'passwd']
+    :return:
+    """
+    for key, value in data.items():
+        if isinstance(value, dict):
+            obscure_data(value, fields)
+        elif isinstance(value, str) or isinstance(value, unicode):
+            if key in fields:
+                data[key] = u'xxxxxx'
+    return data
