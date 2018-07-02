@@ -7,6 +7,9 @@ from paramiko.client import SSHClient, MissingHostKeyPolicy
 from paramiko import RSAKey
 from logging import getLogger
 import StringIO
+import fcntl
+import termios
+import struct
 
 try:
     import interactive
@@ -36,12 +39,17 @@ class ParamikoShell(object):
                             look_for_keys=False, compress=True)
         # timeout=None, #allow_agent=True,
 
+    def terminal_size(self):
+        th, tw, hp, wp = struct.unpack('HHHH', fcntl.ioctl(0, termios.TIOCGWINSZ, struct.pack(u'HHHH', 0, 0, 0, 0)))
+        return tw, th
+
     def run(self):
         """Run interactive shell
         """
+        tw, th = self.terminal_size()
         channel = self.client.get_transport().open_session()
-        # channel.get_pty(term=u'vt100', width=300, height=0, width_pixels=0, height_pixels=0)
-        channel.get_pty(term=u'xterm')
+        channel.get_pty(term=u'xterm', width=tw, height=th, width_pixels=0, height_pixels=0)
+        # channel.get_pty(term=u'xterm')
         channel.invoke_shell()
         interactive.interactive_shell(channel)
         channel.close()
