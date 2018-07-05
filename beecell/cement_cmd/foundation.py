@@ -168,7 +168,7 @@ commands:
             func = None
 
         # check cmds is active
-        if self.app.pargs is not None and self.app.pargs.cmds is True:
+        if self.app.pargs is not None and getattr(self.app.pargs, u'cmds', False) is True:
             self.app.print_cmd_list()
             return None
 
@@ -489,7 +489,7 @@ class CementCmd(cmd.Cmd, CementApp):
         cmd, arg, line = self.parseline(line)
         if not line:
             return
-            #return self.emptyline()
+            # return self.emptyline()
         if cmd is None:
             return self.default(line)
         self.lastcmd = line
@@ -504,13 +504,13 @@ class CementCmd(cmd.Cmd, CementApp):
                     try:
                         return_val = self.controller._dispatch()
                     except Exception as ex:
-                        #self.stdout.write(ex)
+                        logger.error(ex, exc_info=1)
+                        # self.stdout.write(ex)
                         return_val = None
                 else:
                     self._parse_args()
-                
-                #func = getattr(self, 'do_' + cmd)
+                # func = getattr(self, 'do_' + cmd)
             except AttributeError as ex:
-                LOG.error(ex, exc_info=1)
+                logger.error(ex, exc_info=1)
                 return self.default(line)
             return return_val
