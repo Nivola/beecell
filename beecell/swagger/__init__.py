@@ -34,6 +34,7 @@ class SwaggerHelper(object):
         """
         fields = schema.__dict__.get(u'_declared_fields', [])
         res = []
+        kvargs = {}
         for field, value in fields.items():
             if value.load_from is not None:
                 field = value.load_from
