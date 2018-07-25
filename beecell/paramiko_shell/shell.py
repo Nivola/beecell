@@ -35,8 +35,13 @@ class ParamikoShell(object):
 
         if pre_login is not None:
             pre_login()
-        self.client.connect(host, port, username=user, password=pwd, key_filename=keyfile, pkey=pkey,
-                            look_for_keys=False, compress=True)
+        try:
+            self.client.connect(host, port, username=user, password=pwd, key_filename=keyfile, pkey=pkey,
+                                look_for_keys=False, compress=True)
+        except Exception as ex:
+            if self.post_logout is not None:
+                self.post_logout(str(ex))
+            raise
         # timeout=None, #allow_agent=True,
 
     def terminal_size(self):
@@ -55,4 +60,4 @@ class ParamikoShell(object):
         channel.close()
         self.client.close()
         if self.post_logout is not None:
-            self.post_logout()
+            self.post_logout(True)
