@@ -78,10 +78,15 @@ class RedisManager(ConnectionManager):
             
         # single redis node
         elif redis_uri.find(u'redis') >= 0:
-            redis_uri = redis_uri.replace(u'redis://', u'')
+            pwd = None
+            if redis_uri.find(u'@') > 0:
+                redis_uri = redis_uri.replace(u'redis://:', u'')
+                pwd, redis_uri = redis_uri.split(u'@')
+            else:
+                redis_uri = redis_uri.replace(u'redis://', u'')
             host, port = redis_uri.split(u':')
             port, db = port.split(u'/')
-            self.server = redis.StrictRedis(host=host, port=int(port), db=int(db), password=None,
+            self.server = redis.StrictRedis(host=host, port=int(port), db=int(db), password=pwd,
                                             socket_timeout=timeout, retry_on_timeout=False, connection_pool=None,
                                             max_connections=max_connections)
 

@@ -404,10 +404,15 @@ def parse_redis_uri(uri):
         
     # single redis node
     elif uri.find(u'redis') >= 0:
-        redis_uri = uri.replace(u'redis://', u'')
+        pwd = None
+        if uri.find(u'@') > 0:
+            redis_uri = uri.replace(u'redis://:', u'')
+            pwd, redis_uri = redis_uri.split(u'@')
+        else:
+            redis_uri = uri.replace(u'redis://', u'')
         host, port = redis_uri.split(u':')
         port, db = port.split(u'/')
-        res = {u'type': u'single', u'host': host, u'port': int(port), u'db': int(db)}
+        res = {u'type': u'single', u'host': host, u'port': int(port), u'db': int(db), u'pwd': pwd}
 
     # single redis node
     else:
