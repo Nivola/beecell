@@ -60,4 +60,4 @@ class ParamikoShell(object):
         channel.close()
         self.client.close()
         if self.post_logout is not None:
-            self.post_logout(True)
+            self.post_logout(u'OK')
