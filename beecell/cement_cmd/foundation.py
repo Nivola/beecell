@@ -61,15 +61,15 @@ class CementCmdBaseController(CementBaseController):
                     cmd_txt = cmd_txt + "  %s (aliases: %s)\n" % \
                               (first, ', '.join(cmd['aliases']))
                 else:
-                    cmd_txt = cmd_txt + "  %s\n" % cmd['aliases'][0]
+                    cmd_txt = cmd_txt + "  %-20s" % cmd['aliases'][0]
             elif len(cmd['aliases']) > 0:
                 cmd_txt = cmd_txt + "  %s (aliases: %s)\n" % \
                           (label, ', '.join(cmd['aliases']))
             else:
-                cmd_txt = cmd_txt + "  %s\n" % label
+                cmd_txt = cmd_txt + "  %-20s" % label
 
             if cmd['help']:
-                cmd_txt = cmd_txt + "    %s\n\n" % cmd['help']
+                cmd_txt = cmd_txt + " %s\n" % cmd['help']
             else:
                 cmd_txt = cmd_txt + "\n"
 
@@ -77,7 +77,6 @@ class CementCmdBaseController(CementBaseController):
             txt = '''%s
 
 commands: 
-
 %s
 
 
