@@ -61,15 +61,15 @@ class CementCmdBaseController(CementBaseController):
                     cmd_txt = cmd_txt + "  %s (aliases: %s)\n" % \
                               (first, ', '.join(cmd['aliases']))
                 else:
-                    cmd_txt = cmd_txt + "  %s\n" % cmd['aliases'][0]
+                    cmd_txt = cmd_txt + "  %-20s" % cmd['aliases'][0]
             elif len(cmd['aliases']) > 0:
                 cmd_txt = cmd_txt + "  %s (aliases: %s)\n" % \
                           (label, ', '.join(cmd['aliases']))
             else:
-                cmd_txt = cmd_txt + "  %s\n" % label
+                cmd_txt = cmd_txt + "  %-20s" % label
 
             if cmd['help']:
-                cmd_txt = cmd_txt + "    %s\n\n" % cmd['help']
+                cmd_txt = cmd_txt + " %s\n" % cmd['help']
             else:
                 cmd_txt = cmd_txt + "\n"
 
@@ -77,7 +77,6 @@ class CementCmdBaseController(CementBaseController):
             txt = '''%s
 
 commands: 
-
 %s
 
 
@@ -339,6 +338,7 @@ class CementCmd(cmd.Cmd, CementApp):
     #
     def _internal_parse_args(self, args=None, namespace=None):
         args, argv = self.args.parse_known_args(args, namespace)
+
         if argv:
             msg = _(u'unrecognized arguments: %s')
             msg = msg % u' '.join(argv)
@@ -407,8 +407,14 @@ class CementCmd(cmd.Cmd, CementApp):
             self.start = time.time()
             logger.debug(u'Run command: %s - START' % sys.argv)
             # setup argv... this has to happen before lay_cement()
+            line = u' '.join(sys.argv[1:])
+            m = re.search(r"([\w\W]*) \'([\w\W]*)\'", line)
             if self._meta.argv is None:
-                self._meta.argv = list(sys.argv[1:])
+                if m is None:
+                    self._meta.argv = list(sys.argv[1:])
+                else:
+                    self._meta.argv = m.group(1).split(u' ')
+                    self._meta.argv.append(m.group(2))
             
             # setup the cement framework
             self._lay_cement()
@@ -445,7 +451,7 @@ class CementCmd(cmd.Cmd, CementApp):
         #self._meta.argv = []
         #if line is not None and line != u'':
         self._meta.argv = list(line.split(u' '))
-        
+
         # setup the cement framework
         self._lay_cement()
         self.setup()
