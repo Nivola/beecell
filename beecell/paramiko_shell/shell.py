@@ -20,8 +20,10 @@ logger = getLogger(__name__)
 
 
 class ParamikoShell(object):
-    def __init__(self, host, user, port=22, pwd=None, keyfile=None, keystring=None, pre_login=None, post_logout=None):
+    def __init__(self, host, user, port=22, pwd=None, keyfile=None, keystring=None, pre_login=None, post_logout=None,
+                 post_action=None):
         self.post_logout = post_logout
+        self.post_action = post_action
 
         self.client = SSHClient()
         self.client.set_missing_host_key_policy(MissingHostKeyPolicy())
@@ -61,3 +63,17 @@ class ParamikoShell(object):
         self.client.close()
         if self.post_logout is not None:
             self.post_logout()
+
+    def cmd(self, cmd):
+        """Execute command in shell
+        """
+        stdin, stdout, stderr = self.client.exec_command(cmd)
+        res = {u'stdout': [], u'stderr': stderr.read()}
+        for line in stdout:
+            res[u'stdout'].append(line.strip(u'\n'))
+        self.client.close()
+        if self.post_action is not None:
+            self.post_action(cmd)
+        if self.post_logout is not None:
+            self.post_logout()
+        return res
