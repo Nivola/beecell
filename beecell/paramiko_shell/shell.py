@@ -28,6 +28,8 @@ class ParamikoShell(object):
         self.client = SSHClient()
         self.client.set_missing_host_key_policy(MissingHostKeyPolicy())
 
+        self.timeout = 1.0
+
         if keystring is not None:
             keystring_io = StringIO.StringIO(keystring)
             pkey = RSAKey.from_private_key(keystring_io)
@@ -39,7 +41,8 @@ class ParamikoShell(object):
             pre_login()
         try:
             self.client.connect(host, port, username=user, password=pwd, key_filename=keyfile, pkey=pkey,
-                                look_for_keys=False, compress=True)
+                                look_for_keys=False, compress=True, timeout=self.timeout, auth_timeout=self.timeout,
+                                banner_timeout=self.timeout)
         except Exception as ex:
             if self.post_logout is not None:
                 self.post_logout(str(ex))
@@ -64,10 +67,10 @@ class ParamikoShell(object):
         if self.post_logout is not None:
             self.post_logout()
 
-    def cmd(self, cmd):
+    def cmd(self, cmd, timeout=1.0):
         """Execute command in shell
         """
-        stdin, stdout, stderr = self.client.exec_command(cmd)
+        stdin, stdout, stderr = self.client.exec_command(cmd, timeout=timeout)
         res = {u'stdout': [], u'stderr': stderr.read()}
         for line in stdout:
             res[u'stdout'].append(line.strip(u'\n'))
