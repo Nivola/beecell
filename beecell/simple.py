@@ -342,7 +342,7 @@ def get_remote_ip(request):
         return None
 
 
-def truncate(msg, size=200):
+def truncate(msg, size=400):
     """Truncate message to fixed size.
     
     :param str msg: message to truncate
