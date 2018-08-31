@@ -5,7 +5,6 @@ from beecell.simple import isNotBlank
 
 
 class TextDictType(TypeDecorator):
-
     impl = sqlalchemy.Text()
 
     def process_bind_param(self, value, dialect):
@@ -13,7 +12,6 @@ class TextDictType(TypeDecorator):
             value = json.dumps(value)
         else:
             value = u'{}'
-
         return value
 
     def process_result_value(self, value, dialect):
@@ -22,5 +20,3 @@ class TextDictType(TypeDecorator):
         else:
             value = {}
         return value
-
-
