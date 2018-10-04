@@ -61,7 +61,7 @@ class ParamikoShell(object):
         channel.get_pty(term=u'xterm', width=tw, height=th, width_pixels=0, height_pixels=0)
         # channel.get_pty(term=u'xterm')
         channel.invoke_shell()
-        interactive.interactive_shell(channel)
+        interactive.interactive_shell(channel, log=False)
         channel.close()
         self.client.close()
         if self.post_logout is not None:

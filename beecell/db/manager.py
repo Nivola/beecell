@@ -227,6 +227,15 @@ class RedisManager(ConnectionManager):
         """
         return self.server.mget(keys)
 
+    def set(self, key, value):
+        """Set key value.
+
+        :param key: key to insert
+        :param value: value to insert
+        :return:
+        """
+        return self.server.set(key, value)
+
 '''
 @event.listens_for(Pool, "checkout")
 def ping_connection(dbapi_connection, connection_record, connection_proxy):
