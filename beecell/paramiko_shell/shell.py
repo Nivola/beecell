@@ -29,6 +29,7 @@ class ParamikoShell(object):
         self.client.set_missing_host_key_policy(MissingHostKeyPolicy())
 
         self.timeout = 1.0
+        self.host_user = user # user used to connect in the host
 
         if keystring is not None:
             keystring_io = StringIO.StringIO(keystring)
@@ -45,7 +46,7 @@ class ParamikoShell(object):
                                 banner_timeout=self.timeout)
         except Exception as ex:
             if self.post_logout is not None:
-                self.post_logout(str(ex))
+                self.post_logout(status=str(ex))
             raise
         # timeout=None, #allow_agent=True,
 
@@ -61,7 +62,7 @@ class ParamikoShell(object):
         channel.get_pty(term=u'xterm', width=tw, height=th, width_pixels=0, height_pixels=0)
         # channel.get_pty(term=u'xterm')
         channel.invoke_shell()
-        interactive.interactive_shell(channel, log=False)
+        interactive.interactive_shell(channel, log=False, trace=True, trace_func=self.post_action)
         channel.close()
         self.client.close()
         if self.post_logout is not None:
@@ -76,7 +77,7 @@ class ParamikoShell(object):
             res[u'stdout'].append(line.strip(u'\n'))
         self.client.close()
         if self.post_action is not None:
-            self.post_action(cmd)
+            self.post_action(cmd=cmd, elapsed=0)
         if self.post_logout is not None:
             self.post_logout()
         return res
