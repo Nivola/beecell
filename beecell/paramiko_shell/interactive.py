@@ -57,7 +57,7 @@ def posix_shell(chan, log, trace, trace_func):
         cmd = u''
         while chan.closed is False:
             try:
-                x = nb_read(sys.stdin.fileno(), 1024)
+                x = nb_read(sys.stdin.fileno(), 1)
                 ordx = ord(x)
 
                 if 31 < ordx < 127:
