@@ -408,14 +408,16 @@ class CementCmd(cmd.Cmd, CementApp):
             logger.debug(u'Run command: %s - START' % sys.argv)
             # setup argv... this has to happen before lay_cement()
             line = u' '.join(sys.argv[1:])
+
             m = re.search(r"([\w\W]*) \'([\w\W]*)\'", line)
+            #print m
             if self._meta.argv is None:
                 if m is None:
                     self._meta.argv = list(sys.argv[1:])
                 else:
                     self._meta.argv = m.group(1).split(u' ')
                     self._meta.argv.append(m.group(2))
-            
+            #print self._meta.argv
             # setup the cement framework
             self._lay_cement()
             self.setup()

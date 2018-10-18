@@ -60,17 +60,17 @@ def posix_shell(chan, log, trace, trace_func):
                 x = nb_read(sys.stdin.fileno(), 1)
                 ordx = ord(x)
 
-                if 31 < ordx < 127:
-                    cmd += x
-                if ordx in [8, 24, 127]:
-                    cmd = cmd[:-1]
                 if ordx == ord(u'\r'):
                     if trace is True:
                         logger.debug(u'Execute ssh command: %s' % cmd)
                         if trace_func is not None:
                             trace_func(status=None, cmd=cmd, elapsed=u'')
-
                     cmd = u''
+                elif 31 < ordx < 127:
+                    cmd += x
+                # if ordx in [8, 24, 127]:
+                elif ordx < 31 or ordx > 127:
+                    cmd = cmd[:-1]
 
                 if log is True:
                     logger.debug(u'IN : %s' % x)
