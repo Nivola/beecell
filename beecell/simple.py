@@ -6,6 +6,8 @@ Created on Jul 18, 2012
 import ujson as json
 import os, string, random
 import subprocess
+from copy import deepcopy
+
 from prettytable import PrettyTable
 import string
 import binascii
@@ -480,7 +482,7 @@ def isNotBlank(myString):
     return bool(myString and myString.strip())
 
 
-def obscure_data(data, fields=[u'password', u'pwd', u'passwd']):
+def obscure_data(data, fields=[u'password', u'pwd', u'passwd', u'pass']):
     """Obscure some fields in data, fields can be password.
 
     :param data: data to check
@@ -491,6 +493,20 @@ def obscure_data(data, fields=[u'password', u'pwd', u'passwd']):
         if isinstance(value, dict):
             obscure_data(value, fields)
         elif isinstance(value, str) or isinstance(value, unicode):
-            if key in fields:
-                data[key] = u'xxxxxx'
+            for field in fields:
+                if key.find(field) >= 0:
+                    data[key] = u'xxxxxx'
+    return data
+
+
+def obscure_string(data, fields=[u'password', u'pwd', u'passwd', u'pass']):
+    """Obscure entire string if it contains passwords.
+
+    :param data: data to check
+    :param fields: list of fields to obfuscate. default=[u'password', u'pwd', u'passwd']
+    :return:
+    """
+    for field in fields:
+        if data.find(field) >= 0:
+            data = u'xxxxxx'
     return data
