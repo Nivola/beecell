@@ -32,6 +32,45 @@ def check_vault(data, key):
     return data
 
 
+def is_encrypted(data):
+    """Check if data is encrypted with fernet token and AES128
+
+    :param data: data to verify. If encrypted token '$BEEHIVE_VAULT;AES128 | ' is in head of data
+    :return: True if data is encrypted
+    """
+    if data.find(u'$BEEHIVE_VAULT;AES128 | ') == 0:
+        return True
+    return False
+
+
+def encrypt_data(fernet_key, data):
+    """Encrypt data using a fernet key and a symmetric algorithm
+
+    :param fernet_key: fernet key
+    :param data: data to encrypt
+    :return: encrypted data
+    """
+    cipher_suite = Fernet(fernet_key)
+    cipher_data = cipher_suite.encrypt(str(data))
+    return u'$BEEHIVE_VAULT;AES128 | %s' % cipher_data
+
+
+def decrypt_data(fernet_key, data):
+    """Decrypt data using a fernet key and a symmetric algorithm
+
+    :param fernet_key: fernet key
+    :param data: data to decrypt
+    :return: decrypted data
+    """
+    if data.find(u'$BEEHIVE_VAULT;AES128 | ') == 0:
+        data = data.replace(u'$BEEHIVE_VAULT;AES128 | ', u'')
+        cipher_suite = Fernet(fernet_key)
+        cipher_data = cipher_suite.decrypt(str(data))
+    else:
+        cipher_data = data
+    return cipher_data
+
+
 def flatten_dict(d, delimiter=":", loopArray=True):
     """ 
         Flat dictionary conversion
