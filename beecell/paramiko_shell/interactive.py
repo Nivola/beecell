@@ -1,4 +1,5 @@
 import datetime
+import string
 
 from gevent.local import local
 from gevent.monkey import patch_all
@@ -38,26 +39,26 @@ def posix_shell(chan, log, trace, trace_func):
     chan.setblocking(0)
     make_nonblocking(sys.stdin.fileno())
 
-    CMDS = {
-        u'arrow-up': [27, 91, 65],
-        u'arrow-down': [27, 91, 66],
-        u'arrow-left': [27, 91, 68],
-        u'arrow-right': [27, 91, 67],
-        u'del': [127],
-    }
-    bash_completion = queue.Queue()
+    # CMDS = {
+    #     u'arrow-up': [27, 91, 65],
+    #     u'arrow-down': [27, 91, 66],
+    #     u'arrow-left': [27, 91, 68],
+    #     u'arrow-right': [27, 91, 67],
+    #     u'del': [127],
+    # }
+    # bash_completion = queue.Queue()
 
-    def check_cmd(cmd):
-        res = False
-        for val in CMDS.values():
-            temp = set(cmd).issuperset(set(val))
-            res = res or temp
-        return res
-
-    def clean_cmd(cmd):
-        for val in CMDS.values():
-            cleaned_cmd = set(cmd).difference(set(val))
-        return list(cleaned_cmd)
+    # def check_cmd(cmd):
+    #     res = False
+    #     for val in CMDS.values():
+    #         temp = set(cmd).issuperset(set(val))
+    #         res = res or temp
+    #     return res
+    #
+    # def clean_cmd(cmd):
+    #     for val in CMDS.values():
+    #         cleaned_cmd = set(cmd).difference(set(val))
+    #     return list(cleaned_cmd)
 
     def trace_cmd(cmd):
         if trace is True:
@@ -83,7 +84,13 @@ def posix_shell(chan, log, trace, trace_func):
                             # logger.warn(u'%s - %s' % (ordx, cmd))
                             data = m.group(0)
                             data = data.replace(u']# ', u'')
-                            logger.warn(data)
+                            # data = data.rstrip()
+                            data = str(data)
+                            # translation = string.maketrans(None, u'\x08')
+                            # data = data.translate(None, chr(8))
+                            # logger.warn([ord(i) for i in data[-3:]])
+                            if len(data) > 0:
+                                logger.warn(u'%s - %s' % (data, [(ord(i), i) for i in data]))
                             cmd = cmd[-10:]
 
                         # try:
