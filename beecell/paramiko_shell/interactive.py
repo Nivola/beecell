@@ -1,15 +1,15 @@
 import datetime
 
+from gevent.local import local
 from gevent.monkey import patch_all
 #patch_all(os=True, select=True)
 
 from logging import getLogger
 import sys
-from gevent import spawn, joinall, sleep, socket
+from gevent import spawn, joinall, sleep, socket, queue
 from gevent.os import make_nonblocking, nb_read, nb_write
-from paramiko.py3compat import u
-
-from beecell.simple import format_date
+from gevent.queue import Empty
+import re
 
 logger = getLogger(__name__)
 
@@ -38,7 +38,35 @@ def posix_shell(chan, log, trace, trace_func):
     chan.setblocking(0)
     make_nonblocking(sys.stdin.fileno())
 
+    CMDS = {
+        u'arrow-up': [27, 91, 65],
+        u'arrow-down': [27, 91, 66],
+        u'arrow-left': [27, 91, 68],
+        u'arrow-right': [27, 91, 67],
+        u'del': [127],
+    }
+    bash_completion = queue.Queue()
+
+    def check_cmd(cmd):
+        res = False
+        for val in CMDS.values():
+            temp = set(cmd).issuperset(set(val))
+            res = res or temp
+        return res
+
+    def clean_cmd(cmd):
+        for val in CMDS.values():
+            cleaned_cmd = set(cmd).difference(set(val))
+        return list(cleaned_cmd)
+
+    def trace_cmd(cmd):
+        if trace is True:
+            logger.debug(u'Execute ssh command: %s' % cmd)
+            if trace_func is not None and len(cmd) > 0:
+                trace_func(status=None, cmd=cmd, elapsed=0)
+
     def write_output():
+        cmd = u''
         while chan.closed is False:
             if chan is not None:
                 try:
@@ -47,6 +75,25 @@ def posix_shell(chan, log, trace, trace_func):
                         if log is True:
                             logger.info(u'OUT: %s' % x)
                         nb_write(sys.stdout.fileno(), x)
+                        cmd += x
+                        logger.warn(cmd)
+                        m = re.search(r'\]\#\s.+?[\r\n]', cmd)
+                        if m is not None:
+                            m.group(0)
+                            # logger.warn(u'%s - %s' % (ordx, cmd))
+                            data = m.group(0)
+                            data = data.replace(u']# ', u'')
+                            logger.warn(data)
+                            cmd = cmd[-10:]
+
+                        # try:
+                        #     bash_completion.get(block=False)
+                        #     for i in x:
+                        #         logger.warn(u'%s %s' % (i, ord(i)))
+                        #     trace_cmd(x)
+                        # except Empty:
+                        #     pass
+
                 except socket.timeout:
                     logger.error(u'', exc_info=1)
                 except Exception:
@@ -55,22 +102,73 @@ def posix_shell(chan, log, trace, trace_func):
 
     def get_input():
         cmd = u''
+        cmd_ord = []
         while chan.closed is False:
             try:
                 x = nb_read(sys.stdin.fileno(), 1)
                 ordx = ord(x)
+                cmd_ord.append(ordx)
+                # logger.warn(u'%s - %s' % (ordx, cmd))
 
-                if ordx == ord(u'\r'):
-                    if trace is True:
-                        logger.debug(u'Execute ssh command: %s' % cmd)
-                        if trace_func is not None:
-                            trace_func(status=None, cmd=cmd, elapsed=u'')
-                    cmd = u''
-                elif 31 < ordx < 127:
-                    cmd += x
-                # if ordx in [8, 24, 127]:
-                elif ordx < 31 or ordx > 127:
-                    cmd = cmd[:-1]
+                # # end of line
+                # if ordx == 13:
+                #     # cmd_ord.pop()
+                #     # cmd = u''.join([chr(d) for d in cmd_ord])
+                #     trace_cmd(cmd)
+                #     cmd_ord = []
+                #     logger.warn(cmd)
+                #     cmd = u''
+                #
+                # # del char
+                # elif ordx == 127:
+                #     cmd = cmd[:-1]
+                #
+                # # add new char
+                # elif 31 < ordx < 127:
+                #     cmd += x
+                #
+                # # bash_completion
+                # if cmd.find(u'[A') >= 0 or cmd.find(u'[B') >= 0 :
+                #     cmd = u''
+                #     bash_completion.put(True)
+                #
+                # # remove char
+                # if cmd.find(u'[D') >= 0 or cmd.find(u'[C') >= 0 :
+                #     cmd = cmd[:-2]
+
+                # single char that should be removed
+                # elif ordx <= 31 or ordx >= 127:
+                #     cmd_ord.pop()
+
+                # # select command from history
+                # elif CMDS[u'arrow-up'] in cmd_ord or CMDS[u'arrow-down'] in cmd_ord:
+                #     cmd = u''
+                #     # logger.warn(u'in')
+                #     # ordx = None
+                #     # cmd = u''
+                #     cmd_ord = []
+                #     bash_completion.put(True)
+
+
+
+
+
+                # # char sequence that should be removed
+                # elif check_cmd(cmd_ord):
+                #     # ordx = None
+                #     # cmd = u''
+                #     cmd_ord = clean_cmd(cmd_ord)
+
+                # # single char that should be removed
+                # elif ordx <= 31 or ordx >= 127:
+                #     cmd_ord.pop()
+
+                # elif 31 < ordx < 127:
+                #     cmd += x
+                # # if ordx in [8, 24, 127]:
+                # elif ordx <= 31 or ordx >= 127:
+                #     cmd = cmd[:-1]
+                #     cmd_ord.pop()
 
                 if log is True:
                     logger.debug(u'IN : %s' % x)

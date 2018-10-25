@@ -1,14 +1,5 @@
 # Changelog
 
+## Version 0.2.0 (Jul 31 2018)
 
-## Version 1.0 ()
-
-* Added ...
-* Fixed ...
-* integrated ...
-* various bugfixes
-
-
-## Version 0.1.0 (April 18, 2014)
-
-First private preview release.
+First release.
