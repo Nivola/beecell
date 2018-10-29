@@ -33,6 +33,7 @@ class ColoredText:
     YELLOWonBLACK = '\033[1;33;40m'
     PURPLEonBLACK = '\033[1;35;40m'
     CYANonBLACK = '\033[1;36;40m'
+    BLACKonWHITE = '\033[1;40;37m'
     
     def output(self, data, color):
         return getattr(self, color) + data + self.ENDC
