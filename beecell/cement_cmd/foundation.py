@@ -410,15 +410,18 @@ class CementCmd(cmd.Cmd, CementApp):
             # setup argv... this has to happen before lay_cement()
             line = u' '.join(sys.argv[1:])
 
-            m = re.search(r"([\w\W]*) \'([\w\W]*)\'", line)
-            #print m
-            if self._meta.argv is None:
-                if m is None:
-                    self._meta.argv = list(sys.argv[1:])
-                else:
-                    self._meta.argv = m.group(1).split(u' ')
-                    self._meta.argv.append(m.group(2))
-            #print self._meta.argv
+            args = re.findall(r"\s([\"\'].[^\'\"]+[\"\'])", line)
+            kwargs = re.findall(r"\s([\w]+=[\"\'].[^\'\"]+[\"\'])", line)
+
+            line = line.replace(u' '.join(args), '')
+            line = line.replace(u' '.join(kwargs), '')
+            line = line.rstrip(u' ')
+            line = line.split(u' ')
+
+            self._meta.argv = line
+            self._meta.argv.extend(args)
+            self._meta.argv.extend(kwargs)
+
             # setup the cement framework
             self._lay_cement()
             self.setup()

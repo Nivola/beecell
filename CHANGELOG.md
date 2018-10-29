@@ -1,5 +1,5 @@
 # Changelog
 
-## Version 0.2.0 (Jul 31 2018)
+## Version 1.0.0 (Jul 31 2018)
 
 First release.
