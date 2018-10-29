@@ -62,12 +62,16 @@ def posix_shell(chan, log, trace, trace_func):
 
     def trace_cmd(cmd):
         if trace is True:
-            logger.debug(u'Execute ssh command: %s' % cmd)
-            if trace_func is not None and len(cmd) > 0:
-                trace_func(status=None, cmd=cmd, elapsed=0)
+            # logger.debug(u'Execute ssh command: %s' % cmd)
+            import string
+            filtered_string = filter(lambda x: x in string.printable, cmd)
+            logger.debug({u'cmd': filtered_string})
+            # if trace_func is not None and len(cmd) > 0:
+            #    trace_func(status=None, cmd=cmd, elapsed=0)
 
     def write_output():
         cmd = u''
+        print_cmd = False
         while chan.closed is False:
             if chan is not None:
                 try:
@@ -78,29 +82,24 @@ def posix_shell(chan, log, trace, trace_func):
                         nb_write(sys.stdout.fileno(), x)
                         cmd += x
                         logger.warn(cmd)
-                        m = re.search(r'\]\#\s.+?[\r\n]', cmd)
+                        m = re.search(r'[\#\$]\s.+?[\r\n]', cmd)
                         if m is not None:
                             m.group(0)
-                            # logger.warn(u'%s - %s' % (ordx, cmd))
                             data = m.group(0)
-                            data = data.replace(u']# ', u'')
-                            # data = data.rstrip()
-                            data = str(data)
-                            # translation = string.maketrans(None, u'\x08')
-                            # data = data.translate(None, chr(8))
-                            # logger.warn([ord(i) for i in data[-3:]])
-                            if len(data) > 0:
-                                logger.warn(u'%s - %s' % (data, [(ord(i), i) for i in data]))
+                            data = unicode(data.replace(u'# ', u'').replace(u'$ ', u'').rstrip())
+                            # if len(data) > 0:
+                            #     logger.warn(u'%s - %s - %s' % (data.encode(u'utf-8'), len(data.encode(u'utf-8')), [(ord(i), i) for i in data]))
+                            for c in data:
+                                c = ord(c)
+                                if 31 < c < 127:
+                                    print_cmd = True
+                                else:
+                                    logger.warn(c)
+                            if print_cmd is True:
+                                # data = data.encode(u'utf-8')
+                                trace_cmd(data)
+                                print_cmd = False
                             cmd = cmd[-10:]
-
-                        # try:
-                        #     bash_completion.get(block=False)
-                        #     for i in x:
-                        #         logger.warn(u'%s %s' % (i, ord(i)))
-                        #     trace_cmd(x)
-                        # except Empty:
-                        #     pass
-
                 except socket.timeout:
                     logger.error(u'', exc_info=1)
                 except Exception:
@@ -155,10 +154,6 @@ def posix_shell(chan, log, trace, trace_func):
                 #     # cmd = u''
                 #     cmd_ord = []
                 #     bash_completion.put(True)
-
-
-
-
 
                 # # char sequence that should be removed
                 # elif check_cmd(cmd_ord):
