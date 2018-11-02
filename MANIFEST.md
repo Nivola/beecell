@@ -1,0 +1,10 @@
+SQLAlchemy==1.2.8
+Flask==1.0.2
+anyjson==0.3.3
+psutil==5.4.6
+redis==2.10.6
+passlib==1.7.1
+pymysql==0.8.1
+ujson==1.35
+hiredis==0.2.0
+gevent==1.3.4

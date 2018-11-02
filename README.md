@@ -29,8 +29,16 @@ Add additional notes about how to deploy this on a live system
 ## Versioning
 We use Semantic Versioning for versioning. (http://semver.org)
 
-## Authors
-See the list of contributors who participated in this project in file AUTHOR.md.
+## Authors and Contributors
+beecell is written and maintained by: 
+
+* Sergio Tonani
+* Michele Bello
+* Gianpiero Ardissono
+* Ignazio Cassano
+
+## Copyrights
+CSI Piemonte
 
 ## License
 See the LICENSE.txt file for details

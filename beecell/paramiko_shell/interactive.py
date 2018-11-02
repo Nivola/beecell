@@ -11,6 +11,7 @@ from gevent import spawn, joinall, sleep, socket, queue
 from gevent.os import make_nonblocking, nb_read, nb_write
 from gevent.queue import Empty
 import re
+import string
 
 logger = getLogger(__name__)
 
@@ -39,39 +40,71 @@ def posix_shell(chan, log, trace, trace_func):
     chan.setblocking(0)
     make_nonblocking(sys.stdin.fileno())
 
-    # CMDS = {
-    #     u'arrow-up': [27, 91, 65],
-    #     u'arrow-down': [27, 91, 66],
-    #     u'arrow-left': [27, 91, 68],
-    #     u'arrow-right': [27, 91, 67],
-    #     u'del': [127],
-    # }
-    # bash_completion = queue.Queue()
+    KEYS = {
+        u'arrow-left': 8,
+        u'arrow-right': 7,
+        u'del': [27, 91, 75],
+        u'move': [27, 91, 67],
+        u'ctrl': [[27, 91, 49, 80], [27, 91, 50, 80], [27, 91, 51, 80], [27, 91, 52, 80], [27, 91, 53, 80],
+                  [27, 91, 54, 80]]
 
-    # def check_cmd(cmd):
-    #     res = False
-    #     for val in CMDS.values():
-    #         temp = set(cmd).issuperset(set(val))
-    #         res = res or temp
-    #     return res
-    #
-    # def clean_cmd(cmd):
-    #     for val in CMDS.values():
-    #         cleaned_cmd = set(cmd).difference(set(val))
-    #     return list(cleaned_cmd)
+    }
 
     def trace_cmd(cmd):
         if trace is True:
             # logger.debug(u'Execute ssh command: %s' % cmd)
-            import string
-            filtered_string = filter(lambda x: x in string.printable, cmd)
-            logger.debug({u'cmd': filtered_string})
-            # if trace_func is not None and len(cmd) > 0:
-            #    trace_func(status=None, cmd=cmd, elapsed=0)
+            # import string
+            # filtered_string = filter(lambda x: x in string.printable, cmd)
+            logger.debug({u'cmd': cmd})
+            if trace_func is not None and len(cmd) > 0:
+               trace_func(status=None, cmd=cmd, elapsed=0)
+
+    def string_parser(data):
+        """List of ord(character)
+
+        :param data
+        :return:
+        """
+        # logger.warn(u'%s - %s' % (data, [chr(i) for i in data]))
+        res = []
+        pos = 0
+        data_pos = 0
+        max_data_pos = len(data)
+        while data_pos < max_data_pos:
+            item = data[data_pos] # (ord, chr)
+            if item == KEYS[u'arrow-left']:
+                if pos > 0:
+                    pos -= 1
+                data_pos += 1
+            elif item == KEYS[u'arrow-right']:
+                pos += 1
+                data_pos += 1
+            elif data[data_pos:data_pos+4] in KEYS[u'ctrl']:
+                res = res[0:pos]
+                data_pos += 4
+            elif data[data_pos:data_pos+3] == KEYS[u'del']:
+                res = res[0:pos]
+                data_pos += 3
+            elif data[data_pos:data_pos+3] == KEYS[u'move']:
+                pos += 1
+                data_pos += 3
+            elif 31 < item < 127:
+                try:
+                    res[pos] = chr(item)
+                except:
+                    res.append(chr(item))
+                pos += 1
+                data_pos += 1
+            else:
+                res = []
+                pos = 0
+                data_pos += 1
+        res = u''.join(res)
+        # logger.debug(res)
+        return res
 
     def write_output():
         cmd = u''
-        print_cmd = False
         while chan.closed is False:
             if chan is not None:
                 try:
@@ -81,25 +114,34 @@ def posix_shell(chan, log, trace, trace_func):
                             logger.info(u'OUT: %s' % x)
                         nb_write(sys.stdout.fileno(), x)
                         cmd += x
-                        logger.warn(cmd)
-                        m = re.search(r'[\#\$]\s.+?[\r\n]', cmd)
+                        # cmd = filter(lambda x: x in string.printable, cmd)
+
+                        # logger.warn(cmd)
+                        m = re.search(r'[\#\$]\s.*[\r\n]', cmd)
                         if m is not None:
+                            cmd = cmd[-10:]
                             m.group(0)
                             data = m.group(0)
                             data = unicode(data.replace(u'# ', u'').replace(u'$ ', u'').rstrip())
+                            # logger.warn({u'p': data})
+                            # logger.warn([ord(i) for i in data])
+                            data = string_parser([ord(i) for i in data])
                             if len(data) > 0:
-                                logger.warn(u'%s' % ([(ord(i), i) for i in data]))
-                                #s = data
-                                #logger.warn({u'k': s})
-                            for c in data:
-                                c = ord(c)
-                                if 31 < c < 127:
-                                    print_cmd = True
-                            if print_cmd is True:
-                                # data = data.encode(u'utf-8')
                                 trace_cmd(data)
-                                print_cmd = False
-                            cmd = cmd[-10:]
+                            # data = unicode(data.replace(u'# ', u'').replace(u'$ ', u'').rstrip())
+                            # # if len(data) > 0:
+                            # logger.warn([(ord(i), i) for i in data])
+                            # # for c in data:
+                            # #     c = ord(c)
+                            # #     if 31 < c < 127:
+                            # #         print_cmd = True
+                            # #     else:
+                            # #         logger.warn(c)
+                            # if print_cmd is True:
+                            #     # data = data.encode(u'utf-8')
+                            #     trace_cmd(data)
+                            #     # print_cmd = False
+                            # cmd = cmd[-10:]
                 except socket.timeout:
                     logger.error(u'', exc_info=1)
                 except Exception:
