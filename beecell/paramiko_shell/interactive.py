@@ -87,14 +87,14 @@ def posix_shell(chan, log, trace, trace_func):
                             m.group(0)
                             data = m.group(0)
                             data = unicode(data.replace(u'# ', u'').replace(u'$ ', u'').rstrip())
-                            # if len(data) > 0:
-                            #     logger.warn(u'%s - %s - %s' % (data.encode(u'utf-8'), len(data.encode(u'utf-8')), [(ord(i), i) for i in data]))
+                            if len(data) > 0:
+                                logger.warn(u'%s' % ([(ord(i), i) for i in data]))
+                                #s = data
+                                #logger.warn({u'k': s})
                             for c in data:
                                 c = ord(c)
                                 if 31 < c < 127:
                                     print_cmd = True
-                                else:
-                                    logger.warn(c)
                             if print_cmd is True:
                                 # data = data.encode(u'utf-8')
                                 trace_cmd(data)
