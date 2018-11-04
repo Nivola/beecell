@@ -1,5 +1,0 @@
-run uwsgi instance
---------------------------
-uwsgi --ini etc/server.ini
-uwsgi --stop run/server.pid
-uwsgi --reload run/server.pid
