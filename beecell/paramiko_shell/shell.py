@@ -30,6 +30,7 @@ class ParamikoShell(object):
 
         self.timeout = 1.0
         self.host_user = user # user used to connect in the host
+        self.keepalive = 30
 
         if keystring is not None:
             keystring_io = StringIO.StringIO(keystring)
@@ -58,6 +59,7 @@ class ParamikoShell(object):
         """Run interactive shell
         """
         tw, th = self.terminal_size()
+        self.client.get_transport().set_keepalive(self.keepalive)
         channel = self.client.get_transport().open_session()
         channel.get_pty(term=u'xterm', width=tw, height=th, width_pixels=0, height_pixels=0)
         # channel.get_pty(term=u'xterm')

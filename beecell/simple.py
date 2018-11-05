@@ -160,6 +160,7 @@ def merge_dicts(*dict_args):
 
 def random_password(length=10):
     chars = string.ascii_uppercase + string.digits + string.ascii_lowercase
+    # chars = string.printable
     password = ''
     for i in range(length):
         # password += chars[ord(M2Crypto.m2.rand_bytes(1)) % len(chars)]
