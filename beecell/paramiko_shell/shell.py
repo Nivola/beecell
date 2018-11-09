@@ -83,3 +83,39 @@ class ParamikoShell(object):
         if self.post_logout is not None:
             self.post_logout()
         return res
+
+    def file_put(self, source, dest):
+        """Put a local file to remote server
+
+        :param source: local file name
+        :param dest: remote file name
+        :return:
+        """
+        ftp_client = self.client.open_sftp()
+        res = ftp_client.put(source, dest)
+        ftp_client.close()
+        return res
+
+    def file_get(self, source, dest):
+        """Get a file from remote server
+
+        :param source: remote file name
+        :param dest: local file name
+        :return:
+        """
+        ftp_client = self.client.open_sftp()
+        res = ftp_client.get(source, dest)
+        ftp_client.close()
+        return res
+
+    def file_list_dir(self, path):
+        """Get the content of a directory on the remote server
+
+        :param path: directory path
+        :return:
+        """
+        ftp_client = self.client.open_sftp()
+        res = ftp_client.listdir_attr(path)
+        ftp_client.close()
+        return res
+
