@@ -529,6 +529,9 @@ def obscure_data(data, fields=[u'password', u'pwd', u'passwd', u'pass']):
     :param fields: list of fields to obfuscate. default=[u'password', u'pwd', u'passwd']
     :return:
     """
+    if isinstance(data, str) or isinstance(data, unicode):
+        return obscure_string(data, fields)
+
     for key, value in data.items():
         if isinstance(value, dict):
             obscure_data(value, fields)
