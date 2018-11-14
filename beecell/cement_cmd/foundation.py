@@ -55,24 +55,27 @@ class CementCmdBaseController(CementBaseController):
 
         cmd_txt = ''
         for label in self._visible_commands:
+            cmd_txt1 = ''
             cmd = self._dispatch_map[label]
             if len(cmd['aliases']) > 0 and cmd['aliases_only']:
                 if len(cmd['aliases']) > 1:
                     first = cmd['aliases'].pop(0)
-                    cmd_txt = cmd_txt + "  %s (aliases: %s)\n" % \
-                              (first, ', '.join(cmd['aliases']))
+                    cmd_txt1 = cmd_txt1 + "  %s (aliases: %s)" % (first, ', '.join(cmd['aliases']))
                 else:
-                    cmd_txt = cmd_txt + "  %-20s" % cmd['aliases'][0]
+                    cmd_txt1 = cmd_txt1 + "  %s" % cmd['aliases'][0]
             elif len(cmd['aliases']) > 0:
-                cmd_txt = cmd_txt + "  %s (aliases: %s)\n" % \
-                          (label, ', '.join(cmd['aliases']))
+                cmd_txt1 = cmd_txt1 + "  %s (aliases: %s)" % (label, ', '.join(cmd['aliases']))
             else:
-                cmd_txt = cmd_txt + "  %-20s" % label
+                cmd_txt1 = cmd_txt1 + "  %-20s" % label
 
             if cmd['help']:
-                cmd_txt = cmd_txt + " %s\n" % cmd['help']
+                if len(cmd_txt1) > 23:
+                    cmd_txt1 = "%-23s \n    %s\n" % (cmd_txt1, cmd['help'].rstrip())
+                else:
+                    cmd_txt1 = "%-23s %s\n" % (cmd_txt1, cmd['help'].rstrip())
             else:
-                cmd_txt = cmd_txt + "\n"
+                cmd_txt1 = cmd_txt1 + "\n"
+            cmd_txt += cmd_txt1
 
         if len(cmd_txt) > 0:
             txt = '''%s
