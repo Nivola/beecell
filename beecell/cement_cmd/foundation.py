@@ -39,15 +39,57 @@ class ColoredText:
         return getattr(self, color) + data + self.ENDC
     
     def error(self, data):
-        return self.FAIL + u' ERROR : ' + self.ENDC +\
-            self.FAIL + self.BOLD + str(data) + self.ENDC
+        return self.FAIL + u' ERROR : ' + self.ENDC + self.FAIL + self.BOLD + str(data) + self.ENDC
 
 
 class CementCmdBaseController(CementBaseController):
+    usage_text = []
+
     @property
     def _help_cmd_list(self):
         """Returns the help visible command list."""
         return self._visible_commands
+
+    @property
+    def _help_text_orig(self):
+        """Returns the help text displayed when '--help' is passed."""
+
+        cmd_txt = ''
+        for label in self._visible_commands:
+            cmd_txt1 = ''
+            cmd = self._dispatch_map[label]
+            if len(cmd['aliases']) > 0 and cmd['aliases_only']:
+                if len(cmd['aliases']) > 1:
+                    first = cmd['aliases'].pop(0)
+                    cmd_txt1 = cmd_txt1 + "  %s (aliases: %s)" % (first, ', '.join(cmd['aliases']))
+                else:
+                    cmd_txt1 = cmd_txt1 + "  %s" % cmd['aliases'][0]
+            elif len(cmd['aliases']) > 0:
+                cmd_txt1 = cmd_txt1 + "  %s (aliases: %s)" % (label, ', '.join(cmd['aliases']))
+            else:
+                cmd_txt1 = cmd_txt1 + "  %-20s" % label
+
+            if cmd['help']:
+                if len(cmd_txt1) > 23:
+                    cmd_txt1 = "%-23s \n      %s\n\n" % (cmd_txt1, cmd['help'].rstrip())
+                else:
+                    cmd_txt1 = "%-23s %s\n" % (cmd_txt1, cmd['help'].rstrip())
+            else:
+                cmd_txt1 = cmd_txt1 + "\n"
+            cmd_txt += cmd_txt1
+
+        if len(cmd_txt) > 0:
+            txt = '''%s
+
+    commands: 
+    %s
+
+
+        ''' % (self._meta.description, cmd_txt)
+        else:
+            txt = self._meta.description
+
+        return textwrap.dedent(txt)
 
     @property
     def _help_text(self):
@@ -68,11 +110,13 @@ class CementCmdBaseController(CementBaseController):
             else:
                 cmd_txt1 = cmd_txt1 + "  %-20s" % label
 
+            cmd_txt1 = u'  ' + cmd_txt1.lstrip(u'  ').split(u' ')[0]
             if cmd['help']:
+                cmd_help = cmd['help'].rstrip().split(u'\n')[0]
                 if len(cmd_txt1) > 23:
-                    cmd_txt1 = "%-23s \n    %s\n" % (cmd_txt1, cmd['help'].rstrip())
+                    cmd_txt1 = "%-23s \n      %s\n\n" % (cmd_txt1, cmd_help)
                 else:
-                    cmd_txt1 = "%-23s %s\n" % (cmd_txt1, cmd['help'].rstrip())
+                    cmd_txt1 = "%-23s %s\n" % (cmd_txt1, cmd_help)
             else:
                 cmd_txt1 = cmd_txt1 + "\n"
             cmd_txt += cmd_txt1
@@ -90,48 +134,68 @@ commands:
 
         return textwrap.dedent(txt)
 
-    @property
-    def _help_text_cmd(self):
-        """Returns the help text displayed when '--help' is passed."""
-
-        cmd_txt = ''
-        for label in self._visible_commands:
-            cmd = self._dispatch_map[label]
-            if len(cmd['aliases']) > 0 and cmd['aliases_only']:
-                if len(cmd['aliases']) > 1:
-                    first = cmd['aliases'].pop(0)
-                    cmd_txt = cmd_txt + "  %s (aliases: %s)\n" % \
-                              (first, ', '.join(cmd['aliases']))
-                else:
-                    cmd_txt = cmd_txt + "  %s\n" % cmd['aliases'][0]
-            elif len(cmd['aliases']) > 0:
-                cmd_txt = cmd_txt + "  %s (aliases: %s)\n" % \
-                          (label, ', '.join(cmd['aliases']))
-            else:
-                cmd_txt = cmd_txt + "  %s\n" % label
-
-            if cmd['help']:
-                cmd_txt = cmd_txt + "    %s\n\n" % cmd['help']
-            else:
-                cmd_txt = cmd_txt + "\n"
-
-        if len(cmd_txt) > 0:
-            txt = '''%s
-
-commands: 
-
-%s
-
-
-        ''' % (self._meta.description, cmd_txt)
-        else:
-            txt = self._meta.description
-
-        return textwrap.dedent(txt)
+#     @property
+#     def _help_text_cmd(self):
+#         """Returns the help text displayed when '--help' is passed for a single command."""
+#
+#         cmd_txt = ''
+#         for label in self._visible_commands:
+#             cmd = self._dispatch_map[label]
+#             if len(cmd['aliases']) > 0 and cmd['aliases_only']:
+#                 if len(cmd['aliases']) > 1:
+#                     first = cmd['aliases'].pop(0)
+#                     cmd_txt = cmd_txt + "  %s (aliases: %s)\n" % \
+#                               (first, ', '.join(cmd['aliases']))
+#                 else:
+#                     cmd_txt = cmd_txt + "  %s\n" % cmd['aliases'][0]
+#             elif len(cmd['aliases']) > 0:
+#                 cmd_txt = cmd_txt + "  %s (aliases: %s)\n" % \
+#                           (label, ', '.join(cmd['aliases']))
+#             else:
+#                 cmd_txt = cmd_txt + "  %s\n" % label
+#
+#             if cmd['help']:
+#                 cmd_txt = cmd_txt + "    %s\n\n" % cmd['help']
+#             else:
+#                 cmd_txt = cmd_txt + "\n"
+#
+#         if len(cmd_txt) > 0:
+#             txt = '''%s
+#
+# commands:
+#
+# %s
+#
+#
+#         ''' % (self._meta.description, cmd_txt)
+#         else:
+#             txt = self._meta.description
+#
+#         return textwrap.dedent(txt)
 
     def _parse_args(self):
         self.app.args.cmd_list = self._help_cmd_list
         CementBaseController._parse_args(self)
+
+    def _get_section_name(self, usage_text=None):
+        """Append section name to usage help text
+        """
+        if len(self._meta.aliases) > 0:
+            self.usage_text.append(self._meta.aliases[0])
+        else:
+            self.usage_text.append(self._meta.label)
+        if usage_text is not None:
+            self.usage_text.append(usage_text)
+
+    def _get_command_name(self, command, usage_text=None):
+        """Append command name to usage help text
+        """
+        if len(command[u'aliases']) > 0:
+            self.usage_text.append(command[u'aliases'][0])
+        else:
+            self.usage_text.append(command[u'label'])
+        if usage_text is not None:
+            self.usage_text.append(usage_text)
 
     def _dispatch(self):
         """
@@ -152,14 +216,26 @@ commands:
         if self._dispatch_command:
             if self._dispatch_command[u'func_name'] == u'_dispatch':
                 func = getattr(self._dispatch_command[u'controller'], u'_dispatch')
+                self._get_section_name()
             else:
                 self._process_arguments()
                 if command == u'default':
                     self._parse_args()
+                    self._get_section_name(usage_text=u'<command>')
                 elif not self._dispatch_command[u'func_name'] == u'default':
+                    cmd_obj = self._dispatch_map[command]
+
                     self._visible_commands = [command]
-                    self.app.args.description = self._help_text_cmd
-                    self.app.args.usage = self._usage_text
+                    # self.app.args.description = self._help_text_cmd
+                    # self.app.args.usage = self._usage_text
+
+                    self.app.args.description = cmd_obj[u'help']
+
+                    # set help usage
+                    self._get_section_name()
+                    self._get_command_name(cmd_obj)
+                    self.app.args.usage = u'%s [options ...]' % u' '.join(self.usage_text)
+
                     self.app.args.formatter_class = self._meta.argument_formatter
                     self.app._parse_args()
                 self._parse_args()
@@ -174,6 +250,9 @@ commands:
         if self.app.pargs is not None and getattr(self.app.pargs, u'cmds', False) is True:
             self.app.print_cmd_list()
             return None
+
+        # set help usage
+        self.app.args.usage = u'%s [options ...]' % u' '.join(self.usage_text)
 
         try:
             if func is not None:
@@ -295,7 +374,7 @@ class CementCmd(cmd.Cmd, CementApp):
         for option in options:
             for action in parser._actions:
                 if vars(action)['option_strings'][0] == option:
-                    parser._handle_conflict_resolve(None,[(option,action)])
+                    parser._handle_conflict_resolve(None, [(option, action)])
                     break    
     
     #
@@ -331,12 +410,12 @@ class CementCmd(cmd.Cmd, CementApp):
             format_help = self.format_help
         else:
             format_help = self.args.format_help
+
         self.args._print_message(format_help(), file)
 
     def print_cmd_list(self, file=None):
         print u' '.join(map(lambda x: x.split(u'.')[-1], self.args.cmd_list))
 
-    
     #
     # cement extension
     #
