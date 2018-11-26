@@ -537,7 +537,7 @@ def obscure_data(data, fields=[u'password', u'pwd', u'passwd', u'pass']):
             obscure_data(value, fields)
         elif isinstance(value, str) or isinstance(value, unicode):
             for field in fields:
-                if key.find(field) >= 0:
+                if key.lower().find(field) >= 0:
                     data[key] = u'xxxxxx'
     return data
 
@@ -550,6 +550,6 @@ def obscure_string(data, fields=[u'password', u'pwd', u'passwd', u'pass']):
     :return:
     """
     for field in fields:
-        if data.find(field) >= 0:
+        if data.lower().find(field) >= 0:
             data = u'xxxxxx'
     return data
