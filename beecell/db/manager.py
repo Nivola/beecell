@@ -509,11 +509,11 @@ class SqlManager(ConnectionManager):
         if fields is not None:
             fields = ",".join(fields)
         
-        query = "SELECT %s FROM %s ORDER BY id" % (fields, table_name)
+        query = "SELECT %s FROM %s" % (fields, table_name)
         if where is not None:
             query = "%s WHERE %s" % (query, where)
-        
-        query = "%s LIMIT %s OFFSET %s" % (query, rows, offset)    
+
+        query = "%s ORDER BY id LIMIT %s OFFSET %s" % (query, rows, offset)
         
         # get columns name
         col_names = [c[u'name'] for c in self.get_table_description(table_name)]
@@ -614,18 +614,91 @@ class MysqlManager(SqlManager):
         :raise SqlManagerError:
         """
         stmp = ["SET FOREIGN_KEY_CHECKS = 0;",
-                "SET @tables = NULL;",
-                "SELECT GROUP_CONCAT(table_schema, '.', table_name) INTO @tables FROM information_schema.tables WHERE table_schema = '%s';" % schema,
+                "SET @tables = '';",
+                "SET @views = '';",
+                "SET SESSION group_concat_max_len = 10240;",
+                "SELECT GROUP_CONCAT(table_schema, '.', table_name) INTO @tables FROM information_schema.tables "
+                "WHERE table_type='BASE TABLE' and table_schema = '%s';" % schema,
+                "SELECT GROUP_CONCAT(table_schema, '.', table_name) INTO @views FROM information_schema.tables "
+                "WHERE table_type='VIEW' and table_schema = '%s';" % schema,
                 "SET @tables = CONCAT('DROP TABLE ', @tables);",
                 "PREPARE stmt FROM @tables;",
                 "EXECUTE stmt;",
                 "DEALLOCATE PREPARE stmt;",
+                "SET @views = CONCAT('DROP VIEW ', @views);",
+                "PREPARE stmt FROM @views;",
+                "EXECUTE stmt;",
+                "DEALLOCATE PREPARE stmt;",
                 "SET FOREIGN_KEY_CHECKS = 1"]
+
+        start = [
+            "SET FOREIGN_KEY_CHECKS = 0;",
+            "SET @tables = '';",
+            "SET @views = '';",
+            "SET SESSION group_concat_max_len = 10240;"
+        ]
+        end = [
+            "SET FOREIGN_KEY_CHECKS = 1"
+        ]
+
+        select_tables = "SELECT GROUP_CONCAT(table_schema, '.', table_name) FROM information_schema.tables " \
+                        "WHERE table_type='BASE TABLE' and table_schema = '%s';" % schema
+
+        select_views = "SELECT GROUP_CONCAT(table_schema, '.', table_name) FROM information_schema.tables " \
+                       "WHERE table_type='VIEW' and table_schema = '%s';" % schema
+
+        set_tables = "SET @tables = '%s';"
+        set_views = "SET @views = '%s';"
+
+        drop_tables = [
+            "SET @tables = CONCAT('DROP TABLE ', @tables);",
+            "PREPARE stmt FROM @tables;",
+            "EXECUTE stmt;",
+            "DEALLOCATE PREPARE stmt;"
+        ]
+
+        drop_views = [
+            "DEALLOCATE PREPARE stmt;",
+            "SET @views = CONCAT('DROP VIEW ', @views);",
+            "PREPARE stmt FROM @views;",
+            "EXECUTE stmt;",
+            "DEALLOCATE PREPARE stmt;"
+        ]
 
         try:
             connection = self.engine.connect()
             trans = connection.begin()
-            for item in stmp:
+
+            # start
+            for item in start:
+                connection.execute(item)
+
+            # get tables
+            res = connection.execute(select_tables)
+            tables = res.fetchone()[0]
+            res.close()
+            self.logger.debug(tables)
+
+            # delete tables
+            if tables is not None:
+                connection.execute(set_tables % tables)
+                for item in drop_tables:
+                    connection.execute(item)
+
+            # get views
+            res = connection.execute(select_views)
+            tables = res.fetchone()[0]
+            res.close()
+            self.logger.debug(tables)
+
+            # delete views
+            if tables is not None:
+                connection.execute(set_views % tables)
+                for item in drop_views:
+                    connection.execute(item)
+
+            # end
+            for item in end:
                 connection.execute(item)
             trans.commit()
         except:

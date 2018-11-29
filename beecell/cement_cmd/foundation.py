@@ -423,7 +423,7 @@ class CementCmd(cmd.Cmd, CementApp):
         args, argv = self.args.parse_known_args(args, namespace)
 
         if argv:
-            msg = _(u'unrecognized arguments: %s')
+            msg = (u'unrecognized arguments: %s')
             msg = msg % u' '.join(argv)
             self.error = True
             self.print_error(msg)

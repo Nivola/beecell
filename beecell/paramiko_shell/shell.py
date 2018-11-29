@@ -10,6 +10,9 @@ import StringIO
 import fcntl
 import termios
 import struct
+import sys
+from gevent import spawn, joinall, sleep, socket, queue
+from gevent.os import make_nonblocking, nb_read, nb_write
 
 try:
     import interactive
@@ -118,4 +121,53 @@ class ParamikoShell(object):
         res = ftp_client.listdir_attr(path)
         ftp_client.close()
         return res
+
+    def open_file(self, filename):
+        """Get a file from remote server
+
+        :param source: remote file name
+        :param dest: local file name
+        :return:
+        """
+        # ftp_client = self.client.open_sftp()
+        # res = ftp_client.file(filename)
+        # print res.readlines()
+        transport = self.client.get_transport()
+        transport.set_keepalive(self.keepalive)
+        channel = transport.open_session()
+        channel.settimeout(self.timeout)
+
+        cmd = u'tail -f %s' % filename
+        channel.exec_command(cmd)
+
+        make_nonblocking(sys.stdin.fileno())
+        while channel.closed is False:
+            if channel is not None:
+                if channel.recv_ready():
+                    x = channel.recv(4096)
+                    nb_write(sys.stdout.fileno(), x)
+
+        channel.close()
+        self.client.close()
+
+
+        # while transport.is_active():
+        #     print "transport is active"
+        #     rl, wl, xl = select.select([channel], [], [], 0.0)
+        #     if len(rl) > 0:
+        #         buf = channel.recv(BUF_SIZE)
+        #         if len(buf) > 0:
+        #             lines_to_process = LeftOver + buf
+        #             EOL = lines_to_process.rfind("\n")
+        #             if EOL != len(lines_to_process) - 1:
+        #                 LeftOver = lines_to_process[EOL + 1:]
+        #                 lines_to_process = lines_to_process[:EOL]
+        #             else:
+        #                 LeftOver = ""
+        #             for line in lines_to_process.splitlines():
+        #                 if "error" in line:
+        #                     report_error(line)
+        #                 print line
+
+
 
