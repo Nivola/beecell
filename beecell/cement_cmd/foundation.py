@@ -414,7 +414,7 @@ class CementCmd(cmd.Cmd, CementApp):
         self.args._print_message(format_help(), file)
 
     def print_cmd_list(self, file=None):
-        print u' '.join(map(lambda x: x.split(u'.')[-1], self.args.cmd_list))
+        print(u' '.join(map(lambda x: x.split(u'.')[-1], self.args.cmd_list)))
 
     #
     # cement extension

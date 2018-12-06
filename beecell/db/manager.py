@@ -360,6 +360,7 @@ class SqlManager(ConnectionManager):
         connection = None
         try:
             connection = self.engine.connect()
+            self.logger.debug('Get connection : %s' % connection)
             connection.execute(self.ping_query)
             self.logger.debug('Ping dbms %s: OK' % self.engine)
             return True
