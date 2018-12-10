@@ -3,6 +3,7 @@ Created on Jul 18, 2012
 
 @author: darkbk
 """
+import logging
 import ujson as json
 import os, string, random
 import subprocess
@@ -14,6 +15,9 @@ import binascii
 from uuid import uuid4
 from math import ceil
 from cryptography.fernet import Fernet
+
+
+logger = logging.getLogger(__name__)
 
 
 def check_vault(data, key):
@@ -312,6 +316,13 @@ def dynamic_import(name):
     for comp in components[1:]:
         mod = getattr(mod, comp)
     return mod
+
+
+def import_func(name):
+    components = name.split(u'.')
+    mod = __import__(u'.'.join(components[:-1]), globals(), locals(), [components[-1]], -1)
+    func = getattr(mod, components[-1], None)
+    return func
 
 
 def import_class(cl):
