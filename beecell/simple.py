@@ -564,3 +564,32 @@ def obscure_string(data, fields=[u'password', u'pwd', u'passwd', u'pass']):
         if data.lower().find(field) >= 0:
             data = u'xxxxxx'
     return data
+
+
+def dict_get(data, key, separator=u'.'):
+    """Get a key from a dict. Key can be composed to get a field in a complex dict that contains other dict, list and
+    string.
+
+    :param data: dictionary to query
+    :param key: key to search
+    :param separator: key depth separator
+    :return:
+    """
+    keys = key.split(separator)
+    res = data
+    for k in keys:
+        if isinstance(res, list):
+            try:
+                res = res[int(k)]
+            except:
+                res = {}
+        else:
+            if res is not None:
+                res = res.get(k, {})
+    if isinstance(res, list):
+        res = json.dumps(res)
+        # res = u','.join(str(res))
+    if res is None or res == {}:
+        res = u'-'
+
+    return res
