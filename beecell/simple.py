@@ -593,3 +593,27 @@ def dict_get(data, key, separator=u'.'):
         res = u'-'
 
     return res
+
+
+def dict_set(data, key, value, separator=u'.'):
+    """Set a key in a dict. Key can be a composition of different keys separated by a separator.
+
+    :param data: dictionary to query
+    :param key: key to update
+    :param value: key new value
+    :param separator: key depth separator
+    :return:
+    """
+    keys = key.split(separator)
+    keys.reverse()
+    orig = data
+    while len(keys) > 0:
+        k = keys.pop()
+        if len(keys) == 0:
+            data[k] = value
+        elif isinstance(data, dict):
+            if k not in data or not isinstance(data[k], dict):
+                data[k] = {}
+                data = data[k]
+
+    return orig
