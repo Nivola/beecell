@@ -590,11 +590,11 @@ def dict_get(data, key, separator=u'.'):
         else:
             if res is not None:
                 res = res.get(k, {})
-    if isinstance(res, list):
-        res = json.dumps(res)
-        # res = u','.join(str(res))
+    # if isinstance(res, list):
+    #     res = json.dumps(res)
+    #     # res = u','.join(str(res))
     if res is None or res == {}:
-        res = u'-'
+        res = None
 
     return res
 
