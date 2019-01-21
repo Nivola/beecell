@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 1.2.0.alpha (, 2019)
+
+* Added ...
+* Fixed ...
+* Integrated ...
+    * modificato comando **random_password** per creare password strong
+* Various bugfixes
+
 ## Version 1.1.0 (January 13, 2019)
 
 * Added ...

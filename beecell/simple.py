@@ -166,10 +166,11 @@ def merge_dicts(*dict_args):
     return result
 
 
-def random_password(length=10):
+def random_password(length=10, strong=False):
     chars = string.ascii_uppercase + string.digits + string.ascii_lowercase
-    # chars = string.printable
-    password = ''
+    if strong is True:
+        chars += u'!#$%&()*+,-.:;<=>?@[]^_`{|}~'
+    password = u''
     for i in range(length):
         # password += chars[ord(M2Crypto.m2.rand_bytes(1)) % len(chars)]
         password += chars[ord(os.urandom(1)) % len(chars)]

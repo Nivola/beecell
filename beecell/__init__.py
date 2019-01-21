@@ -1,4 +1,4 @@
-__version__ = u'1.1.0'
+__version__ = u'1.1.0.alpha'
 
 import os.path
 version_file = os.path.join(os.path.abspath(__file__).rstrip(u'__init__.pyc'), u'VERSION')
