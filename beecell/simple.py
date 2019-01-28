@@ -19,6 +19,7 @@ import binascii
 from uuid import uuid4
 from math import ceil
 from cryptography.fernet import Fernet
+import datetime
 
 
 logger = logging.getLogger(__name__)
@@ -499,6 +500,21 @@ def bool2str(value):
         res = u'true'
     return res
 
+
+def parse_date(data_str, format=None):
+    """Parse string to date
+    
+    
+    """
+    if format is None:
+        time_format = u'%Y-%m-%dT%H:%M:%SZ'
+    else:
+        time_format = format
+        
+    res = None
+    if data_str is not None:
+        res = datetime.datetime.strptime(data_str, time_format)
+    return res
 
 def format_date(date, format=None):
     """Format date as rfc3339.
