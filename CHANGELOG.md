@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.2.0.alpha (, 2019)
+## Version 1.2.0 (February 01, 2019)
 
 * Added ...
 * Fixed ...
