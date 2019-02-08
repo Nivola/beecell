@@ -32,11 +32,14 @@ class TestResult(DefaultTestResult):
         # else:
         return str(test)
 
-    def write_elapsed(self):
+    def _write_elapsed(self):
         stopTime = time.time()
         timeTaken = stopTime - self.startTime
         timeTaken = round(timeTaken, 3)
         self.stream.write("[%s] " % timeTaken)
+
+    def _print_runner(self):
+        self.stream.write("[runner-%s] " % self.index)
 
     def startTest(self, test):
         self.startTime = time.time()
@@ -48,10 +51,10 @@ class TestResult(DefaultTestResult):
         #     self.stream.flush()
 
     def addSuccess(self, test):
-        self.stream.write("[%s] " % self.index)
+        self._print_runner()
         self.stream.write(self.getDescription(test))
         self.stream.write(" ... ")
-        self.write_elapsed()
+        self._write_elapsed()
         self.stream.write("ok\n")
         self.stream.flush()
         super(TestResult, self).addSuccess(test)
@@ -62,10 +65,10 @@ class TestResult(DefaultTestResult):
         #     self.stream.flush()
 
     def addError(self, test, err):
-        self.stream.write("[%s] " % self.index)
+        self._print_runner()
         self.stream.write(self.getDescription(test))
         self.stream.write(" ... ")
-        self.write_elapsed()
+        self._write_elapsed()
         self.stream.write("ERROR\n")
         self.stream.flush()
 
@@ -77,10 +80,10 @@ class TestResult(DefaultTestResult):
         #     self.stream.flush()
 
     def addFailure(self, test, err):
-        self.stream.write("[%s] " % self.index)
+        self._print_runner()
         self.stream.write(self.getDescription(test))
         self.stream.write(" ... ")
-        self.write_elapsed()
+        self._write_elapsed()
         self.stream.write("FAIL\n")
         self.stream.flush()
 
@@ -92,10 +95,10 @@ class TestResult(DefaultTestResult):
         #     self.stream.flush()
 
     def addSkip(self, test, reason):
-        self.stream.write("[%s] " % self.index)
+        self._print_runner()
         self.stream.write(self.getDescription(test))
         self.stream.write(" ... ")
-        self.write_elapsed()
+        self._write_elapsed()
         self.stream.write("skipped\n")
         self.stream.flush()
 
@@ -155,6 +158,9 @@ class TestRunner(object):
         if resultclass is not None:
             self.resultclass = resultclass
         self.index = index
+
+    def _print_runner(self):
+        self.stream.write("[runner-%s] " % self.index)
 
     def _makeResult(self):
         return self.resultclass(self.stream, self.descriptions, self.verbosity, index=self.index)
@@ -218,6 +224,8 @@ class TestRunner(object):
         return result
 
     def print_result(self, result):
+        self._print_runner()
+
         expectedFails = unexpectedSuccesses = skipped = 0
         try:
             results = map(len, (result.expectedFailures,

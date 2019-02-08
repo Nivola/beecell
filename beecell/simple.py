@@ -168,14 +168,45 @@ def merge_dicts(*dict_args):
 
 
 def random_password(length=10, strong=False):
+    """Generate random password
+    inspired to: https://pynative.com/python-generate-random-string/
+
+    :param length:
+    :param strong:
+    :return:
+    """
     chars = string.ascii_uppercase + string.digits + string.ascii_lowercase
+    # if strong is True:
+    #     chars += u'!#\'&;'
+    #     # chars += u'!#$%&()*+,-.:;<=>?@[]^_`{|}~'
+    # password = u''
+    # for i in range(length):
+    #     # password += chars[ord(M2Crypto.m2.rand_bytes(1)) % len(chars)]
+    #     password += chars[ord(os.urandom(1)) % len(chars)]
+
+    chars = string.ascii_uppercase + string.digits + string.ascii_lowercase
+
     if strong is True:
-        chars += u'!#$%&()*+,-.:;<=>?@[]^_`{|}~'
-    password = u''
-    for i in range(length):
-        # password += chars[ord(M2Crypto.m2.rand_bytes(1)) % len(chars)]
-        password += chars[ord(os.urandom(1)) % len(chars)]
-        
+        randomSource = string.ascii_letters + string.digits + string.punctuation
+        password = random.SystemRandom().choice(string.ascii_lowercase)
+        password += random.SystemRandom().choice(string.ascii_uppercase)
+        password += random.SystemRandom().choice(string.digits)
+        password += random.SystemRandom().choice(string.punctuation)
+        password += random.SystemRandom().choice(string.punctuation)
+        password += random.SystemRandom().choice(string.punctuation)
+
+        for i in range(length-6):
+            password += random.SystemRandom().choice(randomSource)
+
+        passwordList = list(password)
+        random.SystemRandom().shuffle(passwordList)
+        password = u''.join(passwordList)
+    else:
+        password = u''
+        for i in range(length):
+            # password += chars[ord(M2Crypto.m2.rand_bytes(1)) % len(chars)]
+            password += chars[ord(os.urandom(1)) % len(chars)]
+
     return password
 
 
@@ -515,6 +546,7 @@ def parse_date(data_str, format=None):
     if data_str is not None:
         res = datetime.datetime.strptime(data_str, time_format)
     return res
+
 
 def format_date(date, format=None):
     """Format date as rfc3339.
