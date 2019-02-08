@@ -2,10 +2,13 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
-
+import logging
 import sys
 import time
 from unittest.result import TestResult as DefaultTestResult
+
+
+logger = logging.getLogger(__name__)
 
 
 class TestResult(DefaultTestResult):
@@ -124,19 +127,19 @@ class TestResult(DefaultTestResult):
     #     elif self.dots:
     #         self.stream.write("u")
     #         self.stream.flush()
-    #
-    # def printErrors(self):
-    #     if self.dots or self.showAll:
-    #         self.stream.writeln()
-    #     self.printErrorList('ERROR', self.errors)
-    #     self.printErrorList('FAIL', self.failures)
-    #
-    # def printErrorList(self, flavour, errors):
-    #     for test, err in errors:
-    #         self.stream.writeln(self.separator1)
-    #         self.stream.writeln("%s: %s" % (flavour,self.getDescription(test)))
-    #         self.stream.writeln(self.separator2)
-    #         self.stream.writeln("%s" % err)
+
+    def printErrors(self):
+        # if self.dots or self.showAll:
+        #     self.stream.writeln()
+        self.printErrorList('ERROR', self.errors)
+        self.printErrorList('FAIL', self.failures)
+
+    def printErrorList(self, flavour, errors):
+        for test, err in errors:
+            self.stream.write("\n"+self.separator1)
+            self.stream.write("\n%s: %s" % (flavour, self.getDescription(test)))
+            self.stream.write("\n"+self.separator2)
+            self.stream.write("\n%s" % err)
 
 
 class TestRunner(object):
@@ -146,6 +149,8 @@ class TestRunner(object):
     occur, and a summary of the results at the end of the test run.
     """
     resultclass = TestResult
+    separator1 = '=' * 70
+    separator2 = '-' * 70
 
     def __init__(self, stream=sys.stderr, descriptions=True, verbosity=1,
                  failfast=False, buffer=False, resultclass=None, index=0):
@@ -223,6 +228,13 @@ class TestRunner(object):
         #     self.stream.write("\n")
         return result
 
+    def print_error_list(self, flavour, errors):
+        for test, err in errors:
+            self.stream.write("\n" + self.separator1)
+            # self.stream.write("\n%s: %s" % (flavour, self.getDescription(test)))
+            self.stream.write("\n" + self.separator2)
+            self.stream.write("\n%s" % err)
+
     def print_result(self, result):
         self._print_runner()
 
@@ -256,3 +268,6 @@ class TestRunner(object):
             self.stream.write(" (%s)\n" % (", ".join(infos),))
         else:
             self.stream.write("\n")
+
+        self.print_error_list('ERROR', result.errors)
+        self.print_error_list('FAIL', result.failures)
