@@ -28,7 +28,7 @@ import re
 from beecell.logger import LoggerHelper
 from sqlalchemy import create_engine, exc
 from sqlalchemy.orm import sessionmaker
-from beecell.test.runner import TextTestRunner
+# from beecell.test.runner import TextTestRunner
 from beecell.remote import RemoteClient, ServerErrorException,\
     UnsupporteMediaTypeException, ConflictException, TimeoutException,\
     NotAcceptableException, MethodNotAllowedException, NotFoundException,\
