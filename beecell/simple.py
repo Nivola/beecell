@@ -187,15 +187,17 @@ def random_password(length=10, strong=False):
     chars = string.ascii_uppercase + string.digits + string.ascii_lowercase
 
     if strong is True:
+        punctuation = u'()#_-,.'
         randomSource = string.ascii_letters + string.digits + string.punctuation
         password = random.SystemRandom().choice(string.ascii_lowercase)
         password += random.SystemRandom().choice(string.ascii_uppercase)
+        password = random.SystemRandom().choice(string.ascii_lowercase)
+        password += random.SystemRandom().choice(string.ascii_uppercase)
         password += random.SystemRandom().choice(string.digits)
-        password += random.SystemRandom().choice(string.punctuation)
-        password += random.SystemRandom().choice(string.punctuation)
-        password += random.SystemRandom().choice(string.punctuation)
+        password += random.SystemRandom().choice(punctuation)
+        password += random.SystemRandom().choice(punctuation)
 
-        for i in range(length-6):
+        for i in range(length-7):
             password += random.SystemRandom().choice(randomSource)
 
         passwordList = list(password)
