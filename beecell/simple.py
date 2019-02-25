@@ -650,7 +650,7 @@ def dict_get(data, key, separator=u'.'):
     return res
 
 
-def dict_set(data, key, value, separator=u'.'):
+def dict_set1(data, key, value, separator=u'.'):
     """Set a key in a dict. Key can be a composition of different keys separated by a separator.
 
     :param data: dictionary to query
@@ -670,5 +670,55 @@ def dict_set(data, key, value, separator=u'.'):
             if k not in data or not isinstance(data[k], dict):
                 data[k] = {}
                 data = data[k]
-
     return orig
+
+
+def dict_set(data, key, value, separator=u'.'):
+    """Set a key in a dict. Key can be a composition of different keys separated by a separator.
+
+    :param data: dictionary to query
+    :param key: key to update
+    :param value: key new value
+    :param separator: key depth separator
+    :return:
+    """
+    def __dict_set(data):
+        k = keys.pop()
+        if len(keys) == 0:
+            data[k] = value
+        else:
+            if k not in data or not isinstance(data[k], dict):
+                data[k] = {}
+            data[k] = __dict_set(data[k])
+        return data
+
+    keys = key.split(separator)
+    keys.reverse()
+    data = __dict_set(data)
+
+    return data
+
+
+def dict_unset(data, key, separator=u'.'):
+    """Unset a key in a dict. Key can be a composition of different keys separated by a separator.
+
+    :param data: dictionary to query
+    :param key: key to remove
+    :param separator: key depth separator
+    :return:
+    """
+    def __dict_unset(data):
+        k = keys.pop()
+        if len(keys) == 0:
+            if k in data:
+                data.pop(k, None)
+        else:
+            if k in data:
+                data[k] = __dict_unset(data[k])
+        return data
+
+    keys = key.split(separator)
+    keys.reverse()
+    data = __dict_unset(data)
+
+    return data
