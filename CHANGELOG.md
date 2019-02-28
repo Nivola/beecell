@@ -1,12 +1,10 @@
 # Changelog
 
-## Version 1.3.0 (February 27, 2019)
+## Version 1.3.0 (February 08, 2019)
 
 * Added ...
     * aggiunto runner per realizzare test unit concorrenti
-    * aggiunto metodo simple.dict_unset    
 * Fixed ...
-    * corretto funzionamento metodo simple.dict_set
 * Integrated ...
 * Various bugfixes
 

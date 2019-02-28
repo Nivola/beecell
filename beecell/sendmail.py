@@ -1,11 +1,7 @@
-'''
-Created on Oct 22, 2015
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-
-https://docs.python.org/2/library/email-examples.html
-'''
-# Import smtplib for the actual sending function
 from smtplib import SMTP
 from logging import getLogger
 

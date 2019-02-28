@@ -1,15 +1,32 @@
 # beecell
-One Paragraph of project description
+Utility file that include variuos function:
+- __simple.py__: general function for password encryption and decryption, dictionary utility, print data etc.
+- __remote.py__: varius class create remote client, run ssh command, run tcp command, make http request, install software in a remote portal
 
-## Configurations (Optional)
-Software parameters and their meaning.
+Utility package:
+- __paramiko_shell__: Python implementation of SSHv2. This package run and interactive shell and offers utility to handle it
+- __networkx__: utility for handle  network 
 
 ## Prerequisites
-What things you need to install the software and how to install them.
-Also referred to BoM to know external packages to install.
+First of all you have to install a virtual env and have python 2.7
+
+```
+$ virtualenv venv
+$ source venv/bin/activate
+```
+
+At this poit install some package:
+
+```
+$ sudo apt-get install gcc
+$ sudo apt-get install -y python-dev libldap2-dev libsasl2-dev libssl-dev
+```
 
 ## Installing
-A step by step series of examples that tell you how to get a development environment running
+
+```
+$ pip install git+https://clsk-code.csi.it/2076/beecell.git --trusted-host clsk-code.csi.it
+```
 
 ## Getting Started
 Instructions useful to deploy software on a simple environment (local machine or simple server configuration infrastructure).
@@ -17,11 +34,6 @@ Instructions useful to deploy software on a simple environment (local machine or
 ## Running the tests (Optional)
 Results of vulnerability assessment and/or penetration test. If known explain how to run the automated tests for this system
 
-## Break down into end to end tests (Optional)
-Explain what these tests test and why
-
-## And coding style tests (Optional)
-Explain what these tests test and why
 
 ## Deployment (Optional)
 Add additional notes about how to deploy this on a live system
@@ -37,6 +49,7 @@ beecell is written and maintained by:
 * Antonio Brasile
 * Gianni Doria
 * Daniela Ferrarini
+* Dennis Sayed
 
 ## Copyrights
 CSI Piemonte

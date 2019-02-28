@@ -1,8 +1,7 @@
-'''
-Created on Oct 11, 2014
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
 import unittest
 from tests.test_util import run_test, UtilTestCase
 from beecell.auth import LdapAuth, SystemUser

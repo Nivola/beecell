@@ -1,9 +1,7 @@
-'''
-Created on Dec 9, 2013
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
-import cProfile
 import logging
 import unittest
 import pprint
@@ -11,11 +9,7 @@ import time
 import json
 import urllib, urllib2
 import httplib
-import redis
-from beecell.perf import watch_test
 from beecell.logger import LoggerHelper
-from beecell.db import MysqlManager
-#from gibboncloudapi.model import AuthDbManager
 from sqlalchemy import create_engine, exc
 from sqlalchemy.orm import sessionmaker
 

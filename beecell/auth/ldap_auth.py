@@ -1,19 +1,15 @@
-'''
-Created on Jan 16, 2014
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
 import ldap
-import time
-import logging
 import platform
 from .base import AuthError, AbstractAuth
 from beecell.perf import watch
 
 
 class LdapAuth(AbstractAuth):
-    def __init__(self, host, domain, user_class, port=None, timeout=20, 
-                 ssl=False, dn=None):
+    def __init__(self, host, domain, user_class, port=None, timeout=20, ssl=False, dn=None):
         """Ldap auhtentication provider
         
         :param host: Ldap hostname
@@ -125,7 +121,11 @@ class LdapAuth(AbstractAuth):
 
     @watch
     def login(self, username, password):
-        """
+        """Login a user
+
+        :param username: user name
+        :param password: user password
+        :return: instance of user_class
         """
         username = username.split('@')[0]
         self.logger.debug('Login user: %s' % (username))
@@ -148,8 +148,7 @@ class LdapAuth(AbstractAuth):
                 raise AuthError(ex[0]['info'], ex[0]['desc'])
             else:
                 raise AuthError("", "Connection error: %s" % ex[0]['desc'], code=7)
-        
-        #self.dn = "CN=%s,%s" % (username, self.dn)
+
         query = "sAMAccountName=%s" % username
         res = self._query(query)[0][1]
         self.close()
@@ -160,14 +159,10 @@ class LdapAuth(AbstractAuth):
             if k == 'memberOf':
                 # memberOf ['CN=reader,DC=clskdom,DC=lab', 'CN=admin,DC=clskdom,DC=lab']
                 groups = [i.lstrip('CN=').split(',')[0] for i in v]
-            elif k in ['primaryGroupID', 'logonCount', 'instanceType',
-                       'sAMAccountType', 'uSNCreated', 'badPwdCount',
+            elif k in ['primaryGroupID', 'logonCount', 'instanceType', 'sAMAccountType', 'uSNCreated', 'badPwdCount',
                        'codePage', 'userAccountControl', 'uSNChanged']:
                 attrib[k] = int(v[0])
-            elif k in ['lastLogonTimestamp', 'badPasswordTime', 'pwdLastSet',
-                       'accountExpires', 'lastLogon']:
-                #val = time.gmtime(int(v[0]))
-                #date = time.strftime("%d-%m-%y %H:%M:%S", val)
+            elif k in ['lastLogonTimestamp', 'badPasswordTime', 'pwdLastSet', 'accountExpires', 'lastLogon']:
                 attrib[k] = int(v[0])                
             else:
                 attrib[k] = v[0]

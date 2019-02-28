@@ -1,8 +1,7 @@
-'''
-Created on Dec 6, 2013
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
 import time
 from beecell.simple import run_command
 from sqlalchemy.sql import compiler
@@ -31,8 +30,6 @@ def get_process_list():
     cmd = ['mysql', '--port=%s' % port, '--host=%s' % host, '--protocol=tcp', 
            '--password=%s' % pwd, '--user=%s' % user,  
            '-e', 'show processlist\G']
-    #cmd = ['mysql', '-S=%s' % socket, '--user=%s' % user,
-    #       '-e', 'show processlist\G']
     res = run_command(cmd)
     
     # process exit correctly
@@ -52,22 +49,7 @@ def get_process_list():
             elif item[0] == 'Id':
                 process_info['id'] = int(item[1].strip())
                 process_list.append(process_info)
-            # populate ither fields of the current record
-            #elif item[0] == 'Host':
-            #    process_info[(item[0].lower())] = "%s:%s" % (item[1].strip(), 
-            #                                                 int(item[2].strip()))        
             else:
                 process_info[(item[0].lower())] = item[1].strip()
                 
         return process_list
-'''
-i = 0
-while True:
-    process_list = get_process_list()
-    for item in process_list:
-        #print item
-        if item['info'] != 'NULL' and item['info'] != 'show processlist':
-            print "id: %-8s state: %-15s db: %-10s user: %-10s host: %-40s cmd: %-10s info: %s [%s]" % (
-                item['id'], item['state'], item['db'], item['user'], item['host'], item['command'], item['info'], item['time'])
-    i += 1
-'''

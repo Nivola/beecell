@@ -1,24 +1,19 @@
-from flex.core import load, validate_api_call, validate
-from logging import getLogger
-from marshmallow.schema import Schema
-from marshmallow import fields, missing
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
+from flex.core import validate_api_call
+from logging import getLogger
 from apispec import APISpec
-from marshmallow.validate import Range, OneOf
+from marshmallow.validate import OneOf
 from copy import deepcopy
 
 logger = getLogger(__name__)
 
+
 class SwaggerHelper(object):
     def __init__(self):
-        self.spec = APISpec(
-            title=u'',
-            version=u'',
-            plugins=[
-                u'apispec.ext.flask',
-                u'apispec.ext.marshmallow'
-            ]
-        )
+        self.spec = APISpec(title=u'', version=u'', plugins=[u'apispec.ext.flask', u'apispec.ext.marshmallow'])
 
     @staticmethod
     def responses(orig, data):
@@ -71,12 +66,7 @@ class SwaggerHelper(object):
                             kvargs[u'collectionFormat'] = value.metadata.get(u'collection_format', u'')
                             subfield_type = value.container.__class__.__name__.lower()
                             kvargs[u'items'] = {u'type': subfield_type}
-                            # TODO sistemare replace per solo occorrenze in fondo alla stringa
                             kvargs[u'name'] = kvargs[u'name'].replace(u'_N', u'.N')
-                            # logger.warn(value)
-                            # logger.warn(value.__dict__)
-                            # kvargs[u'format'] = u'date'
-                            # logger.warn(kvargs)
                         except:
                             logger.warn(u'', exc_info=1)
                     else:
@@ -87,10 +77,8 @@ class SwaggerHelper(object):
                         kvargs[u'enum'] = value.validate.choices
         
             res.append(kvargs)
-            #self.spec.add_parameter(field, u'query', **kvargs)
-        
-        #return self.spec._parameters.values()
         return res
+
 
 class ApiValidator():
     def __init__(self, schema, uri, method):
@@ -104,7 +92,7 @@ class ApiValidator():
         self.uri = uri
         self.method = method
         self.keys = []
-        self.removed_keys=[]
+        self.removed_keys= []
         self.schema_keys = {}
         self.code = None
         
@@ -182,8 +170,7 @@ class ApiValidator():
     
     def get_schema(self):
         if self.uri in self.master_schema[u'paths']:
-            self.base_schema = self.master_schema[u'paths'][self.uri][self.method]
-            #self.req_schema = self.base_schema[u'parameters']
+            self.base_schema = self.master_schema[u'paths'][self.uri][self.method][u'parameters']
             self.schema = self.base_schema[u'responses']
         else:
             raise Exception(u'Swager schema for %s is not defined' % self.uri)
@@ -193,7 +180,7 @@ class ApiValidator():
         t = set(self.parse_data(s))
         s = set(s.keys())  
         
-        #inspect keys nullable in a subtree
+        # inspect keys nullable in a subtree
         key = set()
         for k in s:
             for r in self.removed_keys: 

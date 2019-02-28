@@ -1,9 +1,11 @@
-'''
-Created on Apr 26, 2014
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
+
 class AuthDbManagerError(Exception): pass
+
+
 class AbstractAuthDbManager(object):
     """
     """   

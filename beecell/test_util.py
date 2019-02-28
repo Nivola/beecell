@@ -1,10 +1,7 @@
-'''
-Created on Dec 9, 2013
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
-import beecell.server.gevent_ssl
-import cProfile
 import logging
 import unittest
 from beecell.logger import LoggerHelper

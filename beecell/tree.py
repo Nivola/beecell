@@ -1,8 +1,7 @@
-'''
-Created on Jul 28, 2015
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
 (_ROOT, _DEPTH, _BREADTH) = range(3)
 
 class Node:

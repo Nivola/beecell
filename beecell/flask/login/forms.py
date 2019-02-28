@@ -1,8 +1,7 @@
-'''
-Created on Jan 16, 2014
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
 try:
     from urlparse import urlsplit
 except ImportError:
@@ -15,14 +14,9 @@ from .bootstrap.wtforms_fields import TextField, PasswordField, SelectField
 from .bootstrap.wtforms_fields import SubmitField, HiddenField, BooleanField
 from .bootstrap.wtforms_widget import TextInput, PasswordInput
 
+
 class LoginForm(BaseForm):
     """The default login form"""
-
-    """
-    label=None, validators=None, filters=tuple(),
-    description='', id=None, default=None, widget=None,
-    _form=None, _name=None, _prefix='', _translations=None    
-    """
     email = TextField(label='Username', default='', widget=TextInput())
     password = PasswordField(label='Password', default='', widget=PasswordInput())
     domain = SelectField(label='Domain')

@@ -1,3 +1,8 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
+
+
 class ModelError(Exception):
     def __init__(self, desc, code=404):
         """

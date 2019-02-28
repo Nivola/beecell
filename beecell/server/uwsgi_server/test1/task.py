@@ -1,15 +1,12 @@
-'''
-Created on Jan 15, 2013
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: io
-'''
-import sys
 import time
 from uwsgidecorators import *
 from gibbon.util.uwsgi_wrapper import uwsgi_util
 from gibbon.util.server.wsgi_server.test1.log_config import severLogger
 from gibbon.util.mathlib.pylib import fib
-from gibbon.util.monitor.resource import info
 from gibbon.util.server.wsgi_server.test1.varaibles import *
 
 def int_cpu_function(wid, req, value):

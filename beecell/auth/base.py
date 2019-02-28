@@ -1,8 +1,7 @@
-'''
-Created on Jan 25, 2014
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
 import logging
 from flask_login import UserMixin
 from beecell.perf import watch
@@ -41,11 +40,11 @@ class SystemUser(UserMixin):
     
     @watch
     def get_dict(self):
-        return {u'id':self.id,
-                u'name':self.email,
-                u'active':self.active,
-                u'roles':self._roles,
-                u'perms':self._perms}
+        return {u'id': self.id,
+                u'name': self.email,
+                u'active': self.active,
+                u'roles': self._roles,
+                u'perms': self._perms}
 
     @watch
     def set_groups(self, groups):
@@ -93,24 +92,28 @@ class AuthError(Exception):
     """
     def __init__(self, info, desc, code=None):
         """Authentication provider exception.
-            code:
-            1 - Invalid credentials
-            2 - User is disabled
-            3 - Password is expired
-            4 - Wrong password
-            5 - User does not exist
-            7 - Connection error
-            9 - Undefined
-            10 - Domain error
-        
-            wrong password, wrong user:
-                info: 80090308: LdapErr: DSID-0C0903C5, comment: AcceptSecurityContext error, data 52e, v23f0, desc: Invalid credentials
-            disabled user:
-                info: 80090308: LdapErr: DSID-0C0903C5, comment: AcceptSecurityContext error, data 533, v23f0, desc: Invalid credentials
-            password elapsed:
-                info: 80090308: LdapErr: DSID-0C0903C5, comment: AcceptSecurityContext error, data 773, v23f0, desc: Invalid credentials
-            wrong domain:
-                info: 10000000, desc:
+
+        code:
+        1 - Invalid credentials
+        2 - User is disabled
+        3 - Password is expired
+        4 - Wrong password
+        5 - User does not exist
+        7 - Connection error
+        9 - Undefined
+        10 - Domain error
+
+        wrong password, wrong user:
+            info: 80090308: LdapErr: DSID-0C0903C5, comment: AcceptSecurityContext error, data 52e, v23f0,
+            desc: Invalid credentials
+        disabled user:
+            info: 80090308: LdapErr: DSID-0C0903C5, comment: AcceptSecurityContext error, data 533, v23f0,
+            desc: Invalid credentials
+        password elapsed:
+            info: 80090308: LdapErr: DSID-0C0903C5, comment: AcceptSecurityContext error, data 773, v23f0,
+            desc: Invalid credentials
+        wrong domain:
+            info: 10000000, desc:
         """
         self.info = info
         self.desc = desc
@@ -138,18 +141,17 @@ class AuthError(Exception):
 class AbstractAuth(object):
     """Abstract auhtentication provider.
     
-    :param user_class: User class returned if authentication succesfully.
-                       Class can be :class:`SystemUser` or a class that 
-                       extend this one.      
+    :param user_class: User class returned if authentication succesfully. Class can be :class:`SystemUser` or a class
+        that extend this one.
     """
-    
     def __init__(self, user_class):
         self.logger = logging.getLogger(self.__class__.__module__+ '.'+self.__class__.__name__)
         
         self.user_class = user_class
 
     def login(self, username, password):
-        """
+        """Base login method
+
         :param username: user name
         :param password: user password
         :return: System user
@@ -167,39 +169,10 @@ class AbstractAuth(object):
         :rtype: :class:`SystemUser`
         :raises AuthError: raise :class:`AuthError`
         """
-        self.logger.debug('Check user: %s' % username)
-
-        # # open database session
-        # session = self.conn_manager.get_session()
-        # auth_manager = self.auth_manager_class(session=session)
-        # self.logger.debug('Authentication manager: %s' % auth_manager.__module__)
-        #
-        # # verify that user exists in the db
-        # try:
-        #     db_user = auth_manager.get_user(username)
-        # except (IndexError, QueryError) as ex:
-        #     self.logger.error(ex)
-        #     # release database session
-        #     self.conn_manager.release_session(session)
-        #     raise AuthError("", "User %s was not found" % username, code=5)
-        #
-        # if db_user == None:
-        #     self.logger.error("Invalid credentials")
-        #     # release database session
-        #     self.conn_manager.release_session(session)
-        #     raise AuthError("", "Invalid credentials", code=1)
-        #
-        # if db_user.active is not True:
-        #     self.logger.error("User is disabled")
-        #     # release database session
-        #     self.conn_manager.release_session(session)
-        #     raise AuthError("", "User is disabled", code=2)
+        self.logger.debug(u'Check user: %s' % username)
 
         # create final user object
         user = self.user_class(user_uuid, username, None, True)
-
-        # release database session
-        # self.conn_manager.release_session(session)
 
         self.logger.debug(u'Login succesfully: %s' % user)
 
@@ -216,5 +189,5 @@ class AbstractAuth(object):
         """
         # create final user object
         user = self.user_class(uid, username, None, True)
-        self.logger.debug(u'Refresh %s successfully' % (user))        
-        return user        
+        self.logger.debug(u'Refresh %s successfully' % user)
+        return user

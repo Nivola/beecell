@@ -1,8 +1,7 @@
-'''
-Created on Nov 11, 2014
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
 from beecell.auth import LdapAuth
 
 class SystemUser():

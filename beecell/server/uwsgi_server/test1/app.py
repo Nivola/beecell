@@ -1,9 +1,7 @@
-'''
-Created on Jan 19, 2013
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: io
-'''
-import sys
 import time
 import traceback
 import random
@@ -14,8 +12,7 @@ from gibbon.util.server.wsgi_server.test1.task import int_cpu_function
 from gibbon.util.server.wsgi_server.test1.task import ext_cpu_function
 from gibbon.util.server.wsgi_server.test1.varaibles import *
 from gibbon.util.flask.decorators import jsonp
-#from gibbon.util.monitor.resource import info
-#from gibbon.util.monitor.resource import stats
+
 
 import gibbon.util.monitor.resource as resource
 

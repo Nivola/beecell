@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
-'''Created on Feb 23, 2013
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-
+'''
 Usage: console.py [options] [args...]
 -s service -c command
   

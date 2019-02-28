@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
+
 import socket
 import os
 import paramiko
@@ -20,7 +24,8 @@ urllib3.disable_warnings()
 
 class Urllib2MethodRequest(urllib2.Request):
     """
-    from: http://stackoverflow.com/questions/21243834/doing-put-using-python-urllib2
+    Inizialize a request method
+    http://stackoverflow.com/questions/21243834/doing-put-using-python-urllib2
     """
     def __init__(self, *args, **kwargs):
         if 'method' in kwargs:
@@ -88,6 +93,10 @@ class ServerErrorException(RemoteException):
         RemoteException.__init__(self, value, 500)
 
 class RemoteClient(object):
+    """
+    Create a Remote Client
+    """
+
     def __init__(self, conn, user=None, pwd=None, proxy=None, keyfile=None,
                  certfile=None):
         """
@@ -103,9 +112,6 @@ class RemoteClient(object):
         self.conn = conn
         self.user = user
         self.pwd = pwd
-        #self.h = httplib2.Http(".cache")
-        #if user is not None:
-        #    self.h.add_credentials(user, pwd)
         self.proxy = proxy
         
         self.keyfile = keyfile
@@ -126,8 +132,8 @@ class RemoteClient(object):
     def __parse_connection(self, conn_uri):
         """Parse connection http://10.102.160.240:6060/path
         
-        :param conn_uri: http://10.102.160.240:6060/path
-        :return: {u'proto':.., u'host':.., u'port':.., u'path':..}
+        :param conn_uri: an uri like http://10.102.160.240:6060/path
+        :return: dictionary with key-value result like {u'proto':.., u'host':.., u'port':.., u'path':..}
         :rtype: dict
         """
         try:
@@ -147,49 +153,29 @@ class RemoteClient(object):
         return res
 
     def run_ssh_command(self, cmd, user, pwd, port=22):
-        '''
-        Run remote command using ssh connection
+        """Run remote command using ssh connection
         Paramiko 1.8 doesn't work with ECDSA key hashing algorithm. Ubuntu 12+ use ECDSA as default.
-        To set RSA open /etc/ssh/sshd_config and comment row 'HostKey /etc/ssh/ssh_host_ecdsa_key', then 
+        To set RSA open /etc/ssh/sshd_config and comment row 'HostKey /etc/ssh/ssh_host_ecdsa_key', then
         restart ssh service
-        '''
-        '''
-        import paramiko, base64
-        key = paramiko.RSAKey(data=base64.decodestring('AAA...'))
-        client = paramiko.SSHClient()
-        client.get_host_keys().add('ssh.example.com', 'ssh-rsa', key)
-        client.connect('ssh.example.com', username='strongbad', password='thecheat')
-        stdin, stdout, stderr = client.exec_command('ls')
-        for line in stdout:
-            print '... ' + line.strip('\n')
-        client.close()        
-        '''
+
+        :param cmd: command to run
+        :param user: usename
+        :param pwd: password
+        :param port: port to connect [default=22]
+        """
         try:
             client = paramiko.SSHClient()
-            #key = paramiko.RSAKey(data=base64.decodestring('AAA...'))
-            #client.load_host_keys(self.syspath + "/.ssh/known_hosts")
             client.set_missing_host_key_policy(paramiko.MissingHostKeyPolicy())
-            #client.set_missing_host_key_policy(paramiko.WarningPolicy)
-            #client.load_system_host_keys()
-            
             client.connect(self.conn.get(u'host'), 
                            self.conn.get(u'port', port), 
                            username=user, 
                            password=pwd,
-                           #timeout=None, 
-                           #allow_agent=True, 
                            look_for_keys=False, 
                            compress=False)
             stdin, stdout, stderr = client.exec_command(cmd)
             res = {u'stdout': [], u'stderr':stderr.read()}
             for line in stdout:
-                res[u'stdout'].append(line.strip(u'\n'))         
-            '''if len(stderr.read()) != 0:
-              print 'ERROR:'
-              print stderr.read()
-            print stdout.read()
-            print stderr.read()'''
-
+                res[u'stdout'].append(line.strip(u'\n'))
             client.close()
             return res
         except Exception as ex:

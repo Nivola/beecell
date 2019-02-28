@@ -1,15 +1,8 @@
-'''
-Created on May 15, 2017
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
 import os
-#from _random import Random
-#os.environ['GEVENT_RESOLVER'] = 'ares'
-#os.environ['GEVENTARES_SERVERS'] = 'ares'
-
-import beecell.server.gevent_ssl
-
 import gevent.monkey
 from beehive.common.log import ColorFormatter
 from beehive.common.apiclient import BeehiveApiClient

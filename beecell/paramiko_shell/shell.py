@@ -1,8 +1,7 @@
-"""
-Created on Jan 19, 2018
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-"""
 from paramiko.client import SSHClient, MissingHostKeyPolicy
 from paramiko import RSAKey
 from logging import getLogger
@@ -11,7 +10,6 @@ import fcntl
 import termios
 import struct
 import sys
-from gevent import spawn, joinall, sleep, socket, queue
 from gevent.os import make_nonblocking, nb_read, nb_write
 
 try:
@@ -129,9 +127,7 @@ class ParamikoShell(object):
         :param dest: local file name
         :return:
         """
-        # ftp_client = self.client.open_sftp()
-        # res = ftp_client.file(filename)
-        # print res.readlines()
+
         transport = self.client.get_transport()
         transport.set_keepalive(self.keepalive)
         channel = transport.open_session()
@@ -149,25 +145,3 @@ class ParamikoShell(object):
 
         channel.close()
         self.client.close()
-
-
-        # while transport.is_active():
-        #     print "transport is active"
-        #     rl, wl, xl = select.select([channel], [], [], 0.0)
-        #     if len(rl) > 0:
-        #         buf = channel.recv(BUF_SIZE)
-        #         if len(buf) > 0:
-        #             lines_to_process = LeftOver + buf
-        #             EOL = lines_to_process.rfind("\n")
-        #             if EOL != len(lines_to_process) - 1:
-        #                 LeftOver = lines_to_process[EOL + 1:]
-        #                 lines_to_process = lines_to_process[:EOL]
-        #             else:
-        #                 LeftOver = ""
-        #             for line in lines_to_process.splitlines():
-        #                 if "error" in line:
-        #                     report_error(line)
-        #                 print line
-
-
-

@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
+
 import json
 import sqlalchemy
 from sqlalchemy.types import TypeDecorator

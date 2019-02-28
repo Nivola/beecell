@@ -1,10 +1,7 @@
-'''
-Created on Nov 2, 2015
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-
-Get from https://github.com/amnong/easywebdav
-'''
 import requests
 import platform
 from numbers import Number

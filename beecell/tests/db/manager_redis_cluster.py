@@ -1,14 +1,10 @@
-'''
-Created on Sep 2, 2013
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
-import unittest
-from beecell.auth import extract
-from beecell.db.manager import RedisManager, MysqlManager
-from beecell.tests.test_util import run_test, UtilTestCase
+
+from beecell.db.manager import RedisManager
 import pprint
-import redis_collections
 from beecell.tests import BeecellTestCase, runtest
 
 tests = [

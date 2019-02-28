@@ -1,15 +1,10 @@
-'''
-Created on Sep 2, 2013
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
 import logging
 import unittest
-import traceback
-import random
-import pprint
 from beecell.perf import watch_test
-from beecell.logger import Event, JobEvent, LoggerHelper, AMQPHandlerError
 from beecell.sendmail import Mailer
 
 class MailerTestCase(unittest.TestCase):

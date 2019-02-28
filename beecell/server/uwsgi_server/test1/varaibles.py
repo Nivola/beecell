@@ -1,8 +1,7 @@
-'''
-Created on Feb 17, 2013
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: io
-'''
 from gibbon.util.uwsgi_wrapper import uwsgi_util
 
 timeout = 0.5

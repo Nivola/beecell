@@ -1,8 +1,7 @@
-'''
-Created on Mar 10, 2013
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: io
-'''
 import logging
 from gibbon.logger.config import setup_file_handler
 from gibbon.util.server.wsgi_server.test1.varaibles import serverLogFileName

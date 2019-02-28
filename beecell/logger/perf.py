@@ -1,12 +1,12 @@
-'''
-Created on Aug 9, 2013
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
 import logging
 import time
 
-class Watch(object):   
+
+class Watch(object):
     def __init__(self, f):
         self.logger = logging.getLogger(self.__class__.__module__+ \
                                         '.'+self.__class__.__name__)        

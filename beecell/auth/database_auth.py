@@ -1,24 +1,20 @@
-'''
-Created on Jan 16, 2014
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
-from beecell.simple import id_gen
 from beecell.perf import watch
 from .base import AuthError, AbstractAuth
-from beecell.db import TransactionError, QueryError
+from beecell.db import QueryError
 
 
 class DatabaseAuth(AbstractAuth):
     def __init__(self, auth_manager, conn_manager, user_class):
-        """
-        :param auth_manager: authentication manager. A class that extend 
-                             beecell.auth.model.AuthManager and implement at 
-                             least two method 'get_user' and 'verify_user_password'
-        :param conn_manager: database connection manager. Instance of a class 
-                             that extend 'beecell.db.manager.ConnectionManager'
-                             and implement at least two method 'get_session' and 
-                             'release_session'
+        """Database authentication manager
+
+        :param auth_manager: authentication manager. A class that extend beecell.auth.model.AuthManager and implement at
+            least two method 'get_user' and 'verify_user_password'
+        :param conn_manager: database connection manager. Instance of a class that extend
+            'beecell.db.manager.ConnectionManager' and implement at least two method 'get_session' and 'release_session'
         :param user_class: flask_login user class
         """
         super(DatabaseAuth, self).__init__(user_class)
@@ -32,7 +28,11 @@ class DatabaseAuth(AbstractAuth):
 
     @watch
     def login(self, username, password):
-        """
+        """Login a user
+
+        :param username: user name
+        :param password: user password
+        :return: instance of user_class
         """
         self.logger.debug('Login user: %s' % username)
         
@@ -78,12 +78,7 @@ class DatabaseAuth(AbstractAuth):
             raise AuthError("", "Wrong password", code=4)
             
         # create final user object
-        #uid = id_gen()
         user = self.user_class(db_user.uuid, username, password, True)
-        #attrib = {a.name:(a.value, a.desc) for a in db_user.attrib}
-        #groups = []
-        #user.set_attributes(attrib)
-        #user.set_groups(groups)
 
         # release database session
         self.conn_manager.release_session(session)

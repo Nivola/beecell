@@ -1,13 +1,13 @@
-'''
-Created on Jan 25, 2014
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
 import pika
 import pickle
 import logging
 
 logger = logging.getLogger('gibbon.util.amqp')
+
 
 def open_amqp_channel(queue_conn, queue):
     """ """
@@ -21,6 +21,7 @@ def open_amqp_channel(queue_conn, queue):
     channel.queue_declare(queue=queue)
     
     return channel
+
 
 def open_amqp_exchange(queue_conn, exchange):
     """ """
@@ -37,6 +38,7 @@ def open_amqp_exchange(queue_conn, exchange):
     channel.queue_bind(exchange=exchange, queue=queue_name)    
      
     return (channel, queue_name)
+
 
 def subscriber(queue_conn, exchange, callback):
     """Base amqp sumbscriber."""
@@ -58,6 +60,7 @@ def subscriber(queue_conn, exchange, callback):
     logger.debug("Start amqp subscriber over exchange: %s" % exchange)
     channel.start_consuming()
 
+
 def consumer(queue_conn, queue, callback):
     """Base amqp consumer."""
     credentials = pika.PlainCredentials(queue_conn['user'], queue_conn['pwd'])
@@ -74,11 +77,11 @@ def consumer(queue_conn, queue, callback):
     channel.basic_consume(callback, queue=queue, no_ack=True)
     logger.debug("Start amqp consumer over queue: %s" % queue)
     channel.start_consuming()
-    
+
+
 def queue_publisher(queue_conn, queue, message):
     """Base amqp queue publisher."""
     # pickle message
-    #data = pickle.dumps(message)
     data = message
     credentials = pika.PlainCredentials(queue_conn['user'], queue_conn['pwd'])
     parameters = pika.ConnectionParameters(queue_conn['host'], 
@@ -96,17 +99,13 @@ def queue_publisher(queue_conn, queue, message):
     channel.basic_publish(exchange='',
                           routing_key=queue,
                           body=data,
-                          properties=pika.BasicProperties(delivery_mode = 2)
-                          #properties=pika.BasicProperties(
-                          #   correlation_id = id,
-                          #   delivery_mode = 2, # make message persistent
-                          #)
-                         )
+                          properties=pika.BasicProperties(delivery_mode=2))
     
     logger.debug("Sent message to queue %s" % (queue))
     connection.close()
     logger.debug("Closed connection: %s" % (connection))
-    
+
+
 def exchange_publisher(queue_conn, exchange, message):
     """Base amqp exchange publisher."""
     # pickle message

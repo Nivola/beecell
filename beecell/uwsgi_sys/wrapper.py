@@ -1,8 +1,8 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
+
 '''
-Created on Jan 23, 2013
-
-@author: darkbk
-
 The uwsgi Python module
 The uWSGI portal2 automagically adds a uwsgi module into your Python apps.
 

@@ -2,16 +2,9 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 
-"""
-Created on Jul 18, 2012
 
-@author: darkbk
-"""
-import logging
 import ujson as json
-import os, string, random
-import subprocess
-from copy import deepcopy
+import os, random, subprocess, logging
 
 from prettytable import PrettyTable
 import string
@@ -21,7 +14,6 @@ from math import ceil
 from cryptography.fernet import Fernet
 import datetime
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -30,7 +22,7 @@ def check_vault(data, key):
 
     :param data: data to verify. If encrypted token '$BEEHIVE_VAULT;AES128 | ' is in head of data
     :param key: fernet key
-    :return:
+    :return: decrypted key
     """
     if data.find(u'$BEEHIVE_VAULT;AES128 | ') == 0:
         if key is None:
@@ -45,7 +37,7 @@ def is_encrypted(data):
     """Check if data is encrypted with fernet token and AES128
 
     :param data: data to verify. If encrypted token '$BEEHIVE_VAULT;AES128 | ' is in head of data
-    :return: True if data is encrypted
+    :return: True if data is encrypted, False otherwise
     """
     if data.find(u'$BEEHIVE_VAULT;AES128 | ') == 0:
         return True
@@ -81,12 +73,13 @@ def decrypt_data(fernet_key, data):
 
 
 def flatten_dict(d, delimiter=":", loopArray=True):
-    """ 
-        Flat dictionary conversion
-        :param loopArray: If True execute loop unrolling array items in keys. False otherwise
-        :param delimiter: delimiter char 
-    
+    """ Flat dictionary conversion
+
+    :param loopArray: If True execute loop unrolling array items in keys. False otherwise
+    :param delimiter: delimiter char
+    :return dictionary unrolled with compound keys
     """
+
     def items():
         for key, value in d.items():
             if isinstance(value, dict):
@@ -94,14 +87,15 @@ def flatten_dict(d, delimiter=":", loopArray=True):
                     yield key + delimiter + subkey, subvalue
             elif isinstance(value, list):
                 if loopArray:
-                    x=0
+                    x = 0
                     for itemArray in value:
                         if isinstance(itemArray, dict):
-                            for subkey, subvalue in flatten_dict(itemArray, delimiter=delimiter, loopArray=loopArray).items():
+                            for subkey, subvalue in flatten_dict(itemArray, delimiter=delimiter,
+                                                                 loopArray=loopArray).items():
                                 yield key + delimiter + str(x) + delimiter + subkey, subvalue
                         else:
                             yield key + delimiter + str(x), itemArray
-                        x+=1
+                        x += 1
                 else:
                     res = []
                     for itemArray in value:
@@ -116,7 +110,7 @@ def flatten_dict(d, delimiter=":", loopArray=True):
 def getkey(data, key, separator=u'.'):
     """Get key value from a complex data (dict with child dict and list) using a string key.
 
-    Ex.
+    Example
 
     a = {u'k1':[{u'k2':..}]}
     b = getkey(a, u'k1.0.k2')
@@ -138,7 +132,6 @@ def getkey(data, key, separator=u'.'):
             res = res.get(k, {})
     if isinstance(res, list):
         res = json.dumps(res)
-        # res = u','.join(str(res))
     if res is None or res == {}:
         res = u'-'
 
@@ -146,20 +139,27 @@ def getkey(data, key, separator=u'.'):
 
 
 def nround(number, decimal=4):
-    """
+    """Round a given number
 
-    :param number:
-    :param decimal:
-    :return:
+        Example decimal = 2
+        3.5643 -> u'3.60'
+        3.5343 -> u'3.55'
+
+    :param number: number to round
+    :param decimal: number of decimal to keep
+    :return: rounded number in UNICODE format
     """
-    factor = 10*decimal
-    convert = u'%.'+str(decimal)+u'f'
+    factor = 10 * decimal
+    convert = u'%.' + str(decimal) + u'f'
     return convert % (ceil(number * factor) / factor)
 
 
 def merge_dicts(*dict_args):
     """Given any number of dicts, shallow copy and merge into a new dict, precedence goes to key value pairs in latter
     dicts.
+
+    :param *dict_args arbitrary number of dictionaries (1 to N)
+    :return dict union of the N dict arguments
     """
     result = {}
     for dictionary in dict_args:
@@ -171,24 +171,15 @@ def random_password(length=10, strong=False):
     """Generate random password
     inspired to: https://pynative.com/python-generate-random-string/
 
-    :param length:
-    :param strong:
-    :return:
+    :param length: length of string to generate
+    :param strong: True for generate strong password (include upper/lowercase, digits and random_password character)
+    :return: generated password in UNICODE format
     """
-    chars = string.ascii_uppercase + string.digits + string.ascii_lowercase
-    # if strong is True:
-    #     chars += u'!#\'&;'
-    #     # chars += u'!#$%&()*+,-.:;<=>?@[]^_`{|}~'
-    # password = u''
-    # for i in range(length):
-    #     # password += chars[ord(M2Crypto.m2.rand_bytes(1)) % len(chars)]
-    #     password += chars[ord(os.urandom(1)) % len(chars)]
-
     chars = string.ascii_uppercase + string.digits + string.ascii_lowercase
 
     if strong is True:
-        punctuation = u'!_-.'
-        randomSource = string.ascii_letters + string.digits + punctuation
+        punctuation = u'()#_-,.'
+        randomSource = string.ascii_letters + string.digits + string.punctuation
         password = random.SystemRandom().choice(string.ascii_lowercase)
         password += random.SystemRandom().choice(string.ascii_uppercase)
         password = random.SystemRandom().choice(string.ascii_lowercase)
@@ -197,7 +188,7 @@ def random_password(length=10, strong=False):
         password += random.SystemRandom().choice(punctuation)
         password += random.SystemRandom().choice(punctuation)
 
-        for i in range(length-7):
+        for i in range(length - 7):
             password += random.SystemRandom().choice(randomSource)
 
         passwordList = list(password)
@@ -206,7 +197,6 @@ def random_password(length=10, strong=False):
     else:
         password = u''
         for i in range(length):
-            # password += chars[ord(M2Crypto.m2.rand_bytes(1)) % len(chars)]
             password += chars[ord(os.urandom(1)) % len(chars)]
 
     return password
@@ -214,8 +204,11 @@ def random_password(length=10, strong=False):
 
 def run_command(command):
     """Run a shell command as an external process and return response or error.
-    
-    :param command: list like ['ls', '-l']
+
+    :param command: unix command: list like ['ls', '-l', 'ps']
+    :param stdout: pipe to the standard out stream should be opened, default subprocess.PIPE
+    :param stderr: pipe to the standard error stream should be opened, default subprocess.PIPE
+    :returns tuple of 0 and the output of the command if there is no error, code error and error message otherwise
     """
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
@@ -226,25 +219,29 @@ def run_command(command):
 
 
 def str2uni(value):
+    """Converts a string in a UNICODE format.
+
+    :param value: string to convert
+    :return: UNICODE string
+    """
     if type(value) is str:
         return value.decode('UTF8')
     return value
-
-'''
-def get_attrib(value_dict, key, default_value):
-    """ """
-    value = default_value
-    if key in value_dict:
-        value = value_dict[key]
-
-    return value'''
 
 
 class AttribException(Exception): pass
 
 
 def get_attrib(value_dict, key, default_value, exception=False):
-    """ """
+    """Get a value of dictionary given a key if it exist, otherwise it throw an exception or give a default value.
+
+    :param value_dict: dictionary to query
+    :param key: key to search
+    :param default_value: default value if key not find and exception argument is False
+    :param exception: exception thrown if argument is True
+    :return: value found if key exist, default value or an exception otherwise according of the exception value
+    """
+
     if exception is True:
         try:
             value = value_dict[key]
@@ -259,15 +256,17 @@ def get_attrib(value_dict, key, default_value, exception=False):
 
 
 def get_value(value_dict, key, default_value, exception=False, vtype=None):
-    """Get value from dictionary and apply some controls.
-    
+    """Get a value of dictionary given a key if it exist, otherwise it throw an exception or give a default value.
+        Moreover it perform a type checking of returned value.
+
     :param value_dict: dictionary to query
     :param key: key to search
-    :param default_value: value to return if key was not found and exception is 
-            False
-    :param exception: if True raise exceptione whne key was not foud [default=False]
+    :param default_value: value to return if key was not found and exception is False
+    :param exception: if True raise exceptione when key was not found [default=False]
     :param vtype: if not None verify value is of type 'vtype'
+    :return: value found if key exist, default value or an exception otherwise according of the exception value
     """
+
     if exception is True:
         try:
             value = value_dict[key]
@@ -287,7 +286,13 @@ def get_value(value_dict, key, default_value, exception=False, vtype=None):
 
 
 def get_attrib2(inst, key, default_value=None):
-    """ """
+    """Get a value of dictionary given a key if it exist, default value otherwise
+
+    :param inst: dictonary to query
+    :param key: key to find
+    :param default_value: value to return if key is not find
+    :return: value found if key exist, default value otherwhise
+    """
     value = default_value
     if inst.__dict__.has_key(key):
         value = inst.__dict__[key]
@@ -297,7 +302,11 @@ def get_attrib2(inst, key, default_value=None):
 
 def getmembers(obj, predicate=None):
     """Return all members of an object as (name, value) pairs sorted by name.
-    Optionally, only return members that satisfy a given predicate."""
+    Optionally, only return members that satisfy a given predicate.
+
+    :param predicate: predicate to satisfy
+    :return: list of members
+    """
     results = []
     for key in dir(obj):
 
@@ -312,44 +321,57 @@ def getmembers(obj, predicate=None):
 
 
 def print_table(fields, data):
+    """print a list of value and header like a table in string format
+
+    :param fields: list like ["City name", "Area", "Population", "Annual Rainfall"]
+    :param data: list like ["Adelaide",1295, 1158259, 600.5]
+    :return: table string formatted
     """
-    :param fields:list like ["City name", "Area", "Population", "Annual Rainfall"]
-    :param dat:list like ["Adelaide",1295, 1158259, 600.5]
-    """
+
     tab = PrettyTable(fields)
-    tab.align = "l" # Left align city names
-    tab.padding_width = 1 # One space between column edges and contents (default)
+    tab.align = "l"  # Left align city names
+    tab.padding_width = 1  # One space between column edges and contents (default)
     for item in data:
         tab.add_row(item)
     return tab
 
 
 def print_table_from_dict(list, order_field=None):
+    """print a list of dictionary like a table in string format and eventually order a determined column
+
+    :param list: list of dictionary
+    :param order_field: column to order
+    :return: None if list
+    """
     if len(list) > 0:
         fields = list[0].keys()
         data = []
         for item in list:
             data.append(item.values())
         tab = print_table(fields, data)
-    
+
         if order_field:
-            print tab.get_string(sortby=order_field)
+            print(tab.get_string(sortby=order_field))
         else:
-            print tab
+            print(tab)
     else:
         return None
 
 
 def query_python_object(obj):
-    """ """
     import pprint
     import inspect
-    
+
     pp = pprint.PrettyPrinter(indent=2)
     pp.pprint(inspect.getmembers(obj))
 
 
 def dynamic_import(name):
+    """Import dinamically a python library
+
+    :param name: name of the library
+    :return:
+    """
     mod = __import__(name)
     components = name.split('.')
     for comp in components[1:]:
@@ -358,6 +380,11 @@ def dynamic_import(name):
 
 
 def import_func(name):
+    """Import dinamically a function
+
+    :param name: name of the function
+    :return:
+    """
     components = name.split(u'.')
     mod = __import__(u'.'.join(components[:-1]), globals(), locals(), [components[-1]], -1)
     func = getattr(mod, components[-1], None)
@@ -365,21 +392,29 @@ def import_func(name):
 
 
 def import_class(cl):
+    """Import dinamically a class
+
+    :param cl: name of the class
+    :return:
+    """
+
     cl = str(cl)
     d = cl.rfind(".")
-    classname = cl[d+1:len(cl)]
+    classname = cl[d + 1:len(cl)]
     m = __import__(cl[0:d], globals(), locals(), [classname])
     return getattr(m, classname)
 
 
 def get_class_props(cls):
-    return [i for i in cls.__dict__.keys() if i[:1] != '_']    
+    return [i for i in cls.__dict__.keys() if i[:1] != '_']
 
 
 def get_member_class(args):
     """"""
-    try: classname = args[0].__class__.__name__
-    except: classname = ''
+    try:
+        classname = args[0].__class__.__name__
+    except:
+        classname = ''
     return classname
 
 
@@ -391,44 +426,51 @@ def get_class_name(classref):
 
 def id_gen(length=10, parent_id=None):
     """Generate unique uuid according to RFC 4122
+
+    :param length: length of id to generate
+    :param parent_id: root to append in the id
+    :return: oid generated
     """
-    '''
-    #print random.seed()
-    #random.seed(time.time())
-    num = 1
-    for i in xrange(1, length):
-        num = num * 10
-    return str(int(round(random.random()*num, 0)))
-    #return binascii.b2a_hex(os.urandom(length))
-    '''
-    # oid = str(uuid4())
-    oid = binascii.hexlify(os.urandom(length/2))
+
+    oid = binascii.hexlify(os.urandom(length / 2))
     if parent_id is not None:
         oid = u'%s//%s' % (parent_id, oid)
     return oid
 
 
 def token_gen(args=None):
+    """Generate a 128 bit token according to RFC 4122
+    :return: token generated
+    """
     return str(uuid4())
 
 
-def transaction_id_generator(length = 20):
+def transaction_id_generator(length=20):
     """Generate random string to use as transaction id
+
+    :param length: length of id to generate
     return : random string
     """
+
     chars = string.ascii_letters + string.digits
-    random.seed = (os.urandom(1024)) 
+    random.seed = (os.urandom(1024))
     return u''.join(random.choice(chars) for i in range(length))
 
 
 def get_remote_ip(request):
+    """Get a remote id
+
+    :param request: request to do
+    :return:  remote ip
+    """
+
     try:
         try:
             # get remote ip when use nginx as balancer
             ipaddr = request.environ[u'HTTP_X_REAL_IP']
         except:
             ipaddr = request.environ[u'REMOTE_ADDR']
-        
+
         return ipaddr
     except RuntimeError:
         return None
@@ -436,10 +478,10 @@ def get_remote_ip(request):
 
 def truncate(msg, size=400):
     """Truncate message to fixed size.
-    
+
     :param str msg: message to truncate
-    :param size: max message length [default=200]
-    :return: truncated Message
+    :param size: max message length [default=400]
+    :return: truncated Message with ...
     """
     msg = str(msg)
     msg = msg.replace('\n', ' | ')
@@ -452,10 +494,11 @@ def truncate(msg, size=400):
 
 def set_dict_item(in_dict, key, value):
     """Set item in input dictionary if item is not None
-    
+
     :param in_dict: input dictionary
     :param value: key value to add
     :param key: dictionary key to add
+    :return dictionary modified
     """
     if value is not None:
         in_dict[key] = value
@@ -464,26 +507,25 @@ def set_dict_item(in_dict, key, value):
 
 def parse_redis_uri(uri):
     """Parse redis uri.
-    
-    **Parameters**:
-    
-        * **uri**: redis connection uri. Ex 
-            * ``redis://localhost:6379/1``
-            * ``localhost:6379:1``
-            * ``redis-cluster://localhost:6379,localhost:6380``
 
-    **Return**:
-        
+    :param uri: redis connection uri. Ex
+            ``redis://localhost:6379/1``
+            ``localhost:6379:1``
+            ``redis-cluster://localhost:6379,localhost:6380``
+
+    :return:
+
         {u'type':u'single', u'host':host, u'port':port, u'db':db}
-        
+
         or
-        
+
         {u'type':u'cluster', u'nodes':[
             {u'host': u'10.102.184.121', u'port': u'6379'},
             {u'host': u'10.102.91.23', u'port': u'6379'}
         ]}
-    
+
     """
+
     # redis cluster
     if uri.find(u'redis-cluster') >= 0:
         redis_uri = uri.replace(u'redis-cluster://', u'')
@@ -493,7 +535,7 @@ def parse_redis_uri(uri):
             host, port = host_port.split(u':')
             cluster_nodes.append({u'host': host, u'port': port})
         res = {u'type': u'cluster', u'nodes': cluster_nodes}
-        
+
     # single redis node
     elif uri.find(u'redis') >= 0:
         pwd = None
@@ -510,12 +552,17 @@ def parse_redis_uri(uri):
     else:
         host, port, db = uri.split(";")
         res = {u'type': u'single', u'host': host, u'port': int(port), u'db': int(db)}
-    
+
     return res
 
 
 def str2bool(value):
-    """Convert value from string to bool"""
+    """Convert value from string to bool
+
+    :param value: value to convert
+    :return: converted value
+    """
+
     res = None
     if value in [u'False', u'false', 0, u'no', False]:
         res = False
@@ -525,7 +572,12 @@ def str2bool(value):
 
 
 def bool2str(value):
-    """Convert value from bool to string"""
+    """Convert value from bool to string
+
+    :param value: value to convert
+    :return: converted value
+    """
+
     res = None
     if value in [False, 0, u'no']:
         res = u'false'
@@ -536,14 +588,16 @@ def bool2str(value):
 
 def parse_date(data_str, format=None):
     """Parse string to date
-    
-    
+
+    :param data_str: date in string format
+    :param format: format date ex: %Y-%m-%dT%H:%M
+    :return: date
     """
     if format is None:
         time_format = u'%Y-%m-%dT%H:%M:%SZ'
     else:
         time_format = format
-        
+
     res = None
     if data_str is not None:
         res = datetime.datetime.strptime(data_str, time_format)
@@ -552,12 +606,14 @@ def parse_date(data_str, format=None):
 
 def format_date(date, format=None):
     """Format date as rfc3339.
-    
+
     Ref. https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html
-    
+
     :param date: datetime object
-    """ 
-    
+    :param format: ormat date ex: %Y-%m-%dT%H:%M
+    :return: formatted date
+    """
+
     if format is None:
         time_format = u'%Y-%m-%dT%H:%M:%SZ'
     else:
@@ -581,10 +637,22 @@ def compat(data):
 
 
 def isBlank(myString):
+    """Test if string is blank
+
+    :param myString: string to test
+    :return: True if blank, False otherwhise
+    """
+
     return not (myString and myString.strip())
 
 
 def isNotBlank(myString):
+    """Test if string is not blank
+
+    :param myString: string to test
+    :return: True if not blank, False otherwhise
+    """
+
     return bool(myString and myString.strip())
 
 
@@ -593,7 +661,7 @@ def obscure_data(data, fields=[u'password', u'pwd', u'passwd', u'pass']):
 
     :param data: data to check
     :param fields: list of fields to obfuscate. default=[u'password', u'pwd', u'passwd']
-    :return:
+    :return: obscured data
     """
     if isinstance(data, str) or isinstance(data, unicode):
         return obscure_string(data, fields)
@@ -613,7 +681,7 @@ def obscure_string(data, fields=[u'password', u'pwd', u'passwd', u'pass']):
 
     :param data: data to check
     :param fields: list of fields to obfuscate. default=[u'password', u'pwd', u'passwd']
-    :return:
+    :return: obscured strinng
     """
     for field in fields:
         if data.lower().find(field) >= 0:
@@ -622,7 +690,7 @@ def obscure_string(data, fields=[u'password', u'pwd', u'passwd', u'pass']):
 
 
 def dict_get(data, key, separator=u'.'):
-    """Get a key from a dict. Key can be composed to get a field in a complex dict that contains other dict, list and
+    """Get a value from a dict. Key can be composed to get a field in a complex dict that contains other dict, list and
     string.
 
     :param data: dictionary to query
@@ -641,36 +709,10 @@ def dict_get(data, key, separator=u'.'):
         else:
             if res is not None:
                 res = res.get(k, {})
-    # if isinstance(res, list):
-    #     res = json.dumps(res)
-    #     # res = u','.join(str(res))
     if res is None or res == {}:
         res = None
 
     return res
-
-
-def dict_set1(data, key, value, separator=u'.'):
-    """Set a key in a dict. Key can be a composition of different keys separated by a separator.
-
-    :param data: dictionary to query
-    :param key: key to update
-    :param value: key new value
-    :param separator: key depth separator
-    :return:
-    """
-    keys = key.split(separator)
-    keys.reverse()
-    orig = data
-    while len(keys) > 0:
-        k = keys.pop()
-        if len(keys) == 0:
-            data[k] = value
-        elif isinstance(data, dict):
-            if k not in data or not isinstance(data[k], dict):
-                data[k] = {}
-                data = data[k]
-    return orig
 
 
 def dict_set(data, key, value, separator=u'.'):

@@ -1,18 +1,17 @@
-'''
-Created on Jan 22, 2014
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
 import logging
 from functools import wraps
 from flask import current_app, request, render_template, abort
 from flask_login import current_user
 
-logger = logging.getLogger('gibbon.util.auth')
+logger = logging.getLogger(__name__)
+
 
 def login_required(func):
-    '''
-    If you decorate a view with this, it will ensure that the current user is
+    """If you decorate a view with this, it will ensure that the current user is
     logged in and authenticated before calling the actual view. (If they are
     not, it calls the :attr:`LoginManager.unauthorized` callback.) For
     example::
@@ -37,7 +36,7 @@ def login_required(func):
 
     :param func: The view function to decorate.
     :type func: function
-    '''
+    """
     @wraps(func)
     def decorated_view(*args, **kwargs):
         if current_app.login_manager._login_disabled:
@@ -46,6 +45,7 @@ def login_required(func):
             return current_app.login_manager.unauthorized()
         return func(*args, **kwargs)
     return decorated_view
+
 
 def perms_required(perm):
     """Decorator which specifies that a user must have all the specified roles.
@@ -64,13 +64,11 @@ def perms_required(perm):
     def wrapper(fn):
         @wraps(fn)
         def decorated_view(*args, **kwargs):
-            #logger.debug(request.headers['Referer'])
             if current_app.login_manager._login_disabled:
                 return fn(*args, **kwargs)
             elif not current_user.is_authenticated():
                 abort(401)
-                #return current_app.login_manager.unauthorized()
-            
+
             # check if user has the required permission
             can = current_user.filter(perm[0], perm[1])
             can.sort()
@@ -82,18 +80,9 @@ def perms_required(perm):
             msg = "User %s doesn't have the permissions to access this page." % current_user.email
             logger.error(request.headers['Referer'])
             return render_template('error.html', msg=msg)
-            
-            #return fn(*args, **kwargs)            
-            #logger.debug(current_user)
-            """
-            perms = [Permission(RoleNeed(role)) for role in roles]
-            for perm in perms:
-                if not perm.can():
-                    return _get_unauthorized_view()
-            """
-            #return fn(*args, **kwargs)
         return decorated_view
     return wrapper
+
 
 def can(perm):
     """Decorator used to verify if user can execute an action over a defined
@@ -111,16 +100,13 @@ def can(perm):
     def wrapper(fn):
         @wraps(fn)
         def decorated_view(*args, **kwargs):
-            #logger.debug(request.headers['Referer'])
             if current_app.login_manager._login_disabled:
                 return fn(*args, **kwargs)
             elif not current_user.is_authenticated():
                 abort(401)
-                #return current_app.login_manager.unauthorized()
             
             # check if user has the required permission
             can = current_user.can(perm[0], perm[1], perm[2])
-            #logger.debug("User can %s %s: %s" % (perm[0], perm[1], can))
             if can:
                 return fn(*args, **kwargs)
             
@@ -130,26 +116,3 @@ def can(perm):
             return render_template('error.html', title="Authorization error", msg=msg)
         return decorated_view
     return wrapper
-
-def jsonp(func):
-    """Wraps JSONified output for JSONP requests.
-    
-    Took from:  https://gist.github.com/1094140    
-    """
-    @wraps(func)
-    def decorated_function(*args, **kwargs):
-        callback = request.args.get('callback', False)
-        jsonp = request.args.get('jsonp', False)
-        if callback:
-            data = str(func(*args, **kwargs))  
-            content = str(callback) + '(' + data + ')'
-            mimetype = 'application/javascript'
-            return current_app.response_class(content, mimetype=mimetype)
-        elif jsonp:
-            data = str(func(*args, **kwargs))  
-            content = str(jsonp) + '(' + data + ')'
-            mimetype = 'application/javascript'
-            return current_app.response_class(content, mimetype=mimetype)        
-        else:
-            return func(*args, **kwargs)
-    return decorated_function

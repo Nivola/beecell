@@ -1,8 +1,7 @@
-'''
-Created on Nov 3, 2017
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
 from cement.core.controller import CementBaseController, expose
 from beecell.cement_cmd.foundation import CementCmd, CementCmdBaseController
 

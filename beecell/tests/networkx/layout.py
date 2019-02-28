@@ -1,16 +1,10 @@
-'''
-Created on Sep 2, 2013
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
 import unittest
-from beecell.auth import extract
-from beecell.db.manager import RedisManager, MysqlManager
 from tests.test_util import run_test, UtilTestCase
-import pprint
 import networkx as nx
-from networkx.readwrite import json_graph
-from random import randint
 from beecell.networkx.layout import GridLayout
 
 class LayoutTestCase(UtilTestCase):

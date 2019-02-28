@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
+
 from beecell.remote import RemoteClient
 from beecell.remote import RemoteManager
 from beecell.remote import RemoteExcpetion
