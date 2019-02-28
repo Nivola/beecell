@@ -287,7 +287,8 @@ class SqlManager(ConnectionManager):
             self.logger1.debug('New simple engine : %s' % self.engine)
             self.db_session = sessionmaker(bind=self.engine, 
                                            autocommit=False, 
-                                           autoflush=False)
+                                           autoflush=True,
+                                           expire_on_commit=True)
             self.logger1.debug('New db session %s over engine %s' % (
                               self.db_session, self.engine))            
         else:
@@ -314,8 +315,8 @@ class SqlManager(ConnectionManager):
             
             self.db_session = sessionmaker(bind=self.engine, 
                                            autocommit=False, 
-                                           autoflush=False,
-                                           expire_on_commit=False)
+                                           autoflush=True,
+                                           expire_on_commit=True)
             self.logger1.debug('New db session %s over engine %s' % (
                               self.db_session, self.engine))
         else:

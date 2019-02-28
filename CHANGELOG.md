@@ -1,5 +1,16 @@
 # Changelog
 
+
+
+## Version 1.3.1 (March ?, 2019)
+
+* Added ...
+* Fixed ...
+    * corretto parametri della creazione sessioni impostate autoflush=True e expire_on_commit=True
+* Integrated ...
+* Various bugfixes
+
+
 ## Version 1.3.0 (February 27, 2019)
 
 * Added ...
