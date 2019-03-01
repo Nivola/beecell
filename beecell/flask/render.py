@@ -1,13 +1,13 @@
-'''
-Created on May 23, 2014
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
 import logging
 from flask import render_template as flask_render_template
 from flask_login import current_user
 
 logger = logging.getLogger(__name__)
+
 
 def _inner_render(url, *argc, **argv):
     """ """
@@ -19,6 +19,7 @@ def _inner_render(url, *argc, **argv):
     
     return res 
 
+
 def render_template(url, *argc, **argv):
     """ """
     ver = None
@@ -28,7 +29,6 @@ def render_template(url, *argc, **argv):
         urllist = url.split(u'.')
         urllist.insert(-1, ver)
         url_profile = u'.'.join(urllist)
-        #url_profile = '%s.%s' % (ver, url)
         res = flask_render_template(url_profile, *argc, **argv)
         logger.debug(u'Use template %s version %s' % (url, ver))
         return res

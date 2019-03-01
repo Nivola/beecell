@@ -1,17 +1,13 @@
-import datetime
-import string
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-from gevent.local import local
-from gevent.monkey import patch_all
-#patch_all(os=True, select=True)
 
 from logging import getLogger
 import sys
 from gevent import spawn, joinall, sleep, socket, queue
 from gevent.os import make_nonblocking, nb_read, nb_write
-from gevent.queue import Empty
 import re
-import string
 
 logger = getLogger(__name__)
 
@@ -123,25 +119,9 @@ def posix_shell(chan, log, trace, trace_func):
                             m.group(0)
                             data = m.group(0)
                             data = unicode(data.replace(u'# ', u'').replace(u'$ ', u'').rstrip())
-                            # logger.warn({u'p': data})
-                            # logger.warn([ord(i) for i in data])
                             data = string_parser([ord(i) for i in data])
                             if len(data) > 0:
                                 trace_cmd(data)
-                            # data = unicode(data.replace(u'# ', u'').replace(u'$ ', u'').rstrip())
-                            # # if len(data) > 0:
-                            # logger.warn([(ord(i), i) for i in data])
-                            # # for c in data:
-                            # #     c = ord(c)
-                            # #     if 31 < c < 127:
-                            # #         print_cmd = True
-                            # #     else:
-                            # #         logger.warn(c)
-                            # if print_cmd is True:
-                            #     # data = data.encode(u'utf-8')
-                            #     trace_cmd(data)
-                            #     # print_cmd = False
-                            # cmd = cmd[-10:]
                 except socket.timeout:
                     logger.error(u'', exc_info=1)
                 except Exception:
@@ -156,63 +136,6 @@ def posix_shell(chan, log, trace, trace_func):
                 x = nb_read(sys.stdin.fileno(), 1)
                 ordx = ord(x)
                 cmd_ord.append(ordx)
-                # logger.warn(u'%s - %s' % (ordx, cmd))
-
-                # # end of line
-                # if ordx == 13:
-                #     # cmd_ord.pop()
-                #     # cmd = u''.join([chr(d) for d in cmd_ord])
-                #     trace_cmd(cmd)
-                #     cmd_ord = []
-                #     logger.warn(cmd)
-                #     cmd = u''
-                #
-                # # del char
-                # elif ordx == 127:
-                #     cmd = cmd[:-1]
-                #
-                # # add new char
-                # elif 31 < ordx < 127:
-                #     cmd += x
-                #
-                # # bash_completion
-                # if cmd.find(u'[A') >= 0 or cmd.find(u'[B') >= 0 :
-                #     cmd = u''
-                #     bash_completion.put(True)
-                #
-                # # remove char
-                # if cmd.find(u'[D') >= 0 or cmd.find(u'[C') >= 0 :
-                #     cmd = cmd[:-2]
-
-                # single char that should be removed
-                # elif ordx <= 31 or ordx >= 127:
-                #     cmd_ord.pop()
-
-                # # select command from history
-                # elif CMDS[u'arrow-up'] in cmd_ord or CMDS[u'arrow-down'] in cmd_ord:
-                #     cmd = u''
-                #     # logger.warn(u'in')
-                #     # ordx = None
-                #     # cmd = u''
-                #     cmd_ord = []
-                #     bash_completion.put(True)
-
-                # # char sequence that should be removed
-                # elif check_cmd(cmd_ord):
-                #     # ordx = None
-                #     # cmd = u''
-                #     cmd_ord = clean_cmd(cmd_ord)
-
-                # # single char that should be removed
-                # elif ordx <= 31 or ordx >= 127:
-                #     cmd_ord.pop()
-
-                # elif 31 < ordx < 127:
-                #     cmd += x
-                # # if ordx in [8, 24, 127]:
-                # elif ordx <= 31 or ordx >= 127:
-                #     cmd = cmd[:-1]
-                #     cmd_ord.pop()
 
                 if log is True:
                     logger.debug(u'IN : %s' % x)

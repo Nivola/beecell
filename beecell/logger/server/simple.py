@@ -1,8 +1,7 @@
-'''
-Created on Jan 23, 2013
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
 import pickle
 import logging
 import logging.handlers
@@ -13,13 +12,10 @@ import struct
 class LogRecordStreamHandler(SocketServer.StreamRequestHandler):
     """Handler for a streaming logging request.
 
-    This basically logs the record using whatever logging policy is
-    configured locally.
+    This basically logs the record using whatever logging policy is configured locally.
     """
-
     def handle(self):
-        """
-        Handle multiple requests - each expected to be a 4-byte length,
+        """Handle multiple requests - each expected to be a 4-byte length,
         followed by the LogRecord in pickle format. Logs the record
         according to whatever policy is configured locally.
         """
@@ -52,15 +48,13 @@ class LogRecordStreamHandler(SocketServer.StreamRequestHandler):
         # cycles and network bandwidth!
         logger.handle(record)
 
-class LogRecordSocketReceiver(SocketServer.ThreadingTCPServer):
-    """
-    Simple TCP socket-based logging receiver suitable for testing.
-    """
 
+class LogRecordSocketReceiver(SocketServer.ThreadingTCPServer):
+    """Simple TCP socket-based logging receiver suitable for testing.
+    """
     allow_reuse_address = 1
 
-    def __init__(self, host='localhost',
-                 port=logging.handlers.DEFAULT_TCP_LOGGING_PORT,
+    def __init__(self, host='localhost', port=logging.handlers.DEFAULT_TCP_LOGGING_PORT,
                  handler=LogRecordStreamHandler):
         SocketServer.ThreadingTCPServer.__init__(self, (host, port), handler)
         self.abort = 0
@@ -71,24 +65,16 @@ class LogRecordSocketReceiver(SocketServer.ThreadingTCPServer):
         import select
         abort = 0
         while not abort:
-            rd, wr, ex = select.select([self.socket.fileno()],
-                                       [], [],
-                                       self.timeout)
+            rd, wr, ex = select.select([self.socket.fileno()], [], [], self.timeout)
             if rd:
                 self.handle_request()
             abort = self.abort
 
+
 def main():
     host = 'localhost'
     port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
-    
-    '''
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-        datefmt='%m-%d %H:%M',
-        filename='/temp/myapp.log',
-        filemode='w')'''
+
     logging.basicConfig(
         level=logging.DEBUG,
         format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
@@ -96,6 +82,7 @@ def main():
     tcpserver = LogRecordSocketReceiver(host, port)
     print('About to start TCP portal2...')
     tcpserver.serve_until_stopped()
+
 
 if __name__ == '__main__':
     main()

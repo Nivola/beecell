@@ -1,9 +1,7 @@
-'''
-Created on Sep 5, 2012
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: io
-'''
-#!/usr/bin/env python
 import pika
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='spedata6', port=5672))
@@ -18,8 +16,10 @@ channel.queue_bind(exchange='dashboard.logs', queue=queue_name)
 
 print ' [*] Waiting for logs. To exit press CTRL+C'
 
+
 def callback(ch, method, properties, body):
     print " [x] %r" % (body,)
+
 
 channel.basic_consume(callback, queue=queue_name, no_ack=True)
 

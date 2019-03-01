@@ -1,15 +1,13 @@
-"""
-Created on Apr 24, 2014
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-"""
 import logging
 import redis
 import os
 import ujson as json
 from sqlalchemy import create_engine, exc, event
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import Pool
 from datetime import datetime
 from beecell.simple import truncate
 from rediscluster.client import StrictRedisCluster
@@ -31,8 +29,7 @@ class ConnectionManager(object):
     """Abstract Connection manager
     """
     def __init__(self):
-        self.logger = logging.getLogger(self.__class__.__module__+ \
-                                        '.'+self.__class__.__name__)
+        self.logger = logging.getLogger(self.__class__.__module__+ u'.' + self.__class__.__name__)
 
     def get_session(self):
         """Open a database session.
@@ -57,6 +54,7 @@ class RedisManager(ConnectionManager):
     :return: RedisManager instance
 
     :Example:
+
     - redis_uri:
         - ``redis://localhost:6379/1``
         - ``localhost:6379:1``
@@ -119,6 +117,7 @@ class RedisManager(ConnectionManager):
     
     def info(self):
         res = self.server.info()
+        self.logger.debug('Get redis %s info: %s' % (self.conn, res))
         return res
 
     def config(self, pattern='*'):
@@ -236,34 +235,13 @@ class RedisManager(ConnectionManager):
         """
         return self.server.set(key, value)
 
-'''
-@event.listens_for(Pool, "checkout")
-def ping_connection(dbapi_connection, connection_record, connection_proxy):
-    cursor = dbapi_connection.cursor()
-    try:
-        cursor.execute("SELECT 1")
-        logging.getLogger('gibbon.util.db').debug('Ping connection OK')
-    except:
-        # optional - dispose the whole pool
-        # instead of invalidating one at a time
-        # connection_proxy._pool.dispose()
-
-        # raise DisconnectionError - pool will try
-        # connecting again up to three times before raising.
-        logging.getLogger('gibbon.util.db').error('Invalidate connection')
-        raise exc.DisconnectionError()
-    cursor.close()
-'''
-
 
 class SqlManager(ConnectionManager):
     """
     :param sql_id: sql manager id
-    :param db_uri: database connection string. 
-                   Ex mysql+pymysql://<user>:<pwd>@<host>:<port>/<db>
+    :param db_uri: database connection string. Ex. mysql+pymysql://<user>:<pwd>@<host>:<port>/<db>
     :param connect_timeout: connection timeout in seconds [default=5]
-    """    
-    
+    """
     def __init__(self, sql_id, db_uri, connect_timeout=5):
         ConnectionManager.__init__(self)
         
@@ -294,11 +272,9 @@ class SqlManager(ConnectionManager):
         else:
             raise SqlManagerError('Engine already configured')            
     
-    def create_pool_engine(self, pool_size=10, 
-                                 max_overflow=10, 
-                                 pool_recycle=3600,
-                                 pool_timeout=30):
+    def create_pool_engine(self, pool_size=10, max_overflow=10, pool_recycle=3600, pool_timeout=30):
         """Create an engine with connection pool
+
         :param pool_size: [optional] [default=]
         :param max_overflow: [optional] [default=]
         :param pool_recycle: [optional] [default=]
@@ -437,15 +413,9 @@ class SqlManager(ConnectionManager):
     def get_schema_tables(self, schema):
         """Get schema table list
         
-        **Parameters:**
-        
-            * **schema** (:py:class:`str`): schema name
-            
-        **Returns:**
-        
-            entity instance
-            
-        **Raise:** :class:`Exception` 
+        :param str schema: schema name
+        :return: entity instance
+        :raise Exception:
         """
         connection = None
         res = []
@@ -477,9 +447,7 @@ class SqlManager(ConnectionManager):
         """Describe a table.
         
         :param table_name: name of the table
-        :return: list of columns description (name, type, default, is index, 
-                                              is nullable, is primary key,
-                                              is unique)
+        :return: list of columns description (name, type, default, is index, is nullable, is primary key, is unique)
         """
         from sqlalchemy import Table, MetaData
         metadata = MetaData()
@@ -487,13 +455,13 @@ class SqlManager(ConnectionManager):
                           autoload_with=self.engine)
         self.logger.debug("Get description for table %s" % (table_name))
         return [{
-            u'name':c.name, 
-            u'type':str(c.type), 
-            u'default':c.default, 
-            u'index':c.index, 
-            u'is_nullable':c.nullable, 
-            u'is_primary_key':c.primary_key, 
-            u'is_unique':c.unique} for c in table_obj.columns]
+            u'name': c.name,
+            u'type': str(c.type),
+            u'default': c.default,
+            u'index': c.index,
+            u'is_nullable': c.nullable,
+            u'is_primary_key': c.primary_key,
+            u'is_unique': c.unique} for c in table_obj.columns]
     
     def query_table(self, table_name, where=None, fields="*", rows=20, offset=0):
         """Query a table
@@ -566,7 +534,7 @@ class SqlManager(ConnectionManager):
     def get_session(self):
         """Open a database session.
         
-        return session object
+        :return: session object
         """
         try:
             if self.db_session:
@@ -600,8 +568,7 @@ class MysqlManager(SqlManager):
     def __init__(self, mysql_id, db_uri, connect_timeout=5):
         """
         :param mysql_id: mysql manager id
-        :param db_uri: database connection string. 
-                       Ex mysql+pymysql://<user>:<pwd>@<host>:<port>/<db>
+        :param db_uri: database connection string. Ex. mysql+pymysql://<user>:<pwd>@<host>:<port>/<db>
         :param connect_timeout: connection timeout in seconds [default=5]
         """
         SqlManager.__init__(self, mysql_id, db_uri, connect_timeout)
@@ -742,10 +709,9 @@ class PostgresManager(SqlManager):
     def __init__(self, mysql_id, db_uri, connect_timeout=5):
         """
         :param mysql_id: mysql manager id
-        :param db_uri: database connection string. 
-                       Ex mysql+pymysql://<user>:<pwd>@<host>:<port>/<db>
+        :param db_uri: database connection string. Ex. mysql+pymysql://<user>:<pwd>@<host>:<port>/<db>
         :param connect_timeout: connection timeout in seconds [default=5]
         """
         SqlManager.__init__(self, mysql_id, db_uri, connect_timeout)
         
-        self.ping_query = "SELECT 1"        
+        self.ping_query = "SELECT 1"

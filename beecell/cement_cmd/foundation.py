@@ -1,13 +1,11 @@
-"""
-Created on Nov 3, 2017
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-"""
 import cmd
 import sys, os, re
 from cement.core.foundation import CementApp, LOG
 from cement.core.controller import CementBaseController, expose
-from gettext import gettext as _
 import logging
 import time
 import traceback
@@ -133,45 +131,6 @@ commands:
             txt = self._meta.description
 
         return textwrap.dedent(txt)
-
-#     @property
-#     def _help_text_cmd(self):
-#         """Returns the help text displayed when '--help' is passed for a single command."""
-#
-#         cmd_txt = ''
-#         for label in self._visible_commands:
-#             cmd = self._dispatch_map[label]
-#             if len(cmd['aliases']) > 0 and cmd['aliases_only']:
-#                 if len(cmd['aliases']) > 1:
-#                     first = cmd['aliases'].pop(0)
-#                     cmd_txt = cmd_txt + "  %s (aliases: %s)\n" % \
-#                               (first, ', '.join(cmd['aliases']))
-#                 else:
-#                     cmd_txt = cmd_txt + "  %s\n" % cmd['aliases'][0]
-#             elif len(cmd['aliases']) > 0:
-#                 cmd_txt = cmd_txt + "  %s (aliases: %s)\n" % \
-#                           (label, ', '.join(cmd['aliases']))
-#             else:
-#                 cmd_txt = cmd_txt + "  %s\n" % label
-#
-#             if cmd['help']:
-#                 cmd_txt = cmd_txt + "    %s\n\n" % cmd['help']
-#             else:
-#                 cmd_txt = cmd_txt + "\n"
-#
-#         if len(cmd_txt) > 0:
-#             txt = '''%s
-#
-# commands:
-#
-# %s
-#
-#
-#         ''' % (self._meta.description, cmd_txt)
-#         else:
-#             txt = self._meta.description
-#
-#         return textwrap.dedent(txt)
 
     def _parse_args(self):
         self.app.args.cmd_list = self._help_cmd_list
@@ -383,22 +342,8 @@ class CementCmd(cmd.Cmd, CementApp):
     def format_help(self):
         formatter = self.args._get_formatter()
 
-        # usage
-        #formatter.add_usage(self.usage, self._actions,
-        #                    self._mutually_exclusive_groups)
-
         # description
         formatter.add_text(self.args.description)
-
-        # positionals, optionals and user-defined groups
-        #for action_group in self.args._action_groups:
-        #    formatter.start_section(action_group.title)
-        #    formatter.add_text(action_group.description)
-        #    formatter.add_arguments(action_group._group_actions)
-        #    formatter.end_section()
-
-        # epilog
-        #formatter.add_text(self.args.epilog)
 
         # determine help from format above
         return formatter.format_help()
@@ -535,9 +480,6 @@ class CementCmd(cmd.Cmd, CementApp):
         self.loop = True
         
         # setup argv... this has to happen before lay_cement()
-        #print line
-        #self._meta.argv = []
-        #if line is not None and line != u'':
         self._meta.argv = list(line.split(u' '))
 
         # setup the cement framework

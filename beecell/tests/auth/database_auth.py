@@ -1,33 +1,79 @@
-'''
-Created on Oct 11, 2014
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
-import unittest
-from tests.test_util import run_test, UtilTestCase
-from beecell.auth import DatabaseAuth, SystemUser
+from sqlalchemy import Column, String, Integer, Boolean
+from sqlalchemy.ext.declarative import declarative_base
+from beecell.auth import SystemUser, DatabaseAuth, AbstractAuthDbManager
+from beecell.db.manager import SqlManager
+from beecell.simple import is_encrypted, decrypt_data
+from beecell.tests.test_util import BeecellTestCase, runtest
+import bcrypt
 
-class LdapAuthTestCase(UtilTestCase):
+
+tests = [
+    u'test_login'
+]
+
+session = None
+Base = declarative_base()
+
+
+class User(Base):
+    """User
+    """
+    __tablename__ = u'user'
+
+    id = Column(Integer, primary_key=True)
+    uuid = Column(String(50), unique=True)
+    objid = Column(String(400))
+    name = Column(String(100), unique=True)
+    desc = Column(String(255))
+    active = Column(Boolean())
+    password = Column(String(150))
+
+    def _check_password(self, password):
+        # verifying the password
+        # res = bcrypt.checkpw(str(password), str(self.password))
+        if is_encrypted(self.password):
+            res = (decrypt_data(self.password) == password)
+        else:
+            res = bcrypt.checkpw(str(password), str(self.password))
+        return res
+
+
+class AuthDbManager(AbstractAuthDbManager):
+    def get_user(self, oid):
+        global session
+        query = session.query(User).filter_by(name=oid)
+        return query.first()
+
+    def verify_user_password(self, user, password):
+        # verifying the password
+        res = user._check_password(password)
+        return res
+
+
+class DbAuthTestCase(BeecellTestCase):
     def setUp(self):
-        UtilTestCase.setUp(self)
+        BeecellTestCase.setUp(self)
 
+        self.manager = SqlManager(1, self.conf(u'authdb.conn'), connect_timeout=self.conf(u'authdb.timeout'))
+        self.manager.create_simple_engine()
+        self.auth_provider = DatabaseAuth(AuthDbManager, self.manager, SystemUser)
+        self.user = self.conf(u'authdb.user')
+        self.password = self.conf(u'authdb.pwd')
 
-        self.auth_provider = DatabaseAuth(self.auth_manager, self.conn_manager, 
-                                          SystemUser)
-        self.user = "admin@local"
-        self.password = "testlab"
-        
     def tearDown(self):
-        UtilTestCase.tearDown(self)
+        BeecellTestCase.tearDown(self)
 
     def test_login(self):
-        self.auth_provider.login(self.user, self.password)
+        global session
+        session = self.manager.get_session()
+        user = self.auth_provider.login(self.user, self.password)
+        self.logger.debug(user)
+        self.manager.release_session(session)
 
-def test_suite():
-    tests = [
-             "test_login",
-            ]
-    return unittest.TestSuite(map(LdapAuthTestCase, tests))
 
-if __name__ == '__main__':
-    run_test([test_suite()])
+if __name__ == u'__main__':
+    runtest(DbAuthTestCase, tests)

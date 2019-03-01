@@ -1,8 +1,7 @@
-"""
-Created on Jan 23, 2013
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-"""
 import sys
 import logging
 from celery.utils.log import ColorFormatter as CeleryColorFormatter

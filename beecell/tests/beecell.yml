@@ -1,0 +1,31 @@
+sendmail:
+  mailer: <BLANK>
+  sender: <BLANK>
+  receiver: <BLANK>
+shell:
+  port: 22
+  user: root
+  pwd: <BLANK>
+  host: localhost
+  keyfile: <BLANK>
+  key_string: -----BEGIN RSA PRIVATE KEY-----\n<BLANK>\n-----END RSA PRIVATE KEY-----
+mysql:
+    conn: mysql+pymysql://root:<BLANK>@<BLANK>:3306
+    schema: <BLANK>
+redis:
+  single: redis://<BLANK>:6379/0
+  cluster: redis-cluster://<BLANK>:6379,<BLANK>:6379,<BLANK>:6379
+ldap:
+  host: <BLANK>
+  port: 389
+  domain: <BLANK>
+  dn:
+  ssl: false
+  timeout: 10
+  user: <BLANK>
+  pwd: <BLANK>
+authdb:
+  conn: mysql+pymysql://<BLANK>:<BLANK>@<BLANK>:3306/<BLANK>
+  user: <BLANK>
+  pwd: <BLANK>
+  timeout: 10

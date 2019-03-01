@@ -1,8 +1,7 @@
-'''
-Created on Jan 18, 2014
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
 from __future__ import unicode_literals
 from cgi import escape
 from wtforms.compat import text_type, string_types, iteritems
@@ -13,9 +12,9 @@ __all__ = (
     'TextInput', 'Option'
 )
 
+
 def html_params(**kwargs):
-    """
-    Generate HTML parameters from inputted keyword arguments.
+    """Generate HTML parameters from inputted keyword arguments.
 
     The output value is sorted by the passed keys, to provide consistent output
     each time this function is called with the same parameters.  Because of the
@@ -42,8 +41,7 @@ class HTMLString(text_type):
 
 
 class ListWidget(object):
-    """
-    Renders a list of fields as a `ul` or `ol` list.
+    """Renders a list of fields as a `ul` or `ol` list.
 
     This is used for fields which encapsulate many inner fields as subfields.
     The widget will try to iterate the field to get access to the subfields and
@@ -69,9 +67,9 @@ class ListWidget(object):
         html.append('</%s>' % self.html_tag)
         return HTMLString(''.join(html))
 
+
 class TableWidget(object):
-    """
-    Renders a list of fields as a set of table rows with th/td pairs.
+    """Renders a list of fields as a set of table rows with th/td pairs.
 
     If `with_table_tag` is True, then an enclosing <table> is placed around the
     rows.
@@ -103,8 +101,7 @@ class TableWidget(object):
 
 
 class Input(object):
-    """
-    Render a basic ``<input>`` field.
+    """Render a basic ``<input>`` field.
 
     This is used as the basis for most of the other input fields.
 
@@ -118,32 +115,26 @@ class Input(object):
             self.input_type = input_type
 
     def __call__(self, field, **kwargs):
-        #kwargs.setdefault('id', field.id)
-        #kwargs.setdefault('type', self.input_type)
-        #kwargs.setdefault('placeholder', field.placeholder)
         if 'value' not in kwargs:
             value = field._value()
         else:
             value = kwargs['value']
             
         res = ['<div class=""><div>',
-               #'<label for="%s" class="col-sm-2 control-label">%s</label>' % (
-               #     field.id, field.label),
-               #'<div class="col-sm-10">',
                '<input type="%s" class="form-control" id="%s" name="%s" value="%s" placeholder="%s">' % (
                     self.input_type, field.id, field.id, field.default, field.label),
                '</div></div>']
         return HTMLString(''.join(res))
 
+
 class TextInput(Input):
-    """
-    Render a single-line text input.
+    """Render a single-line text input.
     """
     input_type = 'text'
 
+
 class PasswordInput(Input):
-    """
-    Render a password input.
+    """Render a password input.
 
     For security purposes, this field will not reproduce the value on a form
     submit by default. To have the value filled in, set `hide_value` to
@@ -159,9 +150,9 @@ class PasswordInput(Input):
             kwargs['value'] = ''
         return super(PasswordInput, self).__call__(field, **kwargs)
 
+
 class HiddenInput(Input):
-    """
-    Render a hidden input.
+    """Render a hidden input.
     """
     input_type = 'hidden'
 
@@ -170,9 +161,9 @@ class HiddenInput(Input):
                     self.input_type, field.id, field.id, field.default)]
         return HTMLString(''.join(res))
 
+
 class CheckboxInput(Input):
-    """
-    Render a checkbox.
+    """Render a checkbox.
 
     The ``checked`` HTML attribute is set if the field's data is a non-false value.
     """
@@ -180,7 +171,6 @@ class CheckboxInput(Input):
 
     def __call__(self, field, **kwargs):
         res = ['<div class=""><div>',
-               #'<div class="col-sm-offset-2 col-sm-10">',
                '<div class="checkbox">',
                '<label></label>',
                '<input type="checkbox">%s' % (field.label),
@@ -188,9 +178,9 @@ class CheckboxInput(Input):
                '</div></div></div>']
         return HTMLString(''.join(res))
 
+
 class RadioInput(Input):
-    """
-    Render a single radio button.
+    """Render a single radio button.
 
     This widget is most commonly used in conjunction with ListWidget or some
     other listing, as singular radio buttons are not very useful.
@@ -214,8 +204,7 @@ class FileInput(object):
 
 
 class SubmitInput(Input):
-    """
-    Renders a submit button.
+    """Renders a submit button.
 
     The field's label is used as the text of the submit button instead of the
     data on the field.
@@ -224,14 +213,14 @@ class SubmitInput(Input):
 
     def __call__(self, field, **kwargs):
         res = ['<div class=""><div>',
-               #'<div class="col-sm-offset-2 col-sm-10">',
-               '<button type="submit" id="%s" class="btn btn-lg btn-primary btn-block">%s</button>' % (field.id, field.label),
+               '<button type="submit" id="%s" class="btn btn-lg btn-primary btn-block">%s</button>' %
+               (field.id, field.label),
                '</div></div>']
         return HTMLString(''.join(res))
 
+
 class TextArea(object):
-    """
-    Renders a multi-line text area.
+    """Renders a multi-line text area.
 
     `rows` and `cols` ought to be passed as keyword args when rendering.
     """
@@ -241,8 +230,7 @@ class TextArea(object):
 
 
 class Select(object):
-    """
-    Renders a select field.
+    """Renders a select field.
 
     If `multiple` is True, then the `size` property should be specified on
     rendering to make the field useful.
@@ -258,20 +246,11 @@ class Select(object):
         kwargs.setdefault('id', field.id)
         if self.multiple:
             kwargs['multiple'] = True
-        #html = ['<select %s>' % html_params(name=field.name, **kwargs)]
-        #for val, label, selected in field.iter_choices():
-        #    html.append(self.render_option(val, label, selected))
-        #html.append('</select>')
 
-        html = [#'<div class="form-group">',
-                #'<label class="col-sm-2 control-label">%s</label>' % field.label,
-                #'<div class="col-sm-6">',
-                '<select class="form-control" id="%s" name="%s">' % (field.id, field.name)]
+        html = ['<select class="form-control" id="%s" name="%s">' % (field.id, field.name)]
         for val, label, selected in field.iter_choices():
             html.append(self.render_option(val, label, selected))
         html.append('</select>')
-        #html.append('</div>')
-        #html.append('</div>')
              
         return HTMLString(''.join(html))
 
@@ -282,9 +261,9 @@ class Select(object):
             options['selected'] = True
         return HTMLString('<option %s>%s</option>' % (html_params(**options), escape(text_type(label))))
 
+
 class Option(object):
-    """
-    Renders the individual option from a select field.
+    """Renders the individual option from a select field.
 
     This is just a convenience for various custom rendering situations, and an
     option by itself does not constitute an entire field.

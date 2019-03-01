@@ -1,24 +1,19 @@
-from flex.core import load, validate_api_call, validate
-from logging import getLogger
-from marshmallow.schema import Schema
-from marshmallow import fields, missing
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
+from flex.core import validate_api_call
+from logging import getLogger
 from apispec import APISpec
-from marshmallow.validate import Range, OneOf
+from marshmallow.validate import OneOf
 from copy import deepcopy
 
 logger = getLogger(__name__)
 
+
 class SwaggerHelper(object):
     def __init__(self):
-        self.spec = APISpec(
-            title=u'',
-            version=u'',
-            plugins=[
-                u'apispec.ext.flask',
-                u'apispec.ext.marshmallow'
-            ]
-        )
+        self.spec = APISpec(title=u'', version=u'', plugins=[u'apispec.ext.flask', u'apispec.ext.marshmallow'])
 
     @staticmethod
     def responses(orig, data):
@@ -43,17 +38,16 @@ class SwaggerHelper(object):
             if context is not None:
                 if context == u'body':
                     kvargs = {
-                        u'in':u'body',
-                        u'name':u'body',
-                        u'schema':{u'$ref':u'#/definitions/%s' % 
-                                   value.nested.__name__}
+                        u'in': u'body',
+                        u'name': u'body',
+                        u'schema': {u'$ref': u'#/definitions/%s' % value.nested.__name__}
                     }
                 else:
                     kvargs = {
-                        u'in':context,
-                        u'name':field,
-                        u'required':value.required, 
-                        u'description':value.metadata.get(u'description', u''),
+                        u'in': context,
+                        u'name': field,
+                        u'required': value.required,
+                        u'description': value.metadata.get(u'description', u''),
                     }                    
                       
                     field_type = value.__class__.__name__.lower()
@@ -71,12 +65,7 @@ class SwaggerHelper(object):
                             kvargs[u'collectionFormat'] = value.metadata.get(u'collection_format', u'')
                             subfield_type = value.container.__class__.__name__.lower()
                             kvargs[u'items'] = {u'type': subfield_type}
-                            # TODO sistemare replace per solo occorrenze in fondo alla stringa
                             kvargs[u'name'] = kvargs[u'name'].replace(u'_N', u'.N')
-                            # logger.warn(value)
-                            # logger.warn(value.__dict__)
-                            # kvargs[u'format'] = u'date'
-                            # logger.warn(kvargs)
                         except:
                             logger.warn(u'', exc_info=1)
                     else:
@@ -87,15 +76,12 @@ class SwaggerHelper(object):
                         kvargs[u'enum'] = value.validate.choices
         
             res.append(kvargs)
-            #self.spec.add_parameter(field, u'query', **kvargs)
-        
-        #return self.spec._parameters.values()
         return res
+
 
 class ApiValidator():
     def __init__(self, schema, uri, method):
-        self.logger = getLogger(self.__class__.__module__+ \
-                                u'.'+self.__class__.__name__)        
+        self.logger = getLogger(self.__class__.__module__+ u'.' + self.__class__.__name__)
         
         self.data = None
         self.code = None
@@ -104,7 +90,7 @@ class ApiValidator():
         self.uri = uri
         self.method = method
         self.keys = []
-        self.removed_keys=[]
+        self.removed_keys= []
         self.schema_keys = {}
         self.code = None
         
@@ -126,7 +112,7 @@ class ApiValidator():
                         if len(value) > 0:
                             self.get_keys(s, value[0], key, s[key][1][0]) 
                         elif len(value) == 0:
-                            if s[key][1][1]==True and s[key][0]==u'array':
+                            if s[key][1][1]==True and s[key][0] == u'array':
                                 self.logger.debug(u'this is not valid key:%s' %key)
                                 self.removed_keys.append(key)
                             
@@ -182,8 +168,7 @@ class ApiValidator():
     
     def get_schema(self):
         if self.uri in self.master_schema[u'paths']:
-            self.base_schema = self.master_schema[u'paths'][self.uri][self.method]
-            #self.req_schema = self.base_schema[u'parameters']
+            self.base_schema = self.master_schema[u'paths'][self.uri][self.method][u'parameters']
             self.schema = self.base_schema[u'responses']
         else:
             raise Exception(u'Swager schema for %s is not defined' % self.uri)
@@ -193,19 +178,17 @@ class ApiValidator():
         t = set(self.parse_data(s))
         s = set(s.keys())  
         
-        #inspect keys nullable in a subtree
+        # inspect keys nullable in a subtree
         key = set()
         for k in s:
             for r in self.removed_keys: 
-                if k.startswith(u'%s.' %r):
+                if k.startswith(u'%s.' % r):
                     key.add(k)
         
         res = s.symmetric_difference(t).symmetric_difference(key)
         if len(res) > 0:
-            self.logger.error(u'Schema and data does not superimpose for'\
-                              u' keys: %s' % u', '.join(res))
-            raise Exception(u'Schema and data does not superimpose for'\
-                            u' keys: %s' % u', '.join(res))
+            self.logger.error(u'Schema and data does not superimpose for keys: %s' % u', '.join(res))
+            raise Exception(u'Schema and data does not superimpose for keys: %s' % u', '.join(res))
         self.logger.debug(u'Schema and response keys are the same')
 
     def validate(self, response):

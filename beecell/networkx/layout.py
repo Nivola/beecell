@@ -1,16 +1,9 @@
-'''
-Created on Aug 4, 2016
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
 import networkx as nx
-from networkx.readwrite import json_graph
 from random import randint
-
-#G = nx.karate_club_graph()
-
-#data = json_graph.node_link_data(G)
-#print data
 
 
 class GridLayout(object):
@@ -44,9 +37,7 @@ class GridLayout(object):
         for i in xrange(0, self._rows):
             for j in xrange(0, self._cols):
                 cw = int(round(w*(1+2*j)))
-                ch = int(round(h*(1+2*i)))              
-                #cw = int(round(w*(1+2*j)-node_width/2))
-                #ch = int(round(h*(1+2*i)-node_height/2))
+                ch = int(round(h*(1+2*i)))
                 self._empty_cells.append((cw, ch))
         
         return self._empty_cells

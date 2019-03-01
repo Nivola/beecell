@@ -1,8 +1,7 @@
-'''
-Created on Jan 21, 2014
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
 import pickle
 import logging
 from datetime import timedelta
@@ -10,7 +9,7 @@ from uuid import uuid4
 from redis import Redis
 from werkzeug.datastructures import CallbackDict
 from flask.sessions import SessionInterface, SessionMixin
-from beecell.simple import truncate
+
 
 class RedisSession(CallbackDict, SessionMixin):
     def __init__(self, initial=None, sid=None, new=False):
@@ -21,6 +20,7 @@ class RedisSession(CallbackDict, SessionMixin):
         self.sid = sid
         self.new = new
         self.modified = False
+
 
 class RedisSessionInterface(SessionInterface):
     serializer = pickle
@@ -44,7 +44,6 @@ class RedisSessionInterface(SessionInterface):
         if session.permanent:
             return app.permanent_session_lifetime
         return self.session_duration
-        #return timedelta(days=1)
 
     def open_session(self, app, request):
         sid = request.cookies.get(app.session_cookie_name)
@@ -59,7 +58,6 @@ class RedisSessionInterface(SessionInterface):
 
     def save_session(self, app, session, response):
         domain = self.get_cookie_domain(app)
-        #path = self.get_cookie_path(app)
         if not session:
             self.redis.delete(self.prefix + session.sid)
             if session.modified:
@@ -71,10 +69,7 @@ class RedisSessionInterface(SessionInterface):
         cookie_exp = self.get_expiration_time(app, session)
         val = self.serializer.dumps(dict(session))
         self.redis.setex(self.prefix + session.sid, redis_exp, val)
-        response.set_cookie(app.session_cookie_name, session.sid,
-                            expires=cookie_exp, httponly=True,
-                            domain=domain)
-        #self.logger.debug("Save flask session: %s" % truncate(dict(session)))
+        response.set_cookie(app.session_cookie_name, session.sid, expires=cookie_exp, httponly=True, domain=domain)
 
     def save_session2(self, app, session, response):
         domain = self.get_cookie_domain(app)
@@ -91,10 +86,8 @@ class RedisSessionInterface(SessionInterface):
         val = self.serializer.dumps(dict(session))
         self.redis.setex(self.prefix + session.sid, redis_exp, val)        
         
-        response.set_cookie(app.session_cookie_name, val,
-                            expires=expires, httponly=httponly,
+        response.set_cookie(app.session_cookie_name, val, expires=expires, httponly=httponly,
                             domain=domain, path=path, secure=secure)
-        #self.logger.debug("Save flask session: %s" % truncate(dict(session)))
 
     def remove_session(self, session, sid=None):
         if session is None:

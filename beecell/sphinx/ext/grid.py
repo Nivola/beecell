@@ -1,12 +1,10 @@
-'''
-Created on Dec 30, 2015
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# (C) Copyright 2018-2019 CSI-Piemonte
 
-@author: darkbk
-'''
 from docutils import nodes
-from docutils.parsers.rst import directives
-from sphinx.util.compat import Directive
-from random import randint
+from docutils.parsers.rst import directives, Directive
+
 
 html_escape_table = {
     "&": "&amp;",
@@ -16,9 +14,11 @@ html_escape_table = {
     "<": "&lt;",
 }
 
+
 def html_escape(text):
     """Produce entities within text."""
     return "".join(html_escape_table.get(c,c) for c in text)
+
 
 class ApiNode(nodes.Element):
     def __init__(self, *args, **kwargs):
@@ -27,8 +27,10 @@ class ApiNode(nodes.Element):
         self['uri'] = ''
         self['desc'] = ''
 
+
 def depart_apinode_latex(self, node):
     pass
+
 
 def visit_apinode_html(self, node):
     user = 'fa-unlock-alt fa text-success'
@@ -45,22 +47,25 @@ def visit_apinode_html(self, node):
             '<i class="%s"></i>&nbsp;' % (sync),
             '<i class="link">%s</i></div>' % (node['uri']),
             '<div class="col-5">%s%s</div>' % (title, node['desc']),
-            '<div class="col-1"><button type="button" name="details" id="%s" class="btn btn-info">Detail</button></div>' %  node['targetid'],
+            '<div class="col-1"><button type="button" name="details" id="%s" class="btn btn-info">'
+            'Detail</button></div>' %  node['targetid'],
             ]
 
     self.body.append('\n'.join(html))
-    #self.body.append(node)
     pass
 
 
 def depart_apinode_html(self, node):
     pass
 
+
 def visit_grid_detail(self, node):
     pass
 
+
 def depart_grid_detail(self, node):
     pass
+
 
 class ExpandDirective(Directive):
     has_content = True
@@ -102,6 +107,7 @@ class ExpandDirective(Directive):
         
         self.state.nested_parse(self.content, self.content_offset, detail)        
         return [node]
+
 
 def setup(app):
     app.add_directive("expand", ExpandDirective)
