@@ -29,3 +29,4 @@ python-ldap==3.1.0
 PyYAML==3.12
 dict-recursive-update==1.0.1
 bcrypt==3.1.4
+networkx==2.1.0

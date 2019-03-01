@@ -47,13 +47,17 @@ Instructions useful to deploy software on a simple environment (local machine or
 ## Running the tests
 Results of vulnerability assessment and/or penetration test. If known explain how to run the automated tests for this system
 
+- Activate virtual env
+
+```
+$ source venv/bin/activate
+```
+
 - Open tests directory __beecell/tests__
 - Copy file beecell.yml in your home directory. Open the file and set correctly all the <BLANK> variables.
 - Run some tests:
 
 ```
-$ source venv/bin/activate
-$ python sendmail.py
 $ python sendmail.py
 $ python cement_cmd.py 
 $ python paramiko_shell.py 
