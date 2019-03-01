@@ -25,7 +25,6 @@ uwsgidecorators==1.1.0
 flex==6.14.0
 apispec==1.0.0
 marshmallow==2.18.1
-redis-collections==0.6.0
 python-ldap==3.1.0
 PyYAML==3.12
 dict-recursive-update==1.0.1
