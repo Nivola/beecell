@@ -51,7 +51,9 @@ if __name__ == '__main__':
             'beecell.sqlalchemy',
             'beecell.swagger',
             'beecell.test',
-            'beecell.tests'
+            'beecell.tests',
+            'beecell.tests.db',
+            'beecell.tests.auth',
         ],
         namespace_packages=[],
         py_modules=[
