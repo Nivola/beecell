@@ -9,9 +9,10 @@ from threading import current_thread
 from functools import wraps
 from beecell.simple import id_gen, get_member_class, nround
 
+
 def watch(func):
-    """Decorator function used to capture elapsed time.
-    Configure 'watch' logger to save data."""
+    """Decorator function used to capture elapsed time. Configure 'watch' logger to save data.
+    """
     @wraps(func)
     def inner(*args, **kwargs): #1
         logger = logging.getLogger(__name__)
@@ -24,10 +25,9 @@ def watch(func):
         task_id = id_gen()
             
         # log start
-        #classname = get_method_class(func)
-        info = u'%s:%s - %s - START -  %s:%s' % (
-            cp.ident, ct.ident, task_id, 
-            func.__module__+u'.'+get_member_class(args), func.func_name)
+        # classname = get_method_class(func)
+        info = u'%s:%s - %s - START -  %s:%s' % (cp.ident, ct.ident, task_id,
+                                                 func.__module__+ u'.' + get_member_class(args), func.func_name)
         logger.info(info)
         
         # get start time
@@ -40,32 +40,27 @@ def watch(func):
         elapsed = round(time() - start, 5)
         
         # log execution info in watch logger
-        info = u'%s:%s - %s - STOP  -  %s:%s - %s' % (
-            cp.ident, ct.ident, task_id, 
-            func.__module__+u'.'+get_member_class(args), 
-            func.func_name, elapsed)
-        
-        #print func.func_name, args, kwargs
-        #ApiObjectCommand()
+        info = u'%s:%s - %s - STOP  -  %s:%s - %s' % (cp.ident, ct.ident, task_id, func.__module__+u'.'+
+                                                      get_member_class(args), func.func_name, elapsed)
 
         logger.info(info)
         return ret
     return inner
 
+
 def watch_test(func):
-    """Decorator function used to capture elapsed time.
-    Configure 'test' logger to save data."""
+    """Decorator function used to capture elapsed time. Configure 'test' logger to save data.
+    """
     @wraps(func)
     def inner(*args, **kwargs): #1
-        logging.getLogger('gibbon.test').info('========== %s ==========' % 
-                                       (func.func_name))
+        logging.getLogger(u'beecell.test').info(u'========== %s ==========' % (func.func_name))
         start = time()
         ret = func(*args, **kwargs) #2
         elapsed = nround(time() - start, 4)
-        logging.getLogger('gibbon.test').info("========== %s ========== : %ss\n" % 
-                                       (func.func_name, elapsed))
+        logging.getLogger(u'beecell.test').info(u'========== %s ========== : %ss\n' % (func.func_name, elapsed))
         return ret
     return inner
+
 
 class Timer(object):
     """Simple class to use when you need to measure elapsed time
@@ -80,7 +75,6 @@ class Timer(object):
     
     def elapsed(self):
         temp = time()
-        #stop = nround(temp - self.startTime, 3)
         stop = temp - self.startTime
         self.startTime = temp
         return stop

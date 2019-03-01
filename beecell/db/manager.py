@@ -29,8 +29,7 @@ class ConnectionManager(object):
     """Abstract Connection manager
     """
     def __init__(self):
-        self.logger = logging.getLogger(self.__class__.__module__+ \
-                                        '.'+self.__class__.__name__)
+        self.logger = logging.getLogger(self.__class__.__module__+ u'.' + self.__class__.__name__)
 
     def get_session(self):
         """Open a database session.
@@ -118,6 +117,7 @@ class RedisManager(ConnectionManager):
     
     def info(self):
         res = self.server.info()
+        self.logger.debug('Get redis %s info: %s' % (self.conn, res))
         return res
 
     def config(self, pattern='*'):
@@ -265,7 +265,8 @@ class SqlManager(ConnectionManager):
             self.logger1.debug('New simple engine : %s' % self.engine)
             self.db_session = sessionmaker(bind=self.engine, 
                                            autocommit=False, 
-                                           autoflush=False)
+                                           autoflush=True,
+                                           expire_on_commit=True)
             self.logger1.debug('New db session %s over engine %s' % (
                               self.db_session, self.engine))            
         else:
@@ -290,8 +291,8 @@ class SqlManager(ConnectionManager):
             
             self.db_session = sessionmaker(bind=self.engine, 
                                            autocommit=False, 
-                                           autoflush=False,
-                                           expire_on_commit=False)
+                                           autoflush=True,
+                                           expire_on_commit=True)
             self.logger1.debug('New db session %s over engine %s' % (
                               self.db_session, self.engine))
         else:

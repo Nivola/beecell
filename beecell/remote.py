@@ -22,15 +22,16 @@ from urlparse import urlparse
 
 urllib3.disable_warnings()
 
+
 class Urllib2MethodRequest(urllib2.Request):
-    """
-    Inizialize a request method
+    """Inizialize a request method
+
     http://stackoverflow.com/questions/21243834/doing-put-using-python-urllib2
     """
     def __init__(self, *args, **kwargs):
-        if 'method' in kwargs:
-            self._method = kwargs['method']
-            del kwargs['method']
+        if u'method' in kwargs:
+            self._method = kwargs[u'method']
+            del kwargs[u'method']
         else:
             self._method = None
         return urllib2.Request.__init__(self, *args, **kwargs)
@@ -39,6 +40,7 @@ class Urllib2MethodRequest(urllib2.Request):
         if self._method is not None:
             return self._method
         return urllib2.Request.get_method(self, *args, **kwargs)
+
 
 class RemoteException(Exception):
     def __init__(self, value, code=400):
@@ -52,63 +54,69 @@ class RemoteException(Exception):
     def __str__(self):
         return u'[%s] %s' % (self.code, self.value)
     
+    
 class BadRequestException(RemoteException):
     def __init__(self, value):
         RemoteException.__init__(self, value, 400)
+        
         
 class UnauthorizedException(RemoteException):
     def __init__(self, value):
         RemoteException.__init__(self, value, 401)
 
+
 class ForbiddenException(RemoteException):
     def __init__(self, value):
         RemoteException.__init__(self, value, 403)
+        
         
 class NotFoundException(RemoteException):
     def __init__(self, value):
         RemoteException.__init__(self, value, 404)        
 
+
 class MethodNotAllowedException(RemoteException):
     def __init__(self, value):
         RemoteException.__init__(self, value, 405)
+
 
 class NotAcceptableException(RemoteException):
     def __init__(self, value):
         RemoteException.__init__(self, value, 406)
 
+
 class TimeoutException(RemoteException):
     def __init__(self, value):
         RemoteException.__init__(self, value, 408)
+
 
 class ConflictException(RemoteException):
     def __init__(self, value):
         RemoteException.__init__(self, value, 409)
 
+
 class UnsupporteMediaTypeException(RemoteException):
     def __init__(self, value):
         RemoteException.__init__(self, value, 415)
+
 
 class ServerErrorException(RemoteException):
     def __init__(self, value):
         RemoteException.__init__(self, value, 500)
 
-class RemoteClient(object):
-    """
-    Create a Remote Client
-    """
 
-    def __init__(self, conn, user=None, pwd=None, proxy=None, keyfile=None,
-                 certfile=None):
-        """
+class RemoteClient(object):
+    def __init__(self, conn, user=None, pwd=None, proxy=None, keyfile=None, certfile=None):
+        """Create a Remote Client
+        
         :param conn: Request connection.
             Ex. {'host':'10.102.90.30', 'port':22} for ssh request
             Ex. {'host':'10.102.90.30', 'port':80, 'path':'/api', 'proto':'http'} 
             Ex. http://10.102.90.30:80/api
         :param proxy: proxy server. Ex. ('proxy.it', 3128) [default=None]
         """
-        self.logger = getLogger(self.__class__.__module__+ \
-                                '.'+self.__class__.__name__)
-        self.syspath = os.path.expanduser("~")
+        self.logger = getLogger(self.__class__.__module__+ u'.' + self.__class__.__name__)
+        self.syspath = os.path.expanduser(u'~')
         self.conn = conn
         self.user = user
         self.pwd = pwd
@@ -123,10 +131,10 @@ class RemoteClient(object):
             c = urlparse(conn)
             host, port = c.netloc.split(u':')
             self.conn = {
-                u'proto':c.scheme, 
-                u'host':host,  
-                u'port':int(port),
-                u'path':c.path
+                u'proto': c.scheme, 
+                u'host': host,  
+                u'port': int(port),
+                u'path': c.path
             }
 
     def __parse_connection(self, conn_uri):
@@ -148,8 +156,7 @@ class RemoteClient(object):
             }
             self.logger.debug(u'Get connection %s' % res)
         except Exception as ex:
-            self.logger.error(u'Error parsing connection %s: %s' % 
-                              (conn_uri, ex))
+            self.logger.error(u'Error parsing connection %s: %s' % (conn_uri, ex))
         return res
 
     def run_ssh_command(self, cmd, user, pwd, port=22):
@@ -182,9 +189,8 @@ class RemoteClient(object):
             raise RemoteException(ex) 
 
     def run_tcp_command(self, cmd, port):
-        '''
-        Run remote command using generic tcp socket connection
-        '''
+        """Run remote command using generic tcp socket connection
+        """
         try:
             response = []
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -197,9 +203,10 @@ class RemoteClient(object):
             raise RemoteException(ex) 
         
     def run_http_request2(self, path, method, data=u'', headers={}, timeout=30):
-        """Http client. Usage:
-            res = http_client2('https', '/api', 'POST',
-                                port=443, data='', headers={})        
+        """Http client.
+        Usage:
+
+            res = http_client2('https', '/api', 'POST', port=443, data='', headers={})
         
         :param proto: Request proto. Ex. http, https
         :param host: Request host. Ex. 10.102.90.30
@@ -207,10 +214,9 @@ class RemoteClient(object):
         :param path: Request path. Ex. /api/
         :param method: Request method. Ex. GET, POST, PUT, DELETE
         :param headers: Request headers. [default={}]. Ex. 
-                        {"Content-type": "application/x-www-form-urlencoded",
-                         "Accept": "text/plain"}
+            {"Content-type": "application/x-www-form-urlencoded", Accept": "text/plain"}
         :param data: Request data. [default={}]. Ex. 
-                       {'@number': 12524, '@type': 'issue', '@action': 'show'}
+            {'@number': 12524, '@type': 'issue', '@action': 'show'}
         :param timeout: Request timeout. [default=30s]
         :raise RemoteException:
         """
@@ -228,18 +234,14 @@ class RemoteClient(object):
             
             # set simple authentication
             if self.user is not None:
-                auth = base64.encodestring(u'%s:%s' % (self.user, self.pwd))\
-                             .replace(u'\n', u'')
+                auth = base64.encodestring(u'%s:%s' % (self.user, self.pwd)).replace(u'\n', u'')
                 headers[u'Authorization'] = u'Basic %s' % auth
             
-            self.logger.info(u'Send http %s api request to %s://%s:%s%s' % 
-                             (method, proto, host, port, path))
+            self.logger.info(u'Send http %s api request to %s://%s:%s%s' % (method, proto, host, port, path))
             if data.lower().find(u'password') < 0:
-                self.logger.debug(u'Send [headers=%s] [data=%s]' % 
-                                  (headers, data))
+                self.logger.debug(u'Send [headers=%s] [data=%s]' % (headers, data))
             else:
-                self.logger.debug(u'Send [headers=%s] [data=%s]' % 
-                                  (headers, u'xxxxxxx'))
+                self.logger.debug(u'Send [headers=%s] [data=%s]' % (headers, u'xxxxxxx'))
 
             _host = host
             _port = port
@@ -265,8 +267,7 @@ class RemoteClient(object):
                     else:
                         ssl._create_default_https_context = None
 
-                conn = httplib.HTTPSConnection(_host, _port, timeout=timeout,
-                                               key_file=self.keyfile, 
+                conn = httplib.HTTPSConnection(_host, _port, timeout=timeout, key_file=self.keyfile,
                                                cert_file=self.certfile)
             if self.proxy is not None:
                 conn.set_tunnel(host, port=port, headers=headers)
@@ -276,8 +277,7 @@ class RemoteClient(object):
             conn.request(method, path, data, _headers)
             response = conn.getresponse()
             content_type = response.getheader(u'content-type')
-            self.logger.info(u'Response status: %s %s' % 
-                              (response.status, response.reason))
+            self.logger.info(u'Response status: %s %s' % (response.status, response.reason))
             
         except httplib.HTTPException as ex:
             self.logger.error(ex, exc_info=True)
@@ -290,15 +290,13 @@ class RemoteClient(object):
         # BAD_REQUEST     400     HTTP/1.1, RFC 2616, Section 10.4.1
         if response.status == 400:
             res = response.read()
-            self.logger.error(u'Response [content-type=%s] [data=%s]' % 
-                              (content_type, truncate(res)), exc_info=True)
+            self.logger.error(u'Response [content-type=%s] [data=%s]' % (content_type, truncate(res)), exc_info=True)
             raise BadRequestException(res)
   
         # UNAUTHORIZED           401     HTTP/1.1, RFC 2616, Section 10.4.2
         elif response.status == 401:
             res = response.read()
-            self.logger.error(u'Response [content-type=%s] [data=%s]' % 
-                              (content_type, truncate(res)), exc_info=True)    
+            self.logger.error(u'Response [content-type=%s] [data=%s]' % (content_type, truncate(res)), exc_info=True)
             raise UnauthorizedException(res)
         
         # PAYMENT_REQUIRED       402     HTTP/1.1, RFC 2616, Section 10.4.3
@@ -306,29 +304,25 @@ class RemoteClient(object):
         # FORBIDDEN              403     HTTP/1.1, RFC 2616, Section 10.4.4
         elif response.status == 403:
             res = response.read()
-            self.logger.error(u'Response [content-type=%s] [data=%s]' % 
-                              (content_type, truncate(res)), exc_info=True)         
+            self.logger.error(u'Response [content-type=%s] [data=%s]' % (content_type, truncate(res)), exc_info=True)
             raise ForbiddenException(res)
         
         # NOT_FOUND              404     HTTP/1.1, RFC 2616, Section 10.4.5
         elif response.status == 404:
             res = response.read()
-            self.logger.error(u'Response [content-type=%s] [data=%s]' % 
-                              (content_type, truncate(res)), exc_info=True)         
+            self.logger.error(u'Response [content-type=%s] [data=%s]' % (content_type, truncate(res)), exc_info=True)
             raise NotFoundException(res)
         
         # METHOD_NOT_ALLOWED     405     HTTP/1.1, RFC 2616, Section 10.4.6
         elif response.status == 405:
             res = response.read()
-            self.logger.error(u'Response [content-type=%s] [data=%s]' % 
-                              (content_type, truncate(res)), exc_info=True)       
+            self.logger.error(u'Response [content-type=%s] [data=%s]' % (content_type, truncate(res)), exc_info=True)
             raise MethodNotAllowedException(res)
         
         # NOT_ACCEPTABLE         406     HTTP/1.1, RFC 2616, Section 10.4.7
         elif response.status == 406:
             res = response.read()
-            self.logger.error(u'Response [content-type=%s] [data=%s]' % 
-                              (content_type, truncate(res)), exc_info=True)           
+            self.logger.error(u'Response [content-type=%s] [data=%s]' % (content_type, truncate(res)), exc_info=True)
             raise NotAcceptableException(res)
         
         # PROXY_AUTHENTICATION_REQUIRED     407     HTTP/1.1, RFC 2616, Section 10.4.8
@@ -341,15 +335,13 @@ class RemoteClient(object):
         # CONFLICT               409
         elif response.status == 409:
             res = response.read()
-            self.logger.error(u'Response [content-type=%s] [data=%s]' % 
-                              (content_type, truncate(res)), exc_info=True)      
+            self.logger.error(u'Response [content-type=%s] [data=%s]' % (content_type, truncate(res)), exc_info=True)
             raise ConflictException(res)
         
         # UNSUPPORTED_MEDIA_TYPE 415
         elif response.status == 415:
             res = response.read()
-            self.logger.error(u'Response [content-type=%s] [data=%s]' % 
-                              (content_type, truncate(res)), exc_info=True)          
+            self.logger.error(u'Response [content-type=%s] [data=%s]' % (content_type, truncate(res)), exc_info=True)
             raise UnsupporteMediaTypeException(res)
         
         # INTERNAL SERVER ERROR  500
@@ -372,8 +364,7 @@ class RemoteClient(object):
         # MULTI_STATUS           207    WEBDAV RFC 2518, Section 10.2
         elif re.match(u'20[0-9]+', str(response.status)):
             res = response.read()
-            self.logger.debug(u'Response [content-type=%s] [data=%s]' % 
-                              (content_type, truncate(res)))
+            self.logger.debug(u'Response [content-type=%s] [data=%s]' % (content_type, truncate(res)))
             if content_type == u'application/json':
                 res_dict = json.loads(res)
                 conn.close()
@@ -383,131 +374,3 @@ class RemoteClient(object):
                 return res
         
         return None
-        
-class RemoteManager(object):
-    '''
-    Method to install some software on a remote portal2.
-    '''
-    def __init__(self, host):
-        '''
-        host : istance of class Host
-        '''        
-        self.syspath = os.path.expanduser("~")
-        self.conn = host
-        self.remoteClient = RemoteClient(self.conn.name)
-    
-    def detect_distribution(self):
-        '''
-        '''
-        # check Linux distrbution
-        cmd = "lsb_release -a"
-        res = self.remoteClient.run_ssh_command(cmd, 
-                                                self.conn.ssh2['user'], 
-                                                self.conn.ssh2['pwd'])
-    
-        if len(res['stdout']) > 0:
-            res = {'distributor_id':res['stdout'][0].split(':\t')[1],
-                   'description':res['stdout'][1].split(':\t')[1],
-                   'Release':res['stdout'][2].split(':\t')[1],
-                   'codename':res['stdout'][3].split(':\t')[1],}
-            return res
-        else:
-            return None
-
-    def detect_python(self):
-        cmd = "which python"
-        res = self.remoteClient.run_ssh_command(cmd, 
-                                                self.conn.ssh2['user'], 
-                                                self.conn.ssh2['pwd'])
-        if len(res['stdout']) > 0:
-            cmd = "python -V"
-            res = self.remoteClient.run_ssh_command(cmd, 
-                                                    self.conn.ssh2['user'], 
-                                                    self.conn.ssh2['pwd'])
-            return res['stderr'].rstrip().lstrip('Python ')
-        else:
-            return None
-
-    def detect_gcc(self):
-        cmd = "which gcc"
-        res = self.remoteClient.run_ssh_command(cmd, 
-                                                self.conn.ssh2['user'], 
-                                                self.conn.ssh2['pwd'])
-        if len(res['stdout']) > 0:
-            cmd = "gcc --version"
-            res = self.remoteClient.run_ssh_command(cmd, 
-                                                    self.conn.ssh2['user'], 
-                                                    self.conn.ssh2['pwd'])
-            return res['stdout'][0]
-        else:
-            return None
-
-    def detect_uwsgi(self):
-        cmd = "which uwsgi"
-        res = self.remoteClient.run_ssh_command(cmd, 
-                                                self.conn.ssh2['user'], 
-                                                self.conn.ssh2['pwd'])
-        if len(res['stdout']) > 0:
-            cmd = "uwsgi --version"
-            res = self.remoteClient.run_ssh_command(cmd, 
-                                                    self.conn.ssh2['user'], 
-                                                    self.conn.ssh2['pwd'])
-            return res['stdout'][0]
-        else:
-            return None
-
-    def install_uwsgi(self, version):
-        '''
-        exec as root
-        $ apt-get install -qq python-setuptools
-        $ pip install -U uwsgi
-        '''
-        ress = []
-        currentVersion = self.detect_uwsgi()
-        if (currentVersion == None or currentVersion < version):
-            cmds = ['apt-get install -qq python-setuptools',
-                    'pip install -U uwsgi']
-            for cmd in cmds:
-                res = self.remoteClient.run_ssh_command(cmd, 
-                                                        self.conn.ssh2['user'], 
-                                                        self.conn.ssh2['pwd'])
-                ress.append(res)
-            return ress
-        else:
-            return None
-        
-    def uninstall_uwsgi(self):
-        '''
-        exec as root
-        $ pip uninstall uwsgi
-        '''
-        ress = []
-        currentVersion = self.detect_uwsgi()
-        if (currentVersion != None):
-            cmds = ['pip uninstall -y uwsgi',
-                    'rm -rf `which uwsgi`']
-            for cmd in cmds:
-                res = self.remoteClient.run_ssh_command(cmd, 
-                                                        self.conn.ssh2['user'], 
-                                                        self.conn.ssh2['pwd'])
-                ress.append(res)
-            return ress
-        else:
-            return None
-          
-    def create_directory(self, directory):
-        '''
-        '''     
-        cmd = "ls %s" % directory
-        res = self.remoteClient.run_ssh_command(cmd, 
-                                                self.conn.ssh2['user'], 
-                                                self.conn.ssh2['pwd'])
-        if len(res['stderr']):
-            # directory doesn't exist
-            cmd = "mkdir -p %s" % directory
-            res = self.remoteClient.run_ssh_command(cmd, 
-                                                    self.conn.ssh2['user'], 
-                                                    self.conn.ssh2['pwd'])
-            return 'created'
-        else:
-            return 'exists'

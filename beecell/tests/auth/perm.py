@@ -2,18 +2,20 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 
-import unittest
 from beecell.auth import extract
-from tests.test_util import run_test, UtilTestCase
+from beecell.tests.test_util import BeecellTestCase, runtest
 
-class PermTestCase(UtilTestCase):
-    """
-    """
+tests = [
+    u'test_extract'
+]
+
+
+class PermTestCase(BeecellTestCase):
     def setUp(self):
-        UtilTestCase.setUp(self)
+        BeecellTestCase.setUp(self)
         
     def tearDown(self):
-        UtilTestCase.tearDown(self)
+        BeecellTestCase.tearDown(self)
 
     def test_extract(self):
         perms = ['a1//b1//c4//*',
@@ -23,17 +25,9 @@ class PermTestCase(UtilTestCase):
                  'a2//b3//*//*',
                  'a1//b4//c3//d1',
                  'a1//*//*//*']
-        #perms = ['*//*//*//*']
-        perms = [u'a1//b4//c3//d1']
-        #perms = [u'portal//main//statustop', u'portal//main//statusbottom', u'portal//main//menuleft']
         res = extract(perms)
-        print res
+        self.logger.debug(res)
 
-def test_suite():
-    tests = [
-             'test_extract',       
-            ]
-    return unittest.TestSuite(map(PermTestCase, tests))
 
-if __name__ == '__main__':
-    run_test([test_suite()])
+if __name__ == u'__main__':
+    runtest(PermTestCase, tests)

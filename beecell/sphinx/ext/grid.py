@@ -3,9 +3,7 @@
 # (C) Copyright 2018-2019 CSI-Piemonte
 
 from docutils import nodes
-from docutils.parsers.rst import directives
-from sphinx.util.compat import Directive
-from random import randint
+from docutils.parsers.rst import directives, Directive
 
 
 html_escape_table = {

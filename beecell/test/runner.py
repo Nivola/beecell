@@ -94,7 +94,7 @@ class TestResult(DefaultTestResult):
 
 
 class TestRunner(object):
-    """A test runner class that displays results in textual form.
+    """A test runner class that displays results in textual form whene run parallel test.
 
     It prints out the names of tests as they are run, errors as they
     occur, and a summary of the results at the end of the test run.

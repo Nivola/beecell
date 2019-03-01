@@ -19,7 +19,7 @@ class SystemUser(UserMixin):
     login_count = None
     
     def __init__(self, uid, email, password, active, login_ip=None):
-        self.logger = logging.getLogger(self.__class__.__module__+ '.'+self.__class__.__name__)
+        self.logger = logging.getLogger(self.__class__.__module__ + u'.' + self.__class__.__name__)
         
         self.id = uid
         self.email = email
@@ -30,21 +30,21 @@ class SystemUser(UserMixin):
         self._attrib = None
         self.current_login_ip = login_ip
         
-        self.logger.debug('Create flask_login user instance: %s, %s' % 
-                          (uid, email))
+        self.logger.debug(u'Create flask_login user instance: %s, %s' % (uid, email))
 
     def __str__(self):
-        return "<SystemUser id:'%s', name:'%s', active:'%s' ip='%s', roles='%s' attribs='%s'>" % (
-               str(self.id), self.email, self.active, self.current_login_ip,
-               self._roles, self._attrib)
+        return u'<SystemUser id: %s, name: %s, active: %s ip= %s>' % \
+               (self.id, self.email, self.active, self.current_login_ip)
     
     @watch
     def get_dict(self):
-        return {u'id': self.id,
-                u'name': self.email,
-                u'active': self.active,
-                u'roles': self._roles,
-                u'perms': self._perms}
+        return {
+            u'id': self.id,
+            u'name': self.email,
+            u'active': self.active,
+            u'roles': self._roles,
+            u'perms': self._perms
+        }
 
     @watch
     def set_groups(self, groups):
@@ -77,14 +77,6 @@ class SystemUser(UserMixin):
     @watch
     def get_perms(self):
         return self._perms
-    
-    @watch
-    def set_profile(self, profile):
-        self._profile = profile
-
-    @watch
-    def get_profile(self):
-        return self._profile
 
 
 class AuthError(Exception):
@@ -119,23 +111,23 @@ class AuthError(Exception):
         self.desc = desc
         self.code = code
         
-        if info.find('52e, v23f0') > 0:
+        if info.find(u'52e, v23f0') > 0:
             # wrong password, wrong user
             self.code = 1
-            self.desc = "Invalid credentials"
-        elif info.find('533, v23f0') > 0:
+            self.desc = u'Invalid credentials'
+        elif info.find(u'533, v23f0') > 0:
             # disabled user
             self.code = 2
-            self.desc = "User is disabled"
-        elif info.find('773, v23f0') > 0:
+            self.desc = u'User is disabled'
+        elif info.find(u'773, v23f0') > 0:
             # password elapsed
             self.code = 3
-            self.desc = "Password is expired"
+            self.desc = u'Password is expired'
         else:
             self.code = code
     
     def __str__(self):
-        return "code: %s, info: %s, desc: %s" % (self.code, self.info, self.desc)
+        return u'code: %s, info: %s, desc: %s' % (self.code, self.info, self.desc)
 
 
 class AbstractAuth(object):

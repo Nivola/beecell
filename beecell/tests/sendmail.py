@@ -2,25 +2,25 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 
-import logging
-import unittest
-from beecell.perf import watch_test
 from beecell.sendmail import Mailer
+from beecell.tests.test_util import runtest
+from beecell.tests.test_util import BeecellTestCase
 
-class MailerTestCase(unittest.TestCase):
-    logger = logging.getLogger('gibbon.test')
 
+tests = [
+    u'test_send'
+]
+
+
+class MailerTestCase(BeecellTestCase):
     def setUp(self):
-        self.logger.debug('\n########## %s.%s ##########' % 
-                          (self.__module__, self.__class__.__name__))
-        
-        self.logging_level = logging.DEBUG
-        self.mailer = Mailer('mailfarm-app.csi.it')
-        
-    def tearDown(self):
-        pass
+        BeecellTestCase.setUp(self)
 
-    @watch_test
+        self.mailer = Mailer(self.conf(u'sendmail.mailer'))
+
+    def tearDown(self):
+        BeecellTestCase.tearDown(self)
+
     def test_send(self):
         # Create the body of the message (a plain-text and an HTML version).
         text = "Hi!\nHow are you?\nHere is the link you wanted:\nhttps://www.python.org"
@@ -35,24 +35,13 @@ class MailerTestCase(unittest.TestCase):
           </body>
         </html>
         """
-        
         # me == the sender's email address
-        me = 'sergio.tonani@csi.it'
+        me = self.conf(u'sendmail.sender')
         # you == the recipient's email address
-        you = 'sergio.tonani@csi.it'
+        you = self.conf(u'sendmail.receiver')
         
-        self.mailer.send(me, you, 'test', text, html)
+        self.mailer.send(me, you, u'test', text, html)
 
-def test_suite():
-    tests = [
-             'test_send',
-            ]
-    return unittest.TestSuite(map(MailerTestCase, tests))
 
-if __name__ == '__main__':
-    import os
-    from beecell.test_util import run_test
-    syspath = os.path.expanduser("~")
-    log_file = '/tmp/test.log'
-    
-    run_test([test_suite()], log_file)    
+if __name__ == u'__main__':
+    runtest(MailerTestCase, tests)

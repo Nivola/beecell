@@ -7,6 +7,7 @@
 from setuptools import setup
 from setuptools.command.install import install as _install
 
+
 class install(_install):
     def pre_install_script(self):
         pass
@@ -21,18 +22,19 @@ class install(_install):
 
         self.post_install_script()
 
+
 if __name__ == '__main__':
     setup(
-        name = 'beecell',
-        version = '1.0.dev0',
-        description = '',
-        long_description = '',
-        author = '',
-        author_email = '',
-        license = '',
-        url = '',
-        scripts = [],
-        packages = [
+        name='beecell',
+        version='1.0',
+        description='',
+        long_description='',
+        author='',
+        author_email='',
+        license='',
+        url='',
+        scripts=[],
+        packages=[
             'beecell.flask',
             'beecell.paramiko_shell',
             'beecell.networkx',
@@ -57,8 +59,8 @@ if __name__ == '__main__':
             'beecell.server.uwsgi_server.test1',
             'beecell.logger.server'
         ],
-        namespace_packages = [],
-        py_modules = [
+        namespace_packages=[],
+        py_modules=[
             'beecell.simple',
             'beecell.dicttoxml',
             'beecell.perf',
@@ -70,14 +72,14 @@ if __name__ == '__main__':
             '__init__',
             'beecell.tree'
         ],
-        classifiers = [
+        classifiers=[
             'Development Status :: 3 - Alpha',
             'Programming Language :: Python'
         ],
-        entry_points = {},
-        data_files = [],
-        package_data = {},
-        install_requires = [
+        entry_points={},
+        data_files=[],
+        package_data={},
+        install_requires=[
             "SQLAlchemy==1.2.8",
             "redis-py-cluster==1.3.6",
             "Flask==1.0.2",
@@ -106,12 +108,15 @@ if __name__ == '__main__':
             "apispec==1.0.0",
             "marshmallow==2.18.1",
             "redis-collections==0.6.0",
-            "python-ldap==3.1.0"
+            "python-ldap==3.1.0",
+            "PyYAML==3.12",
+            "dict-recursive-update==1.0.1",
+            "bcrypt==3.1.4"
         ],
-        dependency_links = [],
-        zip_safe = True,
-        cmdclass = {'install': install},
-        keywords = '',
-        python_requires = '',
-        obsoletes = [],
+        dependency_links=[],
+        zip_safe=True,
+        cmdclass={'install': install},
+        keywords='',
+        python_requires='',
+        obsoletes=[],
     )

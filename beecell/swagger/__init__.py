@@ -38,17 +38,16 @@ class SwaggerHelper(object):
             if context is not None:
                 if context == u'body':
                     kvargs = {
-                        u'in':u'body',
-                        u'name':u'body',
-                        u'schema':{u'$ref':u'#/definitions/%s' % 
-                                   value.nested.__name__}
+                        u'in': u'body',
+                        u'name': u'body',
+                        u'schema': {u'$ref': u'#/definitions/%s' % value.nested.__name__}
                     }
                 else:
                     kvargs = {
-                        u'in':context,
-                        u'name':field,
-                        u'required':value.required, 
-                        u'description':value.metadata.get(u'description', u''),
+                        u'in': context,
+                        u'name': field,
+                        u'required': value.required,
+                        u'description': value.metadata.get(u'description', u''),
                     }                    
                       
                     field_type = value.__class__.__name__.lower()
@@ -82,8 +81,7 @@ class SwaggerHelper(object):
 
 class ApiValidator():
     def __init__(self, schema, uri, method):
-        self.logger = getLogger(self.__class__.__module__+ \
-                                u'.'+self.__class__.__name__)        
+        self.logger = getLogger(self.__class__.__module__+ u'.' + self.__class__.__name__)
         
         self.data = None
         self.code = None
@@ -114,7 +112,7 @@ class ApiValidator():
                         if len(value) > 0:
                             self.get_keys(s, value[0], key, s[key][1][0]) 
                         elif len(value) == 0:
-                            if s[key][1][1]==True and s[key][0]==u'array':
+                            if s[key][1][1]==True and s[key][0] == u'array':
                                 self.logger.debug(u'this is not valid key:%s' %key)
                                 self.removed_keys.append(key)
                             
@@ -184,15 +182,13 @@ class ApiValidator():
         key = set()
         for k in s:
             for r in self.removed_keys: 
-                if k.startswith(u'%s.' %r):
+                if k.startswith(u'%s.' % r):
                     key.add(k)
         
         res = s.symmetric_difference(t).symmetric_difference(key)
         if len(res) > 0:
-            self.logger.error(u'Schema and data does not superimpose for'\
-                              u' keys: %s' % u', '.join(res))
-            raise Exception(u'Schema and data does not superimpose for'\
-                            u' keys: %s' % u', '.join(res))
+            self.logger.error(u'Schema and data does not superimpose for keys: %s' % u', '.join(res))
+            raise Exception(u'Schema and data does not superimpose for keys: %s' % u', '.join(res))
         self.logger.debug(u'Schema and response keys are the same')
 
     def validate(self, response):

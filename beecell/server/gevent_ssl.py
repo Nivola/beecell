@@ -49,4 +49,4 @@ else:
     __ssl__.wrap_socket = new_wrap_socket
     httplib.HTTPSConnection = NewHTTPSConnection
     
-    warn('python <2.7.9 SSLSocket and wrap_socket patch loaded')
+    warn('upython <2.7.9 SSLSocket and wrap_socket patch loaded')

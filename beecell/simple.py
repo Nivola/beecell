@@ -110,10 +110,10 @@ def flatten_dict(d, delimiter=":", loopArray=True):
 def getkey(data, key, separator=u'.'):
     """Get key value from a complex data (dict with child dict and list) using a string key.
 
-    Example
+    Example:
 
-    a = {u'k1':[{u'k2':..}]}
-    b = getkey(a, u'k1.0.k2')
+        a = {u'k1':[{u'k2':..}]}
+        b = getkey(a, u'k1.0.k2')
 
     :param data: complex object. Dict with nested list and dict
     :param key: complex key to search. Ex key1.0.key2
@@ -141,7 +141,8 @@ def getkey(data, key, separator=u'.'):
 def nround(number, decimal=4):
     """Round a given number
 
-        Example decimal = 2
+    Example: decimal = 2
+
         3.5643 -> u'3.60'
         3.5343 -> u'3.55'
 

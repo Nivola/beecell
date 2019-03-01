@@ -98,13 +98,9 @@ class LdapAuth(AbstractAuth):
         if self.conn:
             try:
                 # make query
-                print query
-                print self.dn
                 records = self.conn.search_s(self.dn, ldap.SCOPE_SUBTREE, query)
                 self.logger.debug('Query Ldap: %s' % query)
             except ldap.LDAPError as ex:
-                #self.close()
-                #self.conn = None
                 self.logger.error("Ldap error: %s" % ex)
                 
                 try:
