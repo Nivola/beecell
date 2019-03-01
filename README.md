@@ -1,4 +1,9 @@
 # beecell
+__beecell__ is a project that contains various python 2 utility modules. Utility are useful to manage password, connect to a sql db
+and manage a remote ssh connection.
+
+Here a more specific description of packages and modules.
+
 Utility file that include variuos function:
 - __simple.py__: general function for password encryption and decryption, dictionary utility, print data etc.
 - __remote.py__: varius class create remote client, run ssh command, run tcp command, make http request, install software in a remote portal
@@ -12,18 +17,20 @@ _ __db__: database manager for mysql, postgress and redis
 - __cement_cmd__: cement 2 (https://pypi.org/project/cement/2.2.2/) extensions
 
 ## Prerequisites
-First of all you have to install a virtual env and have python 2.7
+Fundamental requirements is python 2.7.
 
-```
-$ virtualenv venv
-$ source venv/bin/activate
-```
-
-At this point install some package:
+First of all you have to install some package:
 
 ```
 $ sudo apt-get install gcc
 $ sudo apt-get install -y python-dev libldap2-dev libsasl2-dev libssl-dev
+```
+
+At this point install create a virtual env
+
+```
+$ virtualenv venv
+$ source venv/bin/activate
 ```
 
 ## Installing
@@ -37,14 +44,14 @@ $ pip install git+https://github.com/Nivola/nivola.git
 ## Getting Started
 Instructions useful to deploy software on a simple environment (local machine or simple server configuration infrastructure).
 
-## Running the tests (Optional)
+## Running the tests
 Results of vulnerability assessment and/or penetration test. If known explain how to run the automated tests for this system
 
-Open tests directory
-Copy file beecell.yml in your home directory. Open the file and set all the blank variables.
-activate virtual env
+- Open tests directory __beecell/tests__
+- Copy file beecell.yml in your home directory. Open the file and set correctly all the <BLANK> variables.
 
 ```
+$ source venv/bin/activate
 $ python sendmail.py
 ```
 
@@ -59,7 +66,6 @@ beecell is written and maintained by:
 * Antonio Brasile
 * Gianni Doria
 * Daniela Ferrarini
-* Dennis Sayed
 
 ## Copyrights
 CSI Piemonte
