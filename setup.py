@@ -43,7 +43,7 @@ if __name__ == '__main__':
             'beecell.flask.login',
             'beecell.flask.login.bootstrap',
             'beecell.logger',
-            'beecell.logger.server'
+            'beecell.logger.server',
             'beecell.networkx',
             'beecell.paramiko_shell',
             'beecell.server',
@@ -52,7 +52,6 @@ if __name__ == '__main__':
             'beecell.swagger',
             'beecell.test',
             'beecell.tests'
-
         ],
         namespace_packages=[],
         py_modules=[
