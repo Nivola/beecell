@@ -79,7 +79,7 @@ beecell is written and maintained by:
 * Daniela Ferrarini
 
 ## Copyrights
-CSI Piemonte
+CSI Piemonte - 2018-2019
 
 ## License
 See the LICENSE.txt file for details
