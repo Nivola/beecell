@@ -26,7 +26,7 @@ $ sudo apt-get install gcc
 $ sudo apt-get install -y python-dev libldap2-dev libsasl2-dev libssl-dev
 ```
 
-At this point install create a virtual env
+At this point create a virtual env
 
 ```
 $ virtualenv venv
@@ -49,10 +49,21 @@ Results of vulnerability assessment and/or penetration test. If known explain ho
 
 - Open tests directory __beecell/tests__
 - Copy file beecell.yml in your home directory. Open the file and set correctly all the <BLANK> variables.
+- Run some tests:
 
 ```
 $ source venv/bin/activate
 $ python sendmail.py
+$ python sendmail.py
+$ python cement_cmd.py 
+$ python paramiko_shell.py 
+$ python networkx_layout.py
+$ python db/manager_mysql.py 
+$ python db/manager_redis
+$ python db/manager_redis_cluster.py 
+$ python auth/perm.py 
+$ python auth/ldap_auth.py 
+$ python auth/database_auth.py 
 ```
 
 ## Versioning
