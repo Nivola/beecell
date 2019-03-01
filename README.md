@@ -63,7 +63,7 @@ $ python cement_cmd.py
 $ python paramiko_shell.py 
 $ python networkx_layout.py
 $ python db/manager_mysql.py 
-$ python db/manager_redis
+$ python db/manager_redis.py
 $ python db/manager_redis_cluster.py 
 $ python auth/perm.py 
 $ python auth/ldap_auth.py 

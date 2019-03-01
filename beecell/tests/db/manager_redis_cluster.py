@@ -3,7 +3,6 @@
 # (C) Copyright 2018-2019 CSI-Piemonte
 
 from beecell.db.manager import RedisManager
-import redis_collections
 from beecell.tests.test_util import BeecellTestCase, runtest
 
 tests = [
@@ -42,10 +41,7 @@ class RedisManagerTestCase(BeecellTestCase):
         self.manager.cleandb()
 
     def test_redis_inspect(self):
-        keys = self.manager.inspect(pattern='*', debug=False)
-        schedule = redis_collections.Dict(key='celery-schedule', redis=self.manager.conn)
-        res = schedule.keys()
-        self.logger.debug(res)
+        self.manager.inspect(pattern='*', debug=False)
 
 
 if __name__ == u'__main__':
