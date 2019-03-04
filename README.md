@@ -36,7 +36,7 @@ $ source venv/bin/activate
 ## Installing
 
 ```
-$ pip install git+https://clsk-code.csi.it/1362/beecell.git@public1
+$ pip install git+https://clsk-code.csi.it/1362/beecell.git@devel
 
 $ pip install git+https://github.com/Nivola/nivola.git
 ```
