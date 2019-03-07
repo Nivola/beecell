@@ -27,7 +27,7 @@ class DatabaseAuth(AbstractAuth):
             self.auth_manager_class, self.conn_manager.engine, self.user_class)
 
     @watch
-    def login(self, username, password):
+    def login(self, username, password, *args, **kvargs):
         """Login a user
 
         :param username: user name

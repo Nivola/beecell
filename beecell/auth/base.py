@@ -18,13 +18,14 @@ class SystemUser(UserMixin):
     current_login_ip = None
     login_count = None
     
-    def __init__(self, uid, email, password, active, login_ip=None):
+    def __init__(self, uid, email, password, active, login_ip=None, domain=None):
         self.logger = logging.getLogger(self.__class__.__module__ + u'.' + self.__class__.__name__)
         
         self.id = uid
         self.email = email
         self.password = password
         self.active = active
+        self.domain = domain
         self._roles = None
         self._perms = None
         self._attrib = None
@@ -41,6 +42,7 @@ class SystemUser(UserMixin):
         return {
             u'id': self.id,
             u'name': self.email,
+            u'domain': self.domain,
             u'active': self.active,
             u'roles': self._roles,
             u'perms': self._perms
@@ -137,11 +139,11 @@ class AbstractAuth(object):
         that extend this one.
     """
     def __init__(self, user_class):
-        self.logger = logging.getLogger(self.__class__.__module__+ '.'+self.__class__.__name__)
+        self.logger = logging.getLogger(self.__class__.__module__ + u'.' + self.__class__.__name__)
         
         self.user_class = user_class
 
-    def login(self, username, password):
+    def login(self, username, password, *args, **kvargs):
         """Base login method
 
         :param username: user name
