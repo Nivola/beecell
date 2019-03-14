@@ -36,8 +36,6 @@ $ source venv/bin/activate
 ## Installing
 
 ```
-$ pip install git+https://clsk-code.csi.it/1362/beecell.git@devel
-
 $ pip install git+https://github.com/Nivola/nivola.git
 ```
 
@@ -81,7 +79,6 @@ beecell is written and maintained by:
 * Antonio Brasile
 * Gianni Doria
 * Daniela Ferrarini
-* Dennis Sayed
 
 ## Copyrights
 CSI Piemonte - 2018-2019
