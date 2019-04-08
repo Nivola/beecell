@@ -46,6 +46,17 @@ class CacheClient(object):
         self.logger.debug(u'Get cache item %s:%s' % (key, truncate(value)))
         return value
 
+    def expire(self, key, ttl=600):
+        """Set key expire time
+
+        :param key: cache item key
+        :param ttl: item time to live [default=600s]
+        :return: True
+        """
+        value = self.redis.expire(self.prefix + key, ttl)
+        self.logger.debug(u'Set cache item %s expire to %s' % (key, ttl))
+        return True
+
     def delete(self, key):
         """Delete a cache item
 
