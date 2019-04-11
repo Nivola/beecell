@@ -263,12 +263,8 @@ class SqlManager(ConnectionManager):
             args = {'connect_timeout': self.connect_timeout}
             self.engine = create_engine(self.db_uri, connect_args=args)
             self.logger1.debug('New simple engine : %s' % self.engine)
-            self.db_session = sessionmaker(bind=self.engine, 
-                                           autocommit=False, 
-                                           autoflush=True,
-                                           expire_on_commit=True)
-            self.logger1.debug('New db session %s over engine %s' % (
-                              self.db_session, self.engine))            
+            self.db_session = sessionmaker(bind=self.engine, autocommit=False, autoflush=True, expire_on_commit=True)
+            self.logger1.debug('New db session %s over engine %s' % (self.db_session, self.engine))
         else:
             raise SqlManagerError('Engine already configured')            
     
@@ -281,20 +277,12 @@ class SqlManager(ConnectionManager):
         """
         if not self.engine:
             args = {'connect_timeout': self.connect_timeout}
-            self.engine = create_engine(self.db_uri,
-                                        pool_size=pool_size,
-                                        max_overflow=max_overflow,
-                                        pool_recycle=pool_recycle,
-                                        pool_timeout=pool_timeout,
-                                        connect_args=args)
+            self.engine = create_engine(self.db_uri, pool_size=pool_size, max_overflow=max_overflow,
+                                        pool_recycle=pool_recycle, pool_timeout=pool_timeout, connect_args=args)
             self.logger1.debug('New connection pool engine : %s' % self.engine)
             
-            self.db_session = sessionmaker(bind=self.engine, 
-                                           autocommit=False, 
-                                           autoflush=True,
-                                           expire_on_commit=True)
-            self.logger1.debug('New db session %s over engine %s' % (
-                              self.db_session, self.engine))
+            self.db_session = sessionmaker(bind=self.engine, autocommit=False, autoflush=True, expire_on_commit=True)
+            self.logger1.debug('New db session %s over engine %s' % (self.db_session, self.engine))
         else:
             raise SqlManagerError('Engine already configured')
         
@@ -307,8 +295,7 @@ class SqlManager(ConnectionManager):
             pid = os.getpid()
             if connection_record.info['pid'] != pid:
                 connection_record.connection = connection_proxy.connection = None
-                error = "Connection record belongs to pid %s, "\
-                        "attempting to check out in pid %s" % \
+                error = "Connection record belongs to pid %s, attempting to check out in pid %s" % \
                         (connection_record.info['pid'], pid)
                 self.logger1.error(error)
                 raise exc.DisconnectionError(error)
@@ -519,8 +506,7 @@ class SqlManager(ConnectionManager):
             if self.engine:
                 conn = self.engine.connect()
                 return conn
-            raise SqlManagerError("There isn't active db session to use. \
-                                     Session can not be opened.")  
+            raise SqlManagerError("There isn't active db session to use. Session can not be opened.")
         except exc.DBAPIError, e:
             # an exception is raised, Connection is invalidated. Connection 
             # pool will be refresh
@@ -543,13 +529,12 @@ class SqlManager(ConnectionManager):
                 # session._model_changes = {}
                 self.logger1.debug("Open session: %s" % (session))
                 return session
-            raise SqlManagerError("There isn't active db session to use. \
-                                     Session can not be opened.")
+            raise SqlManagerError("There isn't active db session to use. Session can not be opened.")
         except (exc.DBAPIError, Exception), e:
             self.logger1.error(e)
             # an exception is raised, Connection is invalidated. Connection 
             # pool will be refresh
-            #if e.connection_invalidated:
+            # if e.connection_invalidated:
             #    self.logger1.warning("Connection was invalidated! Try to reconnect")
             #    self.engine.connect()
             raise SqlManagerError(e)
@@ -627,7 +612,7 @@ class MysqlManager(SqlManager):
         ]
 
         drop_views = [
-            "DEALLOCATE PREPARE stmt;",
+            # "DEALLOCATE PREPARE stmt;",
             "SET @views = CONCAT('DROP VIEW ', @views);",
             "PREPARE stmt FROM @views;",
             "EXECUTE stmt;",
