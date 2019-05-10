@@ -366,13 +366,12 @@ class CementCmd(cmd.Cmd, CementApp):
     #
     def _internal_parse_args(self, args=None, namespace=None):
         args, argv = self.args.parse_known_args(args, namespace)
-
         if argv:
             msg = (u'unrecognized arguments: %s')
             msg = msg % u' '.join(argv)
             self.error = True
             self.print_error(msg)
-        return args    
+        return args
     
     def _parse_args(self):
         for res in self.hook.run('pre_argument_parsing', self):
@@ -439,7 +438,6 @@ class CementCmd(cmd.Cmd, CementApp):
 
             args = re.findall(r"\s([\"\'].[^\'\"]+[\"\'])", line)
             kwargs = re.findall(r"\s([\w]+=[\"\'].[^\'\"]+[\"\'])", line)
-
             line = line.replace(u' '.join(args), '')
             line = line.replace(u' '.join(kwargs), '')
             line = line.rstrip(u' ')

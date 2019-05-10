@@ -98,16 +98,17 @@ class LdapAuth(AbstractAuth):
             self.logger.debug(u'Close connection to %s' % self.conn)
             self.conn = None
 
-    def query(self, query):
+    def query(self, query, fields=None):
         """Make a query on the Ldap.
 
         :param query: query string. Ex. ['sn']>>>
+        :param fields: query fields
         :return: query response
         """
         if self.conn:
             try:
                 # make query
-                records = self.conn.search_s(self.dn, ldap.SCOPE_SUBTREE, query)
+                records = self.conn.search_s(self.dn, ldap.SCOPE_SUBTREE, query, fields)
                 self.logger.debug(u'Query Ldap: %s' % query)
             except ldap.LDAPError as ex:
                 self.logger.error(u'Ldap error: %s' % ex)
@@ -226,12 +227,35 @@ class LdapAuth(AbstractAuth):
             raise AuthError(u'', u'Ldap error - User %s was not found' % username.get(u'username'), code=5)
         user = list(res[0])
 
-        self.close()
-
         self.logger.debug(u'Get user record: %s' % truncate(user))
-        self.logger.warn(user)
 
         return user
+
+    @watch
+    def search_users(self, search_filter, fields=[u'cn', u'mail']):
+        """Search users
+
+        :param base_filter: filter used to search users
+        :return: instance of user_class
+        """
+        resp = []
+        res = self.query(search_filter, fields=fields)
+        for item in res:
+            item = item[1]
+            user = {}
+            for field in fields:
+                try:
+                    value = item.get(field, None)
+                    if len(value) == 1:
+                        value = value[0]
+                except:
+                    value = u''
+                user[field] = value
+            resp.append(user)
+
+        self.logger.debug(u'Get users: %s' % truncate(res))
+
+        return resp
 
     @watch
     def verify_user(self, username, password):
@@ -249,6 +273,7 @@ class LdapAuth(AbstractAuth):
             res = self.search_user(domain_user, self.search_filter)
             user = res[0]
             user_attribs = res[1]
+            self.close()
 
         self.authenticate(user, password)
 
