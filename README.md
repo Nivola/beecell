@@ -11,7 +11,7 @@ Utility file that include variuos function:
 Utility package:
 - __paramiko_shell__: Python implementation of SSHv2. This package run and interactive shell and offers utility to handle it
 - __networkx__: utility for handle  network
-_ __db__: database manager for mysql, postgress and redis
+- __db__: database manager for mysql, postgress and redis
 - __auth__: authentication manager based on database and on ldap
 - __logger__: logging helper
 - __cement_cmd__: cement 2 (https://pypi.org/project/cement/2.2.2/) extensions
