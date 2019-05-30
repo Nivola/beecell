@@ -18,10 +18,27 @@ redis:
 ldap:
   host: <BLANK>
   port: 389
-  domain: <BLANK>
-  dn:
+  provider: <BLANK>
+  dn: <BLANK>
   ssl: false
   timeout: 10
+  bind_user: <BLANK>
+  bind_pwd: <BLANK>
+  search_filter: (uid={username})
+  search_id: uid
+  user: <BLANK>
+  pwd: <BLANK>
+ldap_ad:
+  host: <BLANK>
+  port: 389
+  provider: <BLANK>
+  dn: <BLANK>
+  ssl: false
+  timeout: 10
+  bind_user: <BLANK>
+  bind_pwd: <BLANK>
+  search_filter: (mail={username})
+  search_id: mail
   user: <BLANK>
   pwd: <BLANK>
 authdb:
