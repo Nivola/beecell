@@ -1,14 +1,14 @@
 # Changelog
 
-## Version 1.4.0 (March ?, 2019)
+## Version 1.4.0 (May 24, 2019)
 
 * Added ...
-    * gestore di cache basato su redis
+    * cache manager based on redis
 * Fixed ...
-    * corretto parametri della creazione sessioni impostate autoflush=True e expire_on_commit=True
+    * corrected parameters of database session creation. Set autoflush=True and expire_on_commit=True
 * Integrated ...
-    * modificata classe auth.LdapAuth. Adesso la login si autentica con un system user, verifica l'esistenza dell'utente
-      richiesto, estrae il dn e verifica la password
+    * modify class auth.LdapAuth. Now login workflow has the following steps: ldap login using a  system user, query
+      ldap for user existence, get user dn, ldap login using user dn and password
 * Various bugfixes
 
 
