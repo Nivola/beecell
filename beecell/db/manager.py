@@ -3,6 +3,8 @@
 # (C) Copyright 2018-2019 CSI-Piemonte
 
 import logging
+from time import sleep
+
 import redis
 import os
 import ujson as json
@@ -209,13 +211,20 @@ class RedisManager(ConnectionManager):
         return data
 
     def get(self, key):
-        """Query key list value.
+        """Query key value.
 
-        :param ttl: if True return for every key (value, ttl)
-        :param keys: keys list from inspect
+        :param key: key to get
         :return: lists of keys with value
         """
         return self.server.get(key)
+
+    def ttl(self, key):
+        """Query key ttl.
+
+        :param keys: key to get
+        :return: lists of keys with value
+        """
+        return self.server.ttl(key)
 
     def gets(self, keys):
         """Query key list value.
@@ -234,6 +243,32 @@ class RedisManager(ConnectionManager):
         :return:
         """
         return self.server.set(key, value)
+
+    def get_with_ttl(self, key, max_retry=3, delay=0.01):
+        """Get task from redis
+
+        :param task_id: redis key
+        :param max_retry: max get retry if value is None [default=3]
+        :param delay: time to wait between two retry [default=0.01]
+        :return: value
+        :raise RedisManagerError: if key was not found
+        """
+        def get_data(key):
+            task_data = self.server.get(key)
+            task_ttl = self.server.ttl(key)
+            return task_data, task_ttl
+
+        retry = 0
+        while retry < max_retry:
+            task_data, task_ttl = get_data(key)
+            if task_data is not None:
+                return task_data, task_ttl
+            sleep(delay)
+            retry += 1
+
+        err = u'Key %s not found' % key
+        self.logger.error(err, exc_info=1)
+        raise RedisManagerError(err)
 
 
 class SqlManager(ConnectionManager):
