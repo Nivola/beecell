@@ -148,6 +148,7 @@ class RedisManager(ConnectionManager):
         :return: list of tuple (key, type, ttl)
         """
         keys = self.server.keys(pattern)
+        # self.server.scan()
 
         data = []
         for key in keys:
@@ -157,6 +158,17 @@ class RedisManager(ConnectionManager):
             else:
                 data.append((key, self.server.type(key), self.server.ttl(key)))
         return data
+
+    def scan(self, pattern='*', cursor=0, count=10):
+        """Scan keys in current db.
+
+        :param pattern: key search pattern [default='*']
+        :param cursor: start cursor position [default=0]
+        :param count: keys max number returned [default=10]
+        :return: list of tuple (key, type, ttl)
+        """
+        keys = self.server.scan(cursor=cursor, match=pattern, count=count)
+        return keys
     
     def delete(self, pattern='*'):
         """Delete keys by pattern in current db.

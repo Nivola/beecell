@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 1.5.0 (.., 2019)
+
+* Added ...
+    * add scan method to RedisManager
+* Fixed ...
+* Integrated ...
+* Various bugfixes
+
 ## Version 1.4.0 (May 24, 2019)
 
 * Added ...
