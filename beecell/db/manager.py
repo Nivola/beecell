@@ -279,7 +279,6 @@ class RedisManager(ConnectionManager):
             retry += 1
 
         err = u'Key %s not found' % key
-        self.logger.error(err, exc_info=1)
         raise RedisManagerError(err)
 
 
