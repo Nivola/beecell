@@ -72,13 +72,7 @@ $ python auth/database_auth.py
 We use Semantic Versioning for versioning. (http://semver.org)
 
 ## Authors and Contributors
-beecell is written and maintained by: 
-
-* Sergio Tonani
-* Michele Bello
-* Antonio Brasile
-* Gianni Doria
-* Daniela Ferrarini
+See the list of contributors who participated in this project in the file AUTHORS.md contained in each specific project.
 
 ## Copyright
 CSI Piemonte - 2018-2019
