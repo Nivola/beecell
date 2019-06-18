@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
-
+from struct import pack
 
 import ujson as json
 import os, random, subprocess, logging
-
+from socket import inet_ntoa
 from prettytable import PrettyTable
 import string
 import binascii
@@ -765,3 +765,16 @@ def dict_unset(data, key, separator=u'.'):
     data = __dict_unset(data)
 
     return data
+
+
+def prefixlength_to_netmask(prefixlength):
+    """Convert a cidr prefix length in subnet mask. Ex. 24 to 255.255.255.0.
+
+    Inspired from: https://stackoverflow.com/questions/33750233/convert-cidr-to-subnet-mask-in-python
+
+    :param prefixlength: cidr prefix length. Ex. 24, 21
+    :return:
+    """
+    host_bits = 32 - int(prefixlength)
+    netmask = inet_ntoa(pack('!I', (1 << 32) - (1 << host_bits)))
+    return netmask
