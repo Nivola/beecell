@@ -690,13 +690,14 @@ def obscure_string(data, fields=[u'password', u'pwd', u'passwd', u'pass']):
     return data
 
 
-def dict_get(data, key, separator=u'.'):
+def dict_get(data, key, separator=u'.', default=None):
     """Get a value from a dict. Key can be composed to get a field in a complex dict that contains other dict, list and
     string.
 
     :param data: dictionary to query
     :param key: key to search
     :param separator: key depth separator
+    :param default: default value [default=None]
     :return:
     """
     keys = key.split(separator)
@@ -711,7 +712,7 @@ def dict_get(data, key, separator=u'.'):
             if res is not None:
                 res = res.get(k, {})
     if res is None or res == {}:
-        res = None
+        res = default
 
     return res
 
