@@ -6,6 +6,7 @@
     * add scan method to RedisManager
     * add method prefixlength_to_netmask
     * module network
+    * added logger for elasticsearch
 * Fixed ...
 * Integrated ...
 * Various bugfixes

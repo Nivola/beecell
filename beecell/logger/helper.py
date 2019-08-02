@@ -7,6 +7,8 @@ import logging
 from celery.utils.log import ColorFormatter as CeleryColorFormatter
 from celery.utils.term import colored
 
+from beecell.logger.elasticsearch import ElasticsearchHandler
+
 DEBUG2 = -10
 DEBUG3 = -20
 
@@ -102,7 +104,7 @@ class LoggerHelper(object):
     
     @staticmethod
     def rotatingfile_handler(loggers, logging_level, file_name, maxBytes=104857600, backupCount=10, frmt=None,
-                             formatter=ColorFormatter):
+                             formatter=ColorFormatter, propagate=False):
         if frmt is None:
             frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] %(name)s:%(funcName)s:%(lineno)d - %(message)s"
         handler = logging.handlers.RotatingFileHandler(file_name, mode=u'a', maxBytes=maxBytes, backupCount=backupCount)
@@ -115,10 +117,10 @@ class LoggerHelper(object):
         for logger in loggers:
             logger.addHandler(handler)
             logger.setLevel(logging_level)
-            logger.propagate = False
+            logger.propagate = propagate
             
     @staticmethod
-    def file_handler(loggers, logging_level, file_name, frmt=None, formatter=ColorFormatter):
+    def file_handler(loggers, logging_level, file_name, frmt=None, formatter=ColorFormatter, propagate=False):
         if frmt is None:
             frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] %(name)s:%(funcName)s:%(lineno)d - %(message)s"
         handler = logging.FileHandler(file_name, mode=u'a')
@@ -131,4 +133,27 @@ class LoggerHelper(object):
         for logger in loggers:
             logger.addHandler(handler)
             logger.setLevel(logging_level)
-            logger.propagate = False
+            logger.propagate = propagate
+
+    @staticmethod
+    def elastic_handler(loggers, logging_level, client, frmt=None, propagate=False, index=u'log'):
+        """Configure a logging handler that use elasticsearch as backend.
+
+        :param loggers: list of loggers
+        :param logging_level: logging level
+        :param client: elasticsearch.Elasticsearch class instance
+        :param index: elasticsearch index name
+        :param frmt: log format [optional]
+        """
+        if frmt is None:
+            frmt = u'{"timestamp":"%(asctime)s", "levelname":"%(levelname)s", "process":"%(process)s", ' \
+                   u'"thread":"%(thread)s", "module":"%(name)s", "func":"%(funcName)s", "lineno":"%(lineno)d",' \
+                   u'"message":"%(message)s"}'
+        handler = ElasticsearchHandler(client, index=index)
+        handler.setLevel(logging_level)
+        handler.setFormatter(logging.Formatter(frmt))
+
+        for logger in loggers:
+            logger.addHandler(handler)
+            logger.setLevel(logging_level)
+            logger.propagate = propagate
