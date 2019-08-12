@@ -28,7 +28,7 @@ def watch(func):
         # classname = get_method_class(func)
         info = u'%s:%s - %s - START -  %s:%s' % (cp.ident, ct.ident, task_id,
                                                  func.__module__+ u'.' + get_member_class(args), func.func_name)
-        logger.info(info)
+        # logger.info(info)
         
         # get start time
         start = time()
@@ -43,7 +43,7 @@ def watch(func):
         info = u'%s:%s - %s - STOP  -  %s:%s - %s' % (cp.ident, ct.ident, task_id, func.__module__+u'.'+
                                                       get_member_class(args), func.func_name, elapsed)
 
-        logger.info(info)
+        # logger.info(info)
         return ret
     return inner
 
