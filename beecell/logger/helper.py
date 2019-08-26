@@ -136,20 +136,21 @@ class LoggerHelper(object):
             logger.propagate = propagate
 
     @staticmethod
-    def elastic_handler(loggers, logging_level, client, frmt=None, propagate=False, index=u'log'):
+    def elastic_handler(loggers, logging_level, client, frmt=None, propagate=False, index=u'log', tags=[]):
         """Configure a logging handler that use elasticsearch as backend.
 
         :param loggers: list of loggers
         :param logging_level: logging level
         :param client: elasticsearch.Elasticsearch class instance
         :param index: elasticsearch index name
+        :param tags: list of tags to add [optional]
         :param frmt: log format [optional]
         """
         if frmt is None:
             frmt = u'{"timestamp":"%(asctime)s", "levelname":"%(levelname)s", "process":"%(process)s", ' \
                    u'"thread":"%(thread)s", "module":"%(name)s", "func":"%(funcName)s", "lineno":"%(lineno)d",' \
                    u'"message":"%(message)s"}'
-        handler = ElasticsearchHandler(client, index=index)
+        handler = ElasticsearchHandler(client, index=index, tags=tags)
         handler.setLevel(logging_level)
         handler.setFormatter(ElasticsearchFormatter(frmt))
 

@@ -12,7 +12,7 @@ from sqlalchemy import create_engine, exc, event
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 from beecell.simple import truncate
-from rediscluster.client import StrictRedisCluster
+from rediscluster import RedisCluster
 
 
 class SqlManagerError(Exception):
@@ -73,8 +73,8 @@ class RedisManager(ConnectionManager):
             for host_port in host_ports:
                 host, port = host_port.split(u':')
                 cluster_nodes.append({u'host': host, u'port': port})
-            self.server = StrictRedisCluster(startup_nodes=cluster_nodes, decode_responses=True, socket_timeout=timeout,
-                                             retry_on_timeout=False, max_connections=max_connections)
+            self.server = RedisCluster(startup_nodes=cluster_nodes, decode_responses=True, socket_timeout=timeout,
+                                       retry_on_timeout=False, max_connections=max_connections)
             
         # single redis node
         elif redis_uri.find(u'redis') >= 0:

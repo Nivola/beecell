@@ -64,11 +64,12 @@ class ElasticsearchFormatter(Formatter):
 
 
 class ElasticsearchHandler(Handler):
-    def __init__(self, client, index=u'log'):
+    def __init__(self, client, index=u'log', tags=[]):
         """Initialize the handler.
 
         :param client: elasticsearch.Elasticsearch class instance
         :param index: elasticsearch index name
+        :param tags: list of tags to add [optional]
         """
         Handler.__init__(self)
 
@@ -77,6 +78,8 @@ class ElasticsearchHandler(Handler):
 
         self.client = client
         self.index = index
+        self.tags = tags
+        self.request_timeout = 30
 
     def emit(self, record):
         """
@@ -94,9 +97,10 @@ class ElasticsearchHandler(Handler):
             msg = json.loads(msg)
             date = datetime.now()
             msg[u'date'] = date
+            msg[u'tags'] = self.tags
             # ex. logstash-2024.03.23
             index = u'%s-%s' % (self.index, date.strftime(u'%Y.%m.%d'))
-            self.client.index(index=index, body=msg)
+            self.client.index(index=index, body=msg, request_timeout=30)
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
