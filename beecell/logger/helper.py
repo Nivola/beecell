@@ -7,7 +7,7 @@ import logging
 from celery.utils.log import ColorFormatter as CeleryColorFormatter
 from celery.utils.term import colored
 
-from beecell.logger.elasticsearch import ElasticsearchHandler
+from beecell.logger.elasticsearch import ElasticsearchHandler, ElasticsearchFormatter
 
 DEBUG2 = -10
 DEBUG3 = -20
@@ -151,7 +151,7 @@ class LoggerHelper(object):
                    u'"message":"%(message)s"}'
         handler = ElasticsearchHandler(client, index=index)
         handler.setLevel(logging_level)
-        handler.setFormatter(logging.Formatter(frmt))
+        handler.setFormatter(ElasticsearchFormatter(frmt))
 
         for logger in loggers:
             logger.addHandler(handler)
