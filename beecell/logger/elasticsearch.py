@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
-
+import threading
 import urllib
 from datetime import datetime
 from logging import Handler, Formatter
@@ -64,12 +64,13 @@ class ElasticsearchFormatter(Formatter):
 
 
 class ElasticsearchHandler(Handler):
-    def __init__(self, client, index=u'log', tags=[]):
+    def __init__(self, client, index=u'log', tags=[], **custom_fields):
         """Initialize the handler.
 
         :param client: elasticsearch.Elasticsearch class instance
         :param index: elasticsearch index name
         :param tags: list of tags to add [optional]
+        :param custom_fields: custom fields as key=value
         """
         Handler.__init__(self)
 
@@ -79,7 +80,29 @@ class ElasticsearchHandler(Handler):
         self.client = client
         self.index = index
         self.tags = tags
+        self.custom_fields = custom_fields
         self.request_timeout = 30
+
+    def _emit(self, record):
+        """
+        Emit a record.
+
+        If a formatter is specified, it is used to format the record.
+        The record is then written to the stream with a trailing newline.  If
+        exception information is present, it is formatted using
+        traceback.print_exception and appended to the stream.  If the stream
+        has an 'encoding' attribute, it is used to determine how to do the
+        output to the stream.
+        """
+        msg = self.format(record)
+        msg = json.loads(msg)
+        date = datetime.now()
+        msg[u'date'] = date
+        msg[u'tags'] = self.tags
+        msg.update(self.custom_fields)
+        # ex. logstash-2024.03.23
+        index = u'%s-%s' % (self.index, date.strftime(u'%Y.%m.%d'))
+        self.client.index(index=index, body=msg, request_timeout=30)
 
     def emit(self, record):
         """
@@ -93,14 +116,8 @@ class ElasticsearchHandler(Handler):
         output to the stream.
         """
         try:
-            msg = self.format(record)
-            msg = json.loads(msg)
-            date = datetime.now()
-            msg[u'date'] = date
-            msg[u'tags'] = self.tags
-            # ex. logstash-2024.03.23
-            index = u'%s-%s' % (self.index, date.strftime(u'%Y.%m.%d'))
-            self.client.index(index=index, body=msg, request_timeout=30)
+            x = threading.Thread(target=self._emit, args=(record,))
+            x.start()
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
