@@ -1,14 +1,16 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
+
 import threading
 import urllib
 from datetime import datetime
 from logging import Handler, Formatter
 from re import escape
 import sys
-import ujson as json
-# import json
+# import ujson as json
+import json
+from beecell.formatter import StringFormatter
 
 from beecell.simple import format_date
 
@@ -28,8 +30,7 @@ class ElasticsearchFormatter(Formatter):
         it is formatted using formatException() and appended to the message.
         """
         message = record.message
-        message = message.replace('\"', "'")
-        record.message = message
+        record.message = u''
 
         if self.usesTime():
             record.asctime = self.formatTime(record, self.datefmt)
@@ -47,19 +48,18 @@ class ElasticsearchFormatter(Formatter):
             # (it's constant anyway)
             if not record.exc_text:
                 record.exc_text = self.formatException(record.exc_info)
+
+        # create main record
+        s = json.loads(s)
+
+        # add exception trace to error message
         if record.exc_text:
-            if s[-1:] != "\n":
-                s = s + "\n"
-            try:
-                s = s + record.exc_text
-            except UnicodeError:
-                # Sometimes filenames have non-ASCII chars, which can lead
-                # to errors when s is Unicode and record.exc_text is str
-                # See issue 8924.
-                # We also use replace for when there are multiple
-                # encodings, e.g. UTF-8 for the filesystem and latin-1
-                # for a script. See issue 13232.
-                s = s + record.exc_text.decode(sys.getfilesystemencoding(), 'replace')
+            message += u' | ' + record.exc_text.replace(u'\n', u' | ')
+
+        # add message to fianle record
+        s[u'message'] = message
+        # StringFormatter().replace(message)
+
         return s
 
 
@@ -95,14 +95,14 @@ class ElasticsearchHandler(Handler):
         output to the stream.
         """
         msg = self.format(record)
-        msg = json.loads(msg)
+        # msg = json.loads(msg)
         date = datetime.now()
         msg[u'date'] = date
         msg[u'tags'] = self.tags
         msg.update(self.custom_fields)
         # ex. logstash-2024.03.23
         index = u'%s-%s' % (self.index, date.strftime(u'%Y.%m.%d'))
-        self.client.index(index=index, body=msg, request_timeout=30)
+        self.client.index(index=index, body=msg, request_timeout=5)
 
     def emit(self, record):
         """
@@ -116,8 +116,7 @@ class ElasticsearchHandler(Handler):
         output to the stream.
         """
         try:
-            x = threading.Thread(target=self._emit, args=(record,))
-            x.start()
+            self._emit(record)
         except (KeyboardInterrupt, SystemExit):
             raise
         except:

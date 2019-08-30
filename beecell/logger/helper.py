@@ -149,8 +149,8 @@ class LoggerHelper(object):
         :param custom_fields: custom fields as key=value
         """
         if frmt is None:
-            frmt = u'{"timestamp":"%(asctime)s", "levelname":"%(levelname)s", "process":"%(process)s", ' \
-                   u'"thread":"%(thread)s", "module":"%(name)s", "func":"%(funcName)s", "lineno":"%(lineno)d",' \
+            frmt = u'{"timestamp":"%(asctime)s","levelname":"%(levelname)s","process":"%(process)s",' \
+                   u'"thread":"%(thread)s","module":"%(name)s","func":"%(funcName)s","lineno":"%(lineno)d",' \
                    u'"message":"%(message)s"}'
         handler = ElasticsearchHandler(client, index=index, tags=tags, **custom_fields)
         handler.setLevel(logging_level)
