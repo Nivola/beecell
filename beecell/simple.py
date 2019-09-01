@@ -616,7 +616,7 @@ def format_date(date, format=None):
     """
 
     if format is None:
-        time_format = u'%Y-%m-%dT%H:%M:%SZ'
+        time_format = u'%Y-%m-%dT%H:%M:%SZ.%f'
     else:
         time_format = format
     res = None
