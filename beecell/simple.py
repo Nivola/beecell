@@ -605,7 +605,7 @@ def parse_date(data_str, format=None):
     return res
 
 
-def format_date(date, format=None):
+def format_date(date, format=None, microsec=False):
     """Format date as rfc3339.
 
     Ref. https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html
@@ -616,7 +616,9 @@ def format_date(date, format=None):
     """
 
     if format is None:
-        time_format = u'%Y-%m-%dT%H:%M:%SZ.%f'
+        time_format = u'%Y-%m-%dT%H:%M:%SZ'
+        if microsec is True:
+            time_format += u'.%f'
     else:
         time_format = format
     res = None
