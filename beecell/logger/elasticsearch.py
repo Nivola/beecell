@@ -102,7 +102,7 @@ class ElasticsearchHandler(Handler):
         msg.update(self.custom_fields)
         # ex. logstash-2024.03.23
         index = u'%s-%s' % (self.index, date.strftime(u'%Y.%m.%d'))
-        self.client.index(index=index, body=msg, request_timeout=5)
+        self.client.index(index=index, body=msg, request_timeout=5, doc_type=u'doc')
 
     def emit(self, record):
         """
