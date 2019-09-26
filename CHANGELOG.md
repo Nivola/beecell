@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.5.0 (.., 2019)
+## Version 1.5.0 (Sep 04, 2019)
 
 * Added ...
     * add scan method to RedisManager
@@ -9,6 +9,7 @@
     * added logger for elasticsearch
 * Fixed ...
 * Integrated ...
+    * requirements update
 * Various bugfixes
 
 ## Version 1.4.0 (May 24, 2019)
