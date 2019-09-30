@@ -432,8 +432,7 @@ def id_gen(length=10, parent_id=None):
     :param parent_id: root to append in the id
     :return: oid generated
     """
-
-    oid = binascii.hexlify(os.urandom(length / 2))
+    oid = binascii.hexlify(os.urandom(int(length / 2)))
     if parent_id is not None:
         oid = u'%s//%s' % (parent_id, oid)
     return oid
