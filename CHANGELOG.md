@@ -1,5 +1,14 @@
 # Changelog
 
+## Version 1.6.0 (Sep , 2019)
+
+* Added ...
+    * add method to check python major version
+    * add method multi_get
+* Fixed ...
+* Integrated ...
+* Various bugfixes
+
 ## Version 1.5.0 (Sep 04, 2019)
 
 * Added ...

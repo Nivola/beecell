@@ -13,6 +13,7 @@ from uuid import uuid4
 from math import ceil
 from cryptography.fernet import Fernet
 import datetime
+from sys import version_info
 
 logger = logging.getLogger(__name__)
 
@@ -658,6 +659,14 @@ def isNotBlank(myString):
     return bool(myString and myString.strip())
 
 
+def is_py3():
+    return version_info.major == 3
+
+
+def is_py2():
+    return version_info.major == 2
+
+
 def obscure_data(data, fields=[u'password', u'pwd', u'passwd', u'pass']):
     """Obscure some fields in data, fields can be password.
 
@@ -665,16 +674,29 @@ def obscure_data(data, fields=[u'password', u'pwd', u'passwd', u'pass']):
     :param fields: list of fields to obfuscate. default=[u'password', u'pwd', u'passwd']
     :return: obscured data
     """
-    if isinstance(data, str) or isinstance(data, unicode):
-        return obscure_string(data, fields)
+    if is_py2():
+        if isinstance(data, str) or isinstance(data, unicode):
+            return obscure_string(data, fields)
 
-    for key, value in data.items():
-        if isinstance(value, dict):
-            obscure_data(value, fields)
-        elif isinstance(value, str) or isinstance(value, unicode):
-            for field in fields:
-                if key.lower().find(field) >= 0:
-                    data[key] = u'xxxxxx'
+        for key, value in data.items():
+            if isinstance(value, dict):
+                obscure_data(value, fields)
+            elif isinstance(value, str) or isinstance(value, unicode):
+                for field in fields:
+                    if key.lower().find(field) >= 0:
+                        data[key] = u'xxxxxx'
+    elif is_py3():
+        if isinstance(data, str) or isinstance(data, bytes):
+            return obscure_string(data, fields)
+
+        for key, value in data.items():
+            if isinstance(value, dict):
+                obscure_data(value, fields)
+            elif isinstance(data, str) or isinstance(data, bytes):
+                for field in fields:
+                    if key.lower().find(field) >= 0:
+                        data[key] = u'xxxxxx'
+
     return data
 
 
@@ -780,3 +802,25 @@ def prefixlength_to_netmask(prefixlength):
     host_bits = 32 - int(prefixlength)
     netmask = inet_ntoa(pack('!I', (1 << 32) - (1 << host_bits)))
     return netmask
+
+
+def multi_get(data, key, separator=u'.'):
+    keys = key.split(separator)
+    res = data
+    for k in keys:
+        if isinstance(res, list):
+            try:
+                res = res[int(k)]
+            except:
+                res = {}
+        else:
+            if res is not None:
+                res = res.get(k, {})
+    if isinstance(res, list):
+        res = res
+        # res = json.dumps(res)
+        # res = u','.join(str(res))
+    if res is None or res == {}:
+        res = u'-'
+
+    return res

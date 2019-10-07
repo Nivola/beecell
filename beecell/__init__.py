@@ -2,7 +2,7 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 
-__version__ = u'1.5.0'
+__version__ = u'1.6.0'
 
 import os.path
 version_file = os.path.join(os.path.abspath(__file__).rstrip(u'__init__.pyc'), u'VERSION')
