@@ -31,7 +31,7 @@ class ConnectionManager(object):
     """Abstract Connection manager
     """
     def __init__(self):
-        self.logger = logging.getLogger(self.__class__.__module__+ u'.' + self.__class__.__name__)
+        self.logger = logging.getLogger(self.__class__.__module__+ '.' + self.__class__.__name__)
 
     def get_session(self):
         """Open a database session.
@@ -65,39 +65,50 @@ class RedisManager(ConnectionManager):
     def __init__(self, redis_uri, timeout=2, max_connections=200):
         ConnectionManager.__init__(self)
         
+        self.is_single = False
+        self.is_cluster = False
+        self.is_sentinel = False
+        self.hosts = []
+        
         # redis cluster
-        if redis_uri.find(u'redis-cluster') >= 0:
-            redis_uri = redis_uri.replace(u'redis-cluster://', u'')
-            host_ports = redis_uri.split(u',')
+        if redis_uri.find('redis-cluster') >= 0:
+            self.is_cluster = True
+            redis_uri = redis_uri.replace('redis-cluster://', '')
+            host_ports = redis_uri.split(',')
             cluster_nodes = []
             for host_port in host_ports:
-                host, port = host_port.split(u':')
-                cluster_nodes.append({u'host': host, u'port': port})
+                host, port = host_port.split(':')
+                cluster_nodes.append({'host': host, 'port': port})
+                self.hosts.append(host_port)
             self.server = RedisCluster(startup_nodes=cluster_nodes, decode_responses=True, socket_timeout=timeout,
                                        retry_on_timeout=False, max_connections=max_connections)
             
         # single redis node
-        elif redis_uri.find(u'redis') >= 0:
+        elif redis_uri.find('redis') >= 0:
+            self.is_single = True            
             pwd = None
-            if redis_uri.find(u'@') > 0:
-                redis_uri = redis_uri.replace(u'redis://:', u'')
-                pwd, redis_uri = redis_uri.split(u'@')
+            if redis_uri.find('@') > 0:
+                redis_uri = redis_uri.replace('redis://:', '')
+                pwd, redis_uri = redis_uri.split('@')
             else:
-                redis_uri = redis_uri.replace(u'redis://', u'')
-            host, port = redis_uri.split(u':')
-            port, db = port.split(u'/')
+                redis_uri = redis_uri.replace('redis://', '')
+            host, port = redis_uri.split(':')
+            self.hosts = [redis_uri]
+            port, db = port.split('/')
             self.server = redis.StrictRedis(host=host, port=int(port), db=int(db), password=pwd,
                                             socket_timeout=timeout, retry_on_timeout=False, connection_pool=None,
                                             max_connections=max_connections)
 
         # single redis node
         else:
-            host, port, db = redis_uri.split(u';')
+            self.is_single = True
+            host, port, db = redis_uri.split(';')
+            self.hosts = ['%s:%s' % (host, port)]
             self.server = redis.StrictRedis(host=host, port=int(port), db=int(db), password=None,
                                             socket_timeout=timeout, retry_on_timeout=False, connection_pool=None,
                                             max_connections=max_connections)
 
-        self.logger.debug(u'Setup redis: %s' % self.server)
+        self.logger.debug('Setup redis: %s' % self.server)
     
     @property
     def conn(self):
@@ -106,6 +117,8 @@ class RedisManager(ConnectionManager):
     def ping(self):
         try:
             res = self.server.ping()
+            if self.is_cluster is True and res == {}:
+                res = {host: False for host in self.hosts}
             self.logger.debug('Ping redis %s: %s' % (self.conn, res))
             return res
         except redis.exceptions.ConnectionError as ex:
@@ -278,7 +291,7 @@ class RedisManager(ConnectionManager):
             sleep(delay)
             retry += 1
 
-        err = u'Key %s not found' % key
+        err = 'Key %s not found' % key
         raise RedisManagerError(err)
 
 
@@ -391,23 +404,23 @@ class SqlManager(ConnectionManager):
         res = {}
         try:
             connection = self.engine.connect()
-            result = connection.execute(u'select table_schema, count(table_name) '
-                                        u'from information_schema.tables group by table_schema')
+            result = connection.execute('select table_schema, count(table_name) '
+                                        'from information_schema.tables group by table_schema')
             for row in result:
                 res[row[0]] = {
-                    u'schema':row[0],
-                    u'tables':row[1]
+                    'schema':row[0],
+                    'tables':row[1]
                 }
             # add empty schema
-            result = connection.execute(u'show databases')
+            result = connection.execute('show databases')
             for row in result:
                 if row[0] not in res.keys():
                     res[row[0]] = {
-                        u'schema':row[0],
-                        u'tables':0
+                        'schema':row[0],
+                        'tables':0
                     }
             res = res.values()
-            self.logger.debug(u'Get schema list: %s' % res)
+            self.logger.debug('Get schema list: %s' % res)
             
         except Exception as ex:
             self.logger.error(ex, exc_info=1)
@@ -424,10 +437,10 @@ class SqlManager(ConnectionManager):
         res = []
         try:
             connection = self.engine.connect()
-            result = connection.execute(u'select Host, User from mysql.user')
+            result = connection.execute('select Host, User from mysql.user')
             for row in result:
-                res.append({u'host':row[0], u'user':row[1]})
-            self.logger.debug(u'Get users list: %s' % res)
+                res.append({'host':row[0], 'user':row[1]})
+            self.logger.debug('Get users list: %s' % res)
             
         except Exception as ex:
             self.logger.error(ex, exc_info=1)
@@ -460,13 +473,13 @@ class SqlManager(ConnectionManager):
             result = connection.execute(sql % schema)
             for row in result:
                 res.append({
-                    u'table_name':row[0], 
-                    u'table_rows':row[1],
-                    u'data_length':row[2],
-                    u'index_length':row[3],
-                    u'auto_increment':row[4]
+                    'table_name':row[0], 
+                    'table_rows':row[1],
+                    'data_length':row[2],
+                    'index_length':row[3],
+                    'auto_increment':row[4]
                 })
-            self.logger.debug(u'Get tables for schema %s: %s' % (schema, res))
+            self.logger.debug('Get tables for schema %s: %s' % (schema, res))
             
         except Exception as ex:
             self.logger.error(ex, exc_info=1)
@@ -488,13 +501,13 @@ class SqlManager(ConnectionManager):
                           autoload_with=self.engine)
         self.logger.debug("Get description for table %s" % (table_name))
         return [{
-            u'name': c.name,
-            u'type': str(c.type),
-            u'default': c.default,
-            u'index': c.index,
-            u'is_nullable': c.nullable,
-            u'is_primary_key': c.primary_key,
-            u'is_unique': c.unique} for c in table_obj.columns]
+            'name': c.name,
+            'type': str(c.type),
+            'default': c.default,
+            'index': c.index,
+            'is_nullable': c.nullable,
+            'is_primary_key': c.primary_key,
+            'is_unique': c.unique} for c in table_obj.columns]
     
     def query_table(self, table_name, where=None, fields="*", rows=20, offset=0):
         """Query a table
@@ -519,7 +532,7 @@ class SqlManager(ConnectionManager):
         query = "%s ORDER BY id LIMIT %s OFFSET %s" % (query, rows, offset)
         
         # get columns name
-        col_names = [c[u'name'] for c in self.get_table_description(table_name)]
+        col_names = [c['name'] for c in self.get_table_description(table_name)]
         
         try:
             # query tables
@@ -703,8 +716,8 @@ class MysqlManager(SqlManager):
             trans.commit()
         except:
             trans.rollback()
-            self.logger.error(u'Error during drop all', exc_info=1)
-            raise SqlManagerError(u'Error during drop all')
+            self.logger.error('Error during drop all', exc_info=1)
+            raise SqlManagerError('Error during drop all')
         finally:
             if connection is not None:
                 connection.close()
@@ -717,15 +730,15 @@ class MysqlManager(SqlManager):
         res = {}
         try:
             connection = self.engine.connect()
-            result = connection.execute(u'select MEMBER_HOST, MEMBER_PORT, MEMBER_STATE '
-                                        u'from performance_schema.replication_group_members;')
+            result = connection.execute('select MEMBER_HOST, MEMBER_PORT, MEMBER_STATE '
+                                        'from performance_schema.replication_group_members;')
             for row in result:
                 res[row[0]] = {
-                    u'MEMBER_HOST': row[0],
-                    u'MEMBER_PORT': row[1],
-                    u'MEMBER_STATE': row[2]
+                    'MEMBER_HOST': row[0],
+                    'MEMBER_PORT': row[1],
+                    'MEMBER_STATE': row[2]
                 }
-            self.logger.debug(u'Get mysql cluster status: %s' % res)
+            self.logger.debug('Get mysql cluster status: %s' % res)
 
         except Exception as ex:
             self.logger.error(ex, exc_info=1)

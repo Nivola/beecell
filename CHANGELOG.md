@@ -6,6 +6,7 @@
     * add method to check python major version
     * add method multi_get
 * Fixed ...
+    * bug on redis-cluster run_cmd that does not return results if connection to redis cluster fails
 * Integrated ...
 * Various bugfixes
 
