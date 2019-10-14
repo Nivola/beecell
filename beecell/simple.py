@@ -713,6 +713,17 @@ def obscure_string(data, fields=[u'password', u'pwd', u'passwd', u'pass']):
     return data
 
 
+def is_string(data):
+    res = False
+    if is_py2():
+        if isinstance(data, str) or isinstance(data, unicode):
+            res = True
+    elif is_py3():
+        if isinstance(data, str) or isinstance(data, bytes):
+            res = True
+    return res
+
+
 def dict_get(data, key, separator=u'.', default=None):
     """Get a value from a dict. Key can be composed to get a field in a complex dict that contains other dict, list and
     string.
