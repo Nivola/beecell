@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
-from struct import pack
 
+from struct import pack
+from six import b
 import ujson as json
 import os, random, subprocess, logging
 from socket import inet_ntoa
@@ -25,11 +26,12 @@ def check_vault(data, key):
     :param key: fernet key
     :return: decrypted key
     """
-    if data.find(u'$BEEHIVE_VAULT;AES128 | ') == 0:
+    data = b(data)
+    if data.find(b('$BEEHIVE_VAULT;AES128 | ')) == 0:
         if key is None:
-            raise Exception(u'Fernet key must be provided')
-        cipher_suite = Fernet(key)
-        data = str(data.replace(u'$BEEHIVE_VAULT;AES128 | ', u''))
+            raise Exception('Fernet key must be provided')        
+        cipher_suite = Fernet(b(key))
+        data = data.replace(b('$BEEHIVE_VAULT;AES128 | '), b(''))
         data = cipher_suite.decrypt(data)
     return data
 
@@ -40,7 +42,7 @@ def is_encrypted(data):
     :param data: data to verify. If encrypted token '$BEEHIVE_VAULT;AES128 | ' is in head of data
     :return: True if data is encrypted, False otherwise
     """
-    if data.find(u'$BEEHIVE_VAULT;AES128 | ') == 0:
+    if data.find('$BEEHIVE_VAULT;AES128 | ') == 0:
         return True
     return False
 
@@ -54,7 +56,7 @@ def encrypt_data(fernet_key, data):
     """
     cipher_suite = Fernet(fernet_key)
     cipher_data = cipher_suite.encrypt(str(data))
-    return u'$BEEHIVE_VAULT;AES128 | %s' % cipher_data
+    return '$BEEHIVE_VAULT;AES128 | %s' % cipher_data
 
 
 def decrypt_data(fernet_key, data):
@@ -64,8 +66,8 @@ def decrypt_data(fernet_key, data):
     :param data: data to decrypt
     :return: decrypted data
     """
-    if data.find(u'$BEEHIVE_VAULT;AES128 | ') == 0:
-        data = data.replace(u'$BEEHIVE_VAULT;AES128 | ', u'')
+    if data.find('$BEEHIVE_VAULT;AES128 | ') == 0:
+        data = data.replace('$BEEHIVE_VAULT;AES128 | ', '')
         cipher_suite = Fernet(fernet_key)
         cipher_data = cipher_suite.decrypt(str(data))
     else:
@@ -108,13 +110,13 @@ def flatten_dict(d, delimiter=":", loopArray=True):
     return dict(items())
 
 
-def getkey(data, key, separator=u'.'):
+def getkey(data, key, separator='.'):
     """Get key value from a complex data (dict with child dict and list) using a string key.
 
     Example:
 
-        a = {u'k1':[{u'k2':..}]}
-        b = getkey(a, u'k1.0.k2')
+        a = {'k1':[{'k2':..}]}
+        b = getkey(a, 'k1.0.k2')
 
     :param data: complex object. Dict with nested list and dict
     :param key: complex key to search. Ex key1.0.key2
@@ -134,7 +136,7 @@ def getkey(data, key, separator=u'.'):
     if isinstance(res, list):
         res = json.dumps(res)
     if res is None or res == {}:
-        res = u'-'
+        res = '-'
 
     return res
 
@@ -144,15 +146,15 @@ def nround(number, decimal=4):
 
     Example: decimal = 2
 
-        3.5643 -> u'3.60'
-        3.5343 -> u'3.55'
+        3.5643 -> '3.60'
+        3.5343 -> '3.55'
 
     :param number: number to round
     :param decimal: number of decimal to keep
     :return: rounded number in UNICODE format
     """
     factor = 10 * decimal
-    convert = u'%.' + str(decimal) + u'f'
+    convert = '%.' + str(decimal) + 'f'
     return convert % (ceil(number * factor) / factor)
 
 
@@ -169,6 +171,18 @@ def merge_dicts(*dict_args):
     return result
 
 
+def merge_list(*list_args):
+    """Given any number of lists, merge into a new list.
+
+    :param *list_args arbitrary number of list (1 to N)
+    :return list
+    """
+    result = []
+    for list_arg in list_args:
+        result.extend(list_arg)
+    return result
+
+
 def random_password(length=10, strong=False):
     """Generate random password
     inspired to: https://pynative.com/python-generate-random-string/
@@ -180,7 +194,7 @@ def random_password(length=10, strong=False):
     chars = string.ascii_uppercase + string.digits + string.ascii_lowercase
 
     if strong is True:
-        punctuation = u'()#_-.'
+        punctuation = '()#_-.'
         randomSource = string.ascii_letters + string.digits + punctuation
         password = random.SystemRandom().choice(string.ascii_lowercase)
         password += random.SystemRandom().choice(string.ascii_uppercase)
@@ -195,9 +209,9 @@ def random_password(length=10, strong=False):
 
         passwordList = list(password)
         random.SystemRandom().shuffle(passwordList)
-        password = u''.join(passwordList)
+        password = ''.join(passwordList)
     else:
-        password = u''
+        password = ''
         for i in range(length):
             password += chars[ord(os.urandom(1)) % len(chars)]
 
@@ -273,7 +287,7 @@ def get_value(value_dict, key, default_value, exception=False, vtype=None):
         try:
             value = value_dict[key]
         except:
-            raise AttribException(u'Attribute %s is missing' % key)
+            raise AttribException('Attribute %s is missing' % key)
     else:
         value = default_value
         if key in value_dict:
@@ -282,7 +296,7 @@ def get_value(value_dict, key, default_value, exception=False, vtype=None):
     # check type
     if vtype is not None:
         if not isinstance(value, vtype):
-            raise AttribException(u'Attribute type is wrong')
+            raise AttribException('Attribute type is wrong')
 
     return value
 
@@ -387,8 +401,8 @@ def import_func(name):
     :param name: name of the function
     :return:
     """
-    components = name.split(u'.')
-    mod = __import__(u'.'.join(components[:-1]), globals(), locals(), [components[-1]], -1)
+    components = name.split('.')
+    mod = __import__('.'.join(components[:-1]), globals(), locals(), [components[-1]], -1)
     func = getattr(mod, components[-1], None)
     return func
 
@@ -435,7 +449,7 @@ def id_gen(length=10, parent_id=None):
     """
     oid = binascii.hexlify(os.urandom(int(length / 2)))
     if parent_id is not None:
-        oid = u'%s//%s' % (parent_id, oid)
+        oid = '%s//%s' % (parent_id, oid)
     return oid
 
 
@@ -455,7 +469,7 @@ def transaction_id_generator(length=20):
 
     chars = string.ascii_letters + string.digits
     random.seed = (os.urandom(1024))
-    return u''.join(random.choice(chars) for i in range(length))
+    return ''.join(random.choice(chars) for i in range(length))
 
 
 def get_remote_ip(request):
@@ -468,9 +482,9 @@ def get_remote_ip(request):
     try:
         try:
             # get remote ip when use nginx as balancer
-            ipaddr = request.environ[u'HTTP_X_REAL_IP']
+            ipaddr = request.environ['HTTP_X_REAL_IP']
         except:
-            ipaddr = request.environ[u'REMOTE_ADDR']
+            ipaddr = request.environ['REMOTE_ADDR']
 
         return ipaddr
     except RuntimeError:
@@ -516,43 +530,43 @@ def parse_redis_uri(uri):
 
     :return:
 
-        {u'type':u'single', u'host':host, u'port':port, u'db':db}
+        {'type':'single', 'host':host, 'port':port, 'db':db}
 
         or
 
-        {u'type':u'cluster', u'nodes':[
-            {u'host': u'10.102.184.121', u'port': u'6379'},
-            {u'host': u'10.102.91.23', u'port': u'6379'}
+        {'type':'cluster', 'nodes':[
+            {'host': '10.102.184.121', 'port': '6379'},
+            {'host': '10.102.91.23', 'port': '6379'}
         ]}
 
     """
 
     # redis cluster
-    if uri.find(u'redis-cluster') >= 0:
-        redis_uri = uri.replace(u'redis-cluster://', u'')
-        host_ports = redis_uri.split(u',')
+    if uri.find('redis-cluster') >= 0:
+        redis_uri = uri.replace('redis-cluster://', '')
+        host_ports = redis_uri.split(',')
         cluster_nodes = []
         for host_port in host_ports:
-            host, port = host_port.split(u':')
-            cluster_nodes.append({u'host': host, u'port': port})
-        res = {u'type': u'cluster', u'nodes': cluster_nodes}
+            host, port = host_port.split(':')
+            cluster_nodes.append({'host': host, 'port': port})
+        res = {'type': 'cluster', 'nodes': cluster_nodes}
 
     # single redis node
-    elif uri.find(u'redis') >= 0:
+    elif uri.find('redis') >= 0:
         pwd = None
-        if uri.find(u'@') > 0:
-            redis_uri = uri.replace(u'redis://:', u'')
-            pwd, redis_uri = redis_uri.split(u'@')
+        if uri.find('@') > 0:
+            redis_uri = uri.replace('redis://:', '')
+            pwd, redis_uri = redis_uri.split('@')
         else:
-            redis_uri = uri.replace(u'redis://', u'')
-        host, port = redis_uri.split(u':')
-        port, db = port.split(u'/')
-        res = {u'type': u'single', u'host': host, u'port': int(port), u'db': int(db), u'pwd': pwd}
+            redis_uri = uri.replace('redis://', '')
+        host, port = redis_uri.split(':')
+        port, db = port.split('/')
+        res = {'type': 'single', 'host': host, 'port': int(port), 'db': int(db), 'pwd': pwd}
 
     # single redis node
     else:
         host, port, db = uri.split(";")
-        res = {u'type': u'single', u'host': host, u'port': int(port), u'db': int(db)}
+        res = {'type': 'single', 'host': host, 'port': int(port), 'db': int(db)}
 
     return res
 
@@ -565,9 +579,9 @@ def str2bool(value):
     """
 
     res = None
-    if value in [u'False', u'false', 0, u'no', False]:
+    if value in ['False', 'false', 0, 'no', False]:
         res = False
-    elif value in [u'True', u'true', 1, u'yes', u'si', True]:
+    elif value in ['True', 'true', 1, 'yes', 'si', True]:
         res = True
     return res
 
@@ -580,10 +594,10 @@ def bool2str(value):
     """
 
     res = None
-    if value in [False, 0, u'no']:
-        res = u'false'
-    elif value in [True, 1, u'yes', u'si']:
-        res = u'true'
+    if value in [False, 0, 'no']:
+        res = 'false'
+    elif value in [True, 1, 'yes', 'si']:
+        res = 'true'
     return res
 
 
@@ -595,7 +609,7 @@ def parse_date(data_str, format=None):
     :return: date
     """
     if format is None:
-        time_format = u'%Y-%m-%dT%H:%M:%SZ'
+        time_format = '%Y-%m-%dT%H:%M:%SZ'
     else:
         time_format = format
 
@@ -616,9 +630,9 @@ def format_date(date, format=None, microsec=False):
     """
 
     if format is None:
-        time_format = u'%Y-%m-%dT%H:%M:%SZ'
+        time_format = '%Y-%m-%dT%H:%M:%SZ'
         if microsec is True:
-            time_format += u'.%f'
+            time_format += '.%f'
     else:
         time_format = format
     res = None
@@ -667,11 +681,11 @@ def is_py2():
     return version_info.major == 2
 
 
-def obscure_data(data, fields=[u'password', u'pwd', u'passwd', u'pass']):
+def obscure_data(data, fields=['password', 'pwd', 'passwd', 'pass']):
     """Obscure some fields in data, fields can be password.
 
     :param data: data to check
-    :param fields: list of fields to obfuscate. default=[u'password', u'pwd', u'passwd']
+    :param fields: list of fields to obfuscate. default=['password', 'pwd', 'passwd']
     :return: obscured data
     """
     if is_py2():
@@ -684,7 +698,7 @@ def obscure_data(data, fields=[u'password', u'pwd', u'passwd', u'pass']):
             elif isinstance(value, str) or isinstance(value, unicode):
                 for field in fields:
                     if key.lower().find(field) >= 0:
-                        data[key] = u'xxxxxx'
+                        data[key] = 'xxxxxx'
     elif is_py3():
         if isinstance(data, str) or isinstance(data, bytes):
             return obscure_string(data, fields)
@@ -695,21 +709,21 @@ def obscure_data(data, fields=[u'password', u'pwd', u'passwd', u'pass']):
             elif isinstance(data, str) or isinstance(data, bytes):
                 for field in fields:
                     if key.lower().find(field) >= 0:
-                        data[key] = u'xxxxxx'
+                        data[key] = 'xxxxxx'
 
     return data
 
 
-def obscure_string(data, fields=[u'password', u'pwd', u'passwd', u'pass']):
+def obscure_string(data, fields=['password', 'pwd', 'passwd', 'pass']):
     """Obscure entire string if it contains passwords.
 
     :param data: data to check
-    :param fields: list of fields to obfuscate. default=[u'password', u'pwd', u'passwd']
+    :param fields: list of fields to obfuscate. default=['password', 'pwd', 'passwd']
     :return: obscured strinng
     """
     for field in fields:
         if data.lower().find(field) >= 0:
-            data = u'xxxxxx'
+            data = 'xxxxxx'
     return data
 
 
@@ -724,7 +738,7 @@ def is_string(data):
     return res
 
 
-def dict_get(data, key, separator=u'.', default=None):
+def dict_get(data, key, separator='.', default=None):
     """Get a value from a dict. Key can be composed to get a field in a complex dict that contains other dict, list and
     string.
 
@@ -751,7 +765,7 @@ def dict_get(data, key, separator=u'.', default=None):
     return res
 
 
-def dict_set(data, key, value, separator=u'.'):
+def dict_set(data, key, value, separator='.'):
     """Set a key in a dict. Key can be a composition of different keys separated by a separator.
 
     :param data: dictionary to query
@@ -777,7 +791,7 @@ def dict_set(data, key, value, separator=u'.'):
     return data
 
 
-def dict_unset(data, key, separator=u'.'):
+def dict_unset(data, key, separator='.'):
     """Unset a key in a dict. Key can be a composition of different keys separated by a separator.
 
     :param data: dictionary to query
@@ -815,7 +829,7 @@ def prefixlength_to_netmask(prefixlength):
     return netmask
 
 
-def multi_get(data, key, separator=u'.'):
+def multi_get(data, key, separator='.'):
     keys = key.split(separator)
     res = data
     for k in keys:
@@ -830,8 +844,8 @@ def multi_get(data, key, separator=u'.'):
     if isinstance(res, list):
         res = res
         # res = json.dumps(res)
-        # res = u','.join(str(res))
+        # res = ','.join(str(res))
     if res is None or res == {}:
-        res = u'-'
+        res = '-'
 
     return res
