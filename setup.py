@@ -85,7 +85,7 @@ if __name__ == '__main__':
             "PrettyTable==0.7.2",
             "paramiko==2.4.2",
             "httplib2==0.12.0",
-            "urllib3==1.24.1",
+            "urllib3==1.24.2",
             "pymongo==3.7.2",
             "pika==0.13.0",
             "flask-login",
