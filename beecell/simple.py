@@ -33,6 +33,7 @@ def check_vault(data, key):
         cipher_suite = Fernet(b(key))
         data = data.replace(b('$BEEHIVE_VAULT;AES128 | '), b(''))
         data = cipher_suite.decrypt(data)
+    data = data.decode('utf-8')
     return data
 
 
