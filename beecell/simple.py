@@ -48,15 +48,23 @@ def is_encrypted(data):
     return False
 
 
+def generate_fernet_key():
+    """Generate fernet key
+
+    :return: fernet key
+    """
+    return Fernet.generate_key()
+
+
 def encrypt_data(fernet_key, data):
     """Encrypt data using a fernet key and a symmetric algorithm
 
-    :param fernet_key: fernet key
+    :param fernet_key: fernet key. To generate use: Fernet.generate_key()
     :param data: data to encrypt
     :return: encrypted data
     """
     cipher_suite = Fernet(fernet_key)
-    cipher_data = cipher_suite.encrypt(str(data))
+    cipher_data = cipher_suite.encrypt(b(data))
     return '$BEEHIVE_VAULT;AES128 | %s' % cipher_data
 
 
@@ -70,7 +78,7 @@ def decrypt_data(fernet_key, data):
     if data.find('$BEEHIVE_VAULT;AES128 | ') == 0:
         data = data.replace('$BEEHIVE_VAULT;AES128 | ', '')
         cipher_suite = Fernet(fernet_key)
-        cipher_data = cipher_suite.decrypt(str(data))
+        cipher_data = cipher_suite.decrypt(b(data))
     else:
         cipher_data = data
     return cipher_data
