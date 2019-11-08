@@ -26,7 +26,7 @@ class install(_install):
 if __name__ == '__main__':
     setup(
         name='beecell',
-        version='1.3',
+        version='1.6',
         description='Utility',
         long_description='Utility',
         author='CSI Piemonte',
@@ -64,7 +64,7 @@ if __name__ == '__main__':
             '__init__'
         ],
         classifiers=[
-            'Development Status :: 1.3',
+            'Development Status :: 1.6',
             'Programming Language :: Python'
         ],
         entry_points={},

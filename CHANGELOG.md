@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.6.0 (Sep , 2019)
+## Version 1.6.0 (Niv 08 , 2019)
 
 * Added ...
     * add method to check python major version
