@@ -3,7 +3,7 @@
 # (C) Copyright 2018-2019 CSI-Piemonte
 
 from struct import pack
-from six import b
+from six import b, PY2
 import ujson as json
 import os, random, subprocess, logging
 from socket import inet_ntoa
@@ -26,6 +26,9 @@ def check_vault(data, key):
     :param key: fernet key
     :return: decrypted key
     """
+    if PY2:
+        data = str(data)
+
     data = b(data)
     if data.find(b('$BEEHIVE_VAULT;AES128 | ')) == 0:
         if key is None:
@@ -63,7 +66,10 @@ def encrypt_data(fernet_key, data):
     :param data: data to encrypt
     :return: encrypted data
     """
-    cipher_suite = Fernet(fernet_key)
+    if PY2:
+        data = str(data)
+
+    cipher_suite = Fernet(b(fernet_key))
     cipher_data = cipher_suite.encrypt(b(data))
     return '$BEEHIVE_VAULT;AES128 | %s' % cipher_data
 
@@ -75,9 +81,15 @@ def decrypt_data(fernet_key, data):
     :param data: data to decrypt
     :return: decrypted data
     """
+    if PY2:
+        data = str(data)
+
     if data.find('$BEEHIVE_VAULT;AES128 | ') == 0:
         data = data.replace('$BEEHIVE_VAULT;AES128 | ', '')
-        cipher_suite = Fernet(fernet_key)
+        logger.warning(type(fernet_key))
+        logger.warning(b(fernet_key))
+        logger.warning(type(data))
+        cipher_suite = Fernet(b(fernet_key))
         cipher_data = cipher_suite.decrypt(b(data))
     else:
         cipher_data = data
