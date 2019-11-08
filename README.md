@@ -36,7 +36,7 @@ $ source venv/bin/activate
 ## Installing
 
 ```
-$ pip install git+https://github.com/Nivola/nivola.git
+$ pip install git+https://github.com/Nivola/beecell.git
 ```
 
 ## Getting Started

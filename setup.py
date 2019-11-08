@@ -93,7 +93,6 @@ if __name__ == '__main__':
             "WTForms==2.2.1",
             "Flask-WTF==0.14.2",
             "celery==4.2.2",
-            "springpython==1.3.0.RC1",
             "uwsgidecorators==1.1.0",
             "flex==6.14.0",
             "marshmallow==2.19.5",
