@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.6.0 (Niv 08 , 2019)
+## Version 1.6.0 (Nov 08 , 2019)
 
 * Added ...
     * add method to check python major version
@@ -8,6 +8,7 @@
     * add method is_string
 * Fixed ...
     * bug on redis-cluster run_cmd that does not return results if connection to redis cluster fails
+    * changed timeout in ParamikoShell from 1.0 to 10.0 seconds
 * Integrated ...
 * Various bugfixes
 

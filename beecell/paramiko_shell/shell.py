@@ -29,7 +29,7 @@ class ParamikoShell(object):
         self.client = SSHClient()
         self.client.set_missing_host_key_policy(MissingHostKeyPolicy())
 
-        self.timeout = 1.0
+        self.timeout = 10.0
         self.host_user = user # user used to connect in the host
         self.keepalive = 30
 
