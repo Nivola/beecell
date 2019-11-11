@@ -161,7 +161,7 @@ class LdapAuth(AbstractAuth):
         
         attrib = {}
         groups = []
-        for k, v in res.iteritems():
+        for k, v in res.items():
             if k == 'memberOf':
                 # memberOf ['CN=reader,DC=clskdom,DC=lab', 'CN=admin,DC=clskdom,DC=lab']
                 groups = [i.lstrip('CN=').split(',')[0] for i in v]

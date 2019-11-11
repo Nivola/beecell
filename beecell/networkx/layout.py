@@ -32,10 +32,9 @@ class GridLayout(object):
         self._cols = width / node_width
         w = 0.5 * node_width
         h = 0.5 * node_height
-        print self._rows, self._cols, w, h
         
-        for i in xrange(0, self._rows):
-            for j in xrange(0, self._cols):
+        for i in range(0, self._rows):
+            for j in range(0, self._cols):
                 cw = int(round(w*(1+2*j)))
                 ch = int(round(h*(1+2*i)))
                 self._empty_cells.append((cw, ch))
@@ -50,8 +49,8 @@ class GridLayout(object):
         res = ['<svg width="%s" height="%s"' % (self._width, self._height),
                'xmlns="http://www.w3.org/2000/svg" ',  
                'style="fill:white;stroke:black;stroke-width:1;">']
-        for i in xrange(0, self._rows):
-            for j in xrange(0, self._cols):
+        for i in range(0, self._rows):
+            for j in range(0, self._cols):
                 res.append('<rect x="%s" y="%s" width="%s" height="%s" />' % (w*j, h*i, w, h))
         
         # print nodes
@@ -60,7 +59,7 @@ class GridLayout(object):
         ix = -0.5 * iw
         iy = -0.5 * ih
         
-        for k, v in self._nodes_pos.iteritems():
+        for k, v in self._nodes_pos.items():
             oid = k
             x = v[0]
             y = v[1]

@@ -14,7 +14,7 @@ def group(rows, pos, maxpos):
                 vals[row[pos]].append(row)
             except:
                 vals[row[pos]] = [row]
-        for key, item in vals.iteritems():
+        for key, item in vals.items():
             vals[key] = group(item, pos+1, maxpos)
     
         return vals
@@ -30,7 +30,7 @@ def compact(vals):
         return vals.values()
     else:
         res = []
-        for key, item in vals.iteritems():
+        for key, item in vals.items():
             data = compact(item)
             if type(data) is not list:
                 res.append(data)

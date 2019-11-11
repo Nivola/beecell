@@ -473,11 +473,11 @@ class SqlManager(ConnectionManager):
             result = connection.execute(sql % schema)
             for row in result:
                 res.append({
-                    'table_name':row[0], 
-                    'table_rows':row[1],
-                    'data_length':row[2],
-                    'index_length':row[3],
-                    'auto_increment':row[4]
+                    'table_name': row[0],
+                    'table_rows': row[1],
+                    'data_length': row[2],
+                    'index_length': row[3],
+                    'auto_increment': row[4]
                 })
             self.logger.debug('Get tables for schema %s: %s' % (schema, res))
             
@@ -566,7 +566,7 @@ class SqlManager(ConnectionManager):
                 conn = self.engine.connect()
                 return conn
             raise SqlManagerError("There isn't active db session to use. Session can not be opened.")
-        except exc.DBAPIError, e:
+        except exc.DBAPIError as e:
             # an exception is raised, Connection is invalidated. Connection 
             # pool will be refresh
             if e.connection_invalidated:
@@ -589,7 +589,7 @@ class SqlManager(ConnectionManager):
                 self.logger1.debug("Open session: %s" % (session))
                 return session
             raise SqlManagerError("There isn't active db session to use. Session can not be opened.")
-        except (exc.DBAPIError, Exception), e:
+        except (exc.DBAPIError, Exception) as e:
             self.logger1.error(e)
             # an exception is raised, Connection is invalidated. Connection 
             # pool will be refresh

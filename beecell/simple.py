@@ -3,7 +3,7 @@
 # (C) Copyright 2018-2019 CSI-Piemonte
 
 from struct import pack
-from six import b, PY2
+from six import b, u, PY2
 import ujson as json
 import os, random, subprocess, logging
 from socket import inet_ntoa
@@ -116,9 +116,9 @@ def flatten_dict(d, delimiter=":", loopArray=True):
                         if isinstance(itemArray, dict):
                             for subkey, subvalue in flatten_dict(itemArray, delimiter=delimiter,
                                                                  loopArray=loopArray).items():
-                                yield key + delimiter + str(x) + delimiter + subkey, subvalue
+                                yield key + delimiter + b(x) + delimiter + subkey, subvalue
                         else:
-                            yield key + delimiter + str(x), itemArray
+                            yield key + delimiter + b(x), itemArray
                         x += 1
                 else:
                     res = []
@@ -175,7 +175,7 @@ def nround(number, decimal=4):
     :return: rounded number in UNICODE format
     """
     factor = 10 * decimal
-    convert = '%.' + str(decimal) + 'f'
+    convert = '%.' + b(decimal) + 'f'
     return convert % (ceil(number * factor) / factor)
 
 
@@ -457,7 +457,7 @@ def get_member_class(args):
 
 def get_class_name(classref):
     """"""
-    name = str(classref).split('.')[-1].rstrip("'>").lower()
+    name = b(classref).split('.')[-1].rstrip("'>").lower()
     return "%s.%s" % (classref.__module__, name)
 
 
@@ -471,7 +471,7 @@ def id_gen(length=10, parent_id=None):
     oid = binascii.hexlify(os.urandom(int(length / 2)))
     if parent_id is not None:
         oid = '%s//%s' % (parent_id, oid)
-    return oid
+    return str(oid)
 
 
 def token_gen(args=None):
@@ -864,8 +864,6 @@ def multi_get(data, key, separator='.'):
                 res = res.get(k, {})
     if isinstance(res, list):
         res = res
-        # res = json.dumps(res)
-        # res = ','.join(str(res))
     if res is None or res == {}:
         res = '-'
 
