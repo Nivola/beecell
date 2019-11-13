@@ -3,7 +3,7 @@
 # (C) Copyright 2018-2019 CSI-Piemonte
 
 from struct import pack
-from six import b, u, PY2
+from six import b, u, PY2, PY3
 import ujson as json
 import os, random, subprocess, logging
 from socket import inet_ntoa
@@ -116,9 +116,9 @@ def flatten_dict(d, delimiter=":", loopArray=True):
                         if isinstance(itemArray, dict):
                             for subkey, subvalue in flatten_dict(itemArray, delimiter=delimiter,
                                                                  loopArray=loopArray).items():
-                                yield key + delimiter + b(x) + delimiter + subkey, subvalue
+                                yield key + delimiter + str(x) + delimiter + subkey, subvalue
                         else:
-                            yield key + delimiter + b(x), itemArray
+                            yield key + delimiter + str(x), itemArray
                         x += 1
                 else:
                     res = []
@@ -266,7 +266,8 @@ def str2uni(value):
     return value
 
 
-class AttribException(Exception): pass
+class AttribException(Exception):
+    pass
 
 
 def get_attrib(value_dict, key, default_value, exception=False):
@@ -457,7 +458,7 @@ def get_member_class(args):
 
 def get_class_name(classref):
     """"""
-    name = b(classref).split('.')[-1].rstrip("'>").lower()
+    name = str(classref).split('.')[-1].rstrip("'>").lower()
     return "%s.%s" % (classref.__module__, name)
 
 
@@ -694,12 +695,12 @@ def isNotBlank(myString):
     return bool(myString and myString.strip())
 
 
-def is_py3():
-    return version_info.major == 3
-
-
-def is_py2():
-    return version_info.major == 2
+# def is_py3():
+#     return version_info.major == 3
+#
+#
+# def is_py2():
+#     return version_info.major == 2
 
 
 def obscure_data(data, fields=['password', 'pwd', 'passwd', 'pass']):
@@ -709,7 +710,8 @@ def obscure_data(data, fields=['password', 'pwd', 'passwd', 'pass']):
     :param fields: list of fields to obfuscate. default=['password', 'pwd', 'passwd']
     :return: obscured data
     """
-    if is_py2():
+    if PY2:
+    # if is_py2():
         if isinstance(data, str) or isinstance(data, unicode):
             return obscure_string(data, fields)
 
@@ -720,7 +722,8 @@ def obscure_data(data, fields=['password', 'pwd', 'passwd', 'pass']):
                 for field in fields:
                     if key.lower().find(field) >= 0:
                         data[key] = 'xxxxxx'
-    elif is_py3():
+    elif PY3:
+    # elif is_py3():
         if isinstance(data, str) or isinstance(data, bytes):
             return obscure_string(data, fields)
 
@@ -750,10 +753,12 @@ def obscure_string(data, fields=['password', 'pwd', 'passwd', 'pass']):
 
 def is_string(data):
     res = False
-    if is_py2():
+    if PY2:
+    # if is_py2():
         if isinstance(data, str) or isinstance(data, unicode):
             res = True
-    elif is_py3():
+    elif PY3:
+    # elif is_py3():
         if isinstance(data, str) or isinstance(data, bytes):
             res = True
     return res

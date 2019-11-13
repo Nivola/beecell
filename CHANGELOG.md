@@ -3,7 +3,6 @@
 ## Version 1.6.0 (Nov 08 , 2019)
 
 * Added ...
-    * add method to check python major version
     * add method multi_get
     * add method is_string
 * Fixed ...
