@@ -37,6 +37,7 @@ if __name__ == '__main__':
         packages=[
             'beecell.amqp',
             'beecell.auth',
+            'beecell.cache',
             'beecell.cement_cmd',
             'beecell.db',
             'beecell.flask',
@@ -61,6 +62,8 @@ if __name__ == '__main__':
             'beecell.perf',
             'beecell.sendmail',
             'beecell.remote',
+            'beecell.formatter',
+            'beecell.network',
             '__init__'
         ],
         classifiers=[
