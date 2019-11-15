@@ -40,6 +40,7 @@ if __name__ == '__main__':
             'beecell.cache',
             'beecell.cement_cmd',
             'beecell.db',
+            'beecell.db.mysql',
             'beecell.flask',
             'beecell.flask.login',
             'beecell.flask.login.bootstrap',
@@ -48,6 +49,7 @@ if __name__ == '__main__':
             'beecell.networkx',
             'beecell.paramiko_shell',
             'beecell.server',
+            'beecell.server.uwsgi_server',
             'beecell.sphinx',
             'beecell.sqlalchemy',
             'beecell.swagger',
@@ -64,7 +66,7 @@ if __name__ == '__main__':
             'beecell.remote',
             'beecell.formatter',
             'beecell.network',
-            '__init__'
+            'beecell.__init__'
         ],
         classifiers=[
             'Development Status :: 1.6',
