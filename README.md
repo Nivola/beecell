@@ -43,7 +43,7 @@ $ pip install git+https://github.com/Nivola/beecell.git
 Instructions useful to deploy software on a simple environment (local machine or simple server configuration infrastructure).
 
 ## Running the tests
-Results of vulnerability assessment and/or penetration test. If known explain how to run the automated tests for this system
+Results of vulnerability assessment and/or penetration test.
 
 - Activate virtual env
 
