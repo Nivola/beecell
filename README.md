@@ -39,9 +39,6 @@ $ source venv/bin/activate
 $ pip install git+https://github.com/Nivola/beecell.git
 ```
 
-## Getting Started
-Instructions useful to deploy software on a simple environment (local machine or simple server configuration infrastructure).
-
 ## Running the tests
 Results of vulnerability assessment and/or penetration test.
 
