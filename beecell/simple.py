@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
-
+import inspect
 from struct import pack
 from six import b, u, PY2, PY3
 import ujson as json
@@ -665,11 +665,13 @@ def format_date(date, format=None, microsec=False):
 
 def compat(data):
     if isinstance(data, list):
-        for item in data:
-            item = compat(item)
-    if isinstance(data, dict):
+        data = '[..]'
+        # data = map(lambda x: compat(x), data)
+    elif isinstance(data, dict):
         for k, v in data.items():
             data[k] = compat(v)
+    elif inspect.isclass(data) is True:
+        data = str(data)
     else:
         data = truncate(data, 30)
     return data
