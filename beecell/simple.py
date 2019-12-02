@@ -215,7 +215,7 @@ def random_password(length=10, strong=False):
     chars = string.ascii_uppercase + string.digits + string.ascii_lowercase
 
     if strong is True:
-        punctuation = '()#_-.'
+        punctuation = '()_-.'
         randomSource = string.ascii_letters + string.digits + punctuation
         password = random.SystemRandom().choice(string.ascii_lowercase)
         password += random.SystemRandom().choice(string.ascii_uppercase)
