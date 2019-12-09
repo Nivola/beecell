@@ -5,7 +5,7 @@
 from paramiko.client import SSHClient, MissingHostKeyPolicy
 from paramiko import RSAKey
 from logging import getLogger
-import StringIO
+from six import StringIO
 import fcntl
 import termios
 import struct
@@ -34,7 +34,7 @@ class ParamikoShell(object):
         self.keepalive = 30
 
         if keystring is not None:
-            keystring_io = StringIO.StringIO(keystring)
+            keystring_io = StringIO(keystring.decode('utf-8'))
             pkey = RSAKey.from_private_key(keystring_io)
             keystring_io.close()
         else:
@@ -50,7 +50,6 @@ class ParamikoShell(object):
             if self.post_logout is not None:
                 self.post_logout(status=str(ex))
             raise
-        # timeout=None, #allow_agent=True,
 
     def terminal_size(self):
         th, tw, hp, wp = struct.unpack('HHHH', fcntl.ioctl(0, termios.TIOCGWINSZ, struct.pack(u'HHHH', 0, 0, 0, 0)))

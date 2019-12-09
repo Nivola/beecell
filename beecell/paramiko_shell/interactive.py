@@ -8,6 +8,8 @@ import sys
 from gevent import spawn, joinall, sleep, socket, queue
 from gevent.os import make_nonblocking, nb_read, nb_write
 import re
+from six import b, u
+
 
 logger = getLogger(__name__)
 
@@ -28,7 +30,7 @@ def interactive_shell(chan, log=False, trace=False, trace_func=None):
 
 
 def posix_shell(chan, log, trace, trace_func):
-    logger.info(u'Run shell to ssh channel: %s' % chan)
+    logger.info('Run shell to ssh channel: %s' % chan)
     old_stdin = termios.tcgetattr(sys.stdin.fileno())
     tty.setraw(sys.stdin.fileno())
     tty.setcbreak(sys.stdin.fileno())
@@ -37,21 +39,21 @@ def posix_shell(chan, log, trace, trace_func):
     make_nonblocking(sys.stdin.fileno())
 
     KEYS = {
-        u'arrow-left': 8,
-        u'arrow-right': 7,
-        u'del': [27, 91, 75],
-        u'move': [27, 91, 67],
-        u'ctrl': [[27, 91, 49, 80], [27, 91, 50, 80], [27, 91, 51, 80], [27, 91, 52, 80], [27, 91, 53, 80],
+        'arrow-left': 8,
+        'arrow-right': 7,
+        'del': [27, 91, 75],
+        'move': [27, 91, 67],
+        'ctrl': [[27, 91, 49, 80], [27, 91, 50, 80], [27, 91, 51, 80], [27, 91, 52, 80], [27, 91, 53, 80],
                   [27, 91, 54, 80]]
 
     }
 
     def trace_cmd(cmd):
         if trace is True:
-            # logger.debug(u'Execute ssh command: %s' % cmd)
+            # logger.debug('Execute ssh command: %s' % cmd)
             # import string
             # filtered_string = filter(lambda x: x in string.printable, cmd)
-            logger.debug({u'cmd': cmd})
+            logger.debug({'cmd': cmd})
             if trace_func is not None and len(cmd) > 0:
                trace_func(status=None, cmd=cmd, elapsed=0)
 
@@ -61,27 +63,27 @@ def posix_shell(chan, log, trace, trace_func):
         :param data
         :return:
         """
-        # logger.warn(u'%s - %s' % (data, [chr(i) for i in data]))
+        # logger.warn('%s - %s' % (data, [chr(i) for i in data]))
         res = []
         pos = 0
         data_pos = 0
         max_data_pos = len(data)
         while data_pos < max_data_pos:
             item = data[data_pos] # (ord, chr)
-            if item == KEYS[u'arrow-left']:
+            if item == KEYS['arrow-left']:
                 if pos > 0:
                     pos -= 1
                 data_pos += 1
-            elif item == KEYS[u'arrow-right']:
+            elif item == KEYS['arrow-right']:
                 pos += 1
                 data_pos += 1
-            elif data[data_pos:data_pos+4] in KEYS[u'ctrl']:
+            elif data[data_pos:data_pos+4] in KEYS['ctrl']:
                 res = res[0:pos]
                 data_pos += 4
-            elif data[data_pos:data_pos+3] == KEYS[u'del']:
+            elif data[data_pos:data_pos+3] == KEYS['del']:
                 res = res[0:pos]
                 data_pos += 3
-            elif data[data_pos:data_pos+3] == KEYS[u'move']:
+            elif data[data_pos:data_pos+3] == KEYS['move']:
                 pos += 1
                 data_pos += 3
             elif 31 < item < 127:
@@ -95,21 +97,21 @@ def posix_shell(chan, log, trace, trace_func):
                 res = []
                 pos = 0
                 data_pos += 1
-        res = u''.join(res)
+        res = ''.join(res)
         # logger.debug(res)
         return res
 
     def write_output():
-        cmd = u''
+        cmd = ''
         while chan.closed is False:
             if chan is not None:
                 try:
                     if chan.recv_ready():
                         x = chan.recv(4096)
                         if log is True:
-                            logger.info(u'OUT: %s' % x)
+                            logger.info('OUT: %s' % x)
                         nb_write(sys.stdout.fileno(), x)
-                        cmd += x
+                        cmd += str(x)
                         # cmd = filter(lambda x: x in string.printable, cmd)
 
                         # logger.warn(cmd)
@@ -118,18 +120,19 @@ def posix_shell(chan, log, trace, trace_func):
                             cmd = cmd[-10:]
                             m.group(0)
                             data = m.group(0)
-                            data = unicode(data.replace(u'# ', u'').replace(u'$ ', u'').rstrip())
+                            data = u(data.replace('# ', '').replace('$ ', '').rstrip())
+                            # data = unicode(data.replace('# ', '').replace('$ ', '').rstrip())
                             data = string_parser([ord(i) for i in data])
                             if len(data) > 0:
                                 trace_cmd(data)
                 except socket.timeout:
-                    logger.error(u'', exc_info=1)
+                    logger.error('', exc_info=1)
                 except Exception:
-                    logger.error(u'', exc_info=1)
+                    logger.error('', exc_info=1)
                 sleep(0.01)
 
     def get_input():
-        cmd = u''
+        cmd = ''
         cmd_ord = []
         while chan.closed is False:
             try:
@@ -138,13 +141,13 @@ def posix_shell(chan, log, trace, trace_func):
                 cmd_ord.append(ordx)
 
                 if log is True:
-                    logger.debug(u'IN : %s' % x)
+                    logger.debug('IN : %s' % x)
                 if chan.send_ready():
                     chan.send(x)
             except socket.timeout:
-                logger.error(u'', exc_info=1)
+                logger.error('', exc_info=1)
             except Exception:
-                logger.error(u'', exc_info=1)
+                logger.error('', exc_info=1)
                 break
             sleep(0.01)
 
@@ -154,8 +157,8 @@ def posix_shell(chan, log, trace, trace_func):
     ])
 
     termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old_stdin)
-    nb_write(sys.stdout.fileno(), u'\n')
-    logger.info(u'Close shell to ssh channel: %s' % chan)
+    nb_write(sys.stdout.fileno(), '\n')
+    logger.info('Close shell to ssh channel: %s' % chan)
 
 
 def windows_shell(chan, log, trace, trace_func):

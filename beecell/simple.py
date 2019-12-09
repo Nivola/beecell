@@ -2,6 +2,7 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 import inspect
+from copy import deepcopy
 from struct import pack
 from six import b, u, PY2, PY3
 import ujson as json
@@ -664,16 +665,22 @@ def format_date(date, format=None, microsec=False):
 
 
 def compat(data):
-    if isinstance(data, list):
-        data = '[..]'
-        # data = map(lambda x: compat(x), data)
-    elif isinstance(data, dict):
-        for k, v in data.items():
-            data[k] = compat(v)
-    elif inspect.isclass(data) is True:
-        data = str(data)
-    else:
-        data = truncate(data, 30)
+    try:
+        if isinstance(data, list):
+            data = '[..]'
+            # data = map(lambda x: compat(x), data)
+        elif isinstance(data, dict):
+            newdata = {}
+            for k, v in data.items():
+                newdata[k] = compat(v)
+            data = newdata
+        elif inspect.isclass(data) is True:
+            data = str(data)
+        else:
+            data = truncate(data, 30)
+    except:
+        logger.warning('compat data %s error' % data, exc_info=1)
+        data = None
     return data
 
 
