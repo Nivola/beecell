@@ -76,7 +76,7 @@ if __name__ == '__main__':
         data_files=[],
         package_data={},
         install_requires=[
-            "SQLAlchemy==1.3.7",
+            "SQLAlchemy==1.3.11",
             "redis-py-cluster==2.0.0",
             "Flask==1.1.1",
             "anyjson==0.3.3",
