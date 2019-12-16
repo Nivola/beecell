@@ -318,7 +318,7 @@ class SqlManager(ConnectionManager):
         self.logger1 = logging.getLogger('sqlalchemy.pool')
         
         self.id = sql_id
-        self.db_uri = db_uri.decode('utf-8')
+        self.db_uri = db_uri
         self.connect_timeout = connect_timeout
         
         # engine
