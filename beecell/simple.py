@@ -2,7 +2,7 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 import inspect
-from copy import deepcopy
+import yaml
 from struct import pack
 from six import b, u, PY2, PY3
 import ujson as json
@@ -15,7 +15,6 @@ from uuid import uuid4
 from math import ceil
 from cryptography.fernet import Fernet
 import datetime
-from sys import version_info
 
 logger = logging.getLogger(__name__)
 
@@ -882,3 +881,22 @@ def multi_get(data, key, separator='.'):
         res = '-'
 
     return res
+
+
+def read_file(file_name):
+    """Load dict from a json or yaml formatted file.
+
+    :param file_cname: file name
+    :return: data
+    """
+    f = open(file_name, u'r')
+    data = f.read()
+    extension = file_name[-4:].lower()
+    if extension == 'json':
+        data = json.loads(data)
+    elif extension == 'yaml':
+        data = yaml.full_load(data)
+    elif extension == '.yml':
+        data = yaml.full_load(data)
+    f.close()
+    return data

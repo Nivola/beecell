@@ -194,7 +194,16 @@ class RedisManager(ConnectionManager):
             res = self.server.delete(*keys)
             return res
         return None
-    
+
+    def delete_key(self, key):
+        """Delete keys by pattern in current db.
+
+        :param key: redis key
+        :return: None
+        """
+        res = self.server.delete(key)
+        return None
+
     def query(self, keys, ttl=False):
         """Query key list value.
         
