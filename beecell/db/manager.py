@@ -227,7 +227,7 @@ class RedisManager(ConnectionManager):
                 data[kname] = get_value(self.server.hgetall(kname), kttl)
             elif ktype == 'list':
                 items = []
-                for index in xrange(0, self.server.llen(kname)):
+                for index in range(0, self.server.llen(kname)):
                     items.append(self.server.lindex(kname, index))
                 data[kname] = get_value(items, kttl)
             elif ktype == 'string':
@@ -316,7 +316,7 @@ class SqlManager(ConnectionManager):
         self.logger1 = logging.getLogger('sqlalchemy.pool')
         
         self.id = sql_id
-        self.db_uri = db_uri
+        self.db_uri = db_uri.decode('utf-8')
         self.connect_timeout = connect_timeout
         
         # engine
