@@ -562,8 +562,6 @@ def parse_redis_uri(uri):
         ]}
 
     """
-    uri = uri.decode('utf-8')
-
     # redis cluster
     if uri.find('redis-cluster') >= 0:
         redis_uri = uri.replace('redis-cluster://', '')

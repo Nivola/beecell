@@ -70,7 +70,7 @@ class RedisManager(ConnectionManager):
         self.is_sentinel = False
         self.hosts = []
 
-        redis_uri = redis_uri.decode('utf-8')
+        # redis_uri = redis_uri.decode('utf-8')
 
         # redis cluster
         if redis_uri.find('redis-cluster') >= 0:
