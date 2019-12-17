@@ -4,7 +4,7 @@
 import inspect
 import yaml
 from struct import pack
-from six import b, u, PY2, PY3
+from six import b, u, PY2, PY3, ensure_text
 import ujson as json
 import os, random, subprocess, logging
 from socket import inet_ntoa
@@ -256,13 +256,12 @@ def run_command(command):
 
 
 def str2uni(value):
-    """Converts a string in a UNICODE format.
+    """Convert in unicode (py2) or string (py3)
 
     :param value: string to convert
-    :return: UNICODE string
+    :return: unicode (py2) or string (py3)
     """
-    if type(value) is str:
-        return value.decode('UTF8')
+    value = ensure_text(value)
     return value
 
 
@@ -472,7 +471,7 @@ def id_gen(length=10, parent_id=None):
     oid = binascii.hexlify(os.urandom(int(length / 2)))
     if parent_id is not None:
         oid = '%s//%s' % (parent_id, oid)
-    return str(oid)
+    return ensure_text(oid)
 
 
 def token_gen(args=None):

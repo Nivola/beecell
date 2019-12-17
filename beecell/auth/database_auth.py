@@ -26,7 +26,6 @@ class DatabaseAuth(AbstractAuth):
         return "<DatabaseAuth provider:'%s', manager:'%s', user_class='%s'>" % (
             self.auth_manager_class, self.conn_manager.engine, self.user_class)
 
-    @watch
     def login(self, username, password, *args, **kvargs):
         """Login a user
 

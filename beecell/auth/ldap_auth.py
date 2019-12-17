@@ -55,7 +55,6 @@ class LdapAuth(AbstractAuth):
     def __str__(self):
         return u'<LdapAuth host:%s, port:%s, ssl:%s, dn:%s>' % (self.host, self.port, self.ssl, self.dn)
 
-    @watch
     def connect(self):
         """Open connection to Ldap."""
         if self.ssl:
@@ -90,7 +89,6 @@ class LdapAuth(AbstractAuth):
         self.conn.set_option(ldap.OPT_X_TLS_DEMAND, True)
         self.logger.debug(u'Open secure connection to %s' % conn_uri)
 
-    @watch
     def close(self):
         """Close connection to Ldap."""
         if self.conn:
@@ -125,7 +123,6 @@ class LdapAuth(AbstractAuth):
         else:
             raise AuthError(u'', u'No connection to server', code=0)
 
-    @watch
     def login1(self, username, password):
         """Login a user
 
@@ -182,7 +179,6 @@ class LdapAuth(AbstractAuth):
 
         return user
 
-    @watch
     def authenticate(self, username, password):
         """Authenticate a user
 
@@ -212,7 +208,6 @@ class LdapAuth(AbstractAuth):
 
         return True
 
-    @watch
     def search_user(self, username, search_filter):
         """Search a user
 
@@ -231,7 +226,6 @@ class LdapAuth(AbstractAuth):
 
         return user
 
-    @watch
     def search_users(self, search_filter, fields=[u'cn', u'mail']):
         """Search users
 
@@ -257,7 +251,6 @@ class LdapAuth(AbstractAuth):
 
         return resp
 
-    @watch
     def verify_user(self, username, password):
         """Search a user
 
@@ -302,7 +295,6 @@ class LdapAuth(AbstractAuth):
 
         return user
 
-    @watch
     def login(self, username, password):
         """Login a user
 

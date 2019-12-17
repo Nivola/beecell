@@ -36,8 +36,7 @@ class SystemUser(UserMixin):
     def __str__(self):
         return u'<SystemUser id: %s, name: %s, active: %s ip= %s>' % \
                (self.id, self.email, self.active, self.current_login_ip)
-    
-    @watch
+
     def get_dict(self):
         return {
             u'id': self.id,
@@ -48,35 +47,27 @@ class SystemUser(UserMixin):
             u'perms': self._perms
         }
 
-    @watch
     def set_groups(self, groups):
         self._groups = groups        
-    
-    @watch
+
     def get_groups(self):
         return self._groups          
-    
-    @watch
+
     def set_attributes(self, attrib):
         self._attrib = attrib  
-    
-    @watch
+
     def get_attributes(self):
         return self._attrib
-    
-    @watch
+
     def set_roles(self, roles):
         self._roles = roles
 
-    @watch
     def get_roles(self):
         return self._roles
 
-    @watch
     def set_perms(self, perms):
         self._perms = perms
 
-    @watch
     def get_perms(self):
         return self._perms
 
