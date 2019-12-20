@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
+# (C) Copyright 2019-2020 CSI-Piemonte
+
 import sys
 
 from cement.core.controller import expose
-
 from beecell.cement_cmd.foundation import CementCmdBaseController, CementCmd
-from beecell.sendmail import Mailer
 from beecell.tests.test_util import runtest
 from beecell.tests.test_util import BeecellTestCase
 

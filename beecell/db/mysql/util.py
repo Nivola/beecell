@@ -1,11 +1,13 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
+# (C) Copyright 2019-2020 CSI-Piemonte
 
 import time
 from beecell.simple import run_command
 from sqlalchemy.sql import compiler
 from MySQLdb.converters import conversions, escape
+
 
 def compile_query(query):
     dialect = query.session.bind.dialect

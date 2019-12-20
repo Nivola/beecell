@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
+# (C) Copyright 2019-2020 CSI-Piemonte
 
 from beecell.network import InternetProtocol
 from beecell.sendmail import Mailer
@@ -34,7 +35,6 @@ class NetworkTestCase(BeecellTestCase):
 
     def test_get_names(self):
         res = self.client.get_names()
-        print res
 
 
 if __name__ == u'__main__':

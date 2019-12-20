@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
+# (C) Copyright 2019-2020 CSI-Piemonte
 
 import logging
 import os
@@ -8,8 +9,9 @@ import unittest
 import pprint
 import time
 import json
-import urllib, urllib2
-import httplib
+from six.moves.urllib.parse import urlencode
+from six.moves.urllib.request import urlopen
+from six.moves import http_client
 import yaml
 from beecell.logger import LoggerHelper
 from sqlalchemy import create_engine
@@ -107,9 +109,9 @@ class BeecellTestCase(unittest.TestCase):
         return db_session
 
     def http_client(self, base_url, params):
-        req_params = urllib.urlencode(params)
+        req_params = urlencode(params)
         timeout = 30
-        f = urllib2.urlopen(base_url, req_params, timeout)
+        f = urlopen(base_url, req_params, timeout)
         response = f.read()
         f.close()
         self.logger.debug(u'Send http request to %s' % base_url)
@@ -135,9 +137,9 @@ class BeecellTestCase(unittest.TestCase):
         """
         self.logger.debug(u'Send http %s request to %s://%s:%s%s' % (method, proto, host, port, path))
         if proto == u'http':       
-            conn = httplib.HTTPConnection(host, port, timeout=timeout)
+            conn = http_client.HTTPConnection(host, port, timeout=timeout)
         else:
-            conn = httplib.HTTPSConnection(host, port, timeout=timeout)
+            conn = http_client.HTTPSConnection(host, port, timeout=timeout)
         conn.request(method, path, data, headers)
         response = conn.getresponse()
         self.logger.debug(u'Response status: %s %s' % (response.status, response.reason))
