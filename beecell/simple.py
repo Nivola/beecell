@@ -892,11 +892,12 @@ def read_file(file_name):
     f = open(file_name, u'r')
     data = f.read()
     extension = file_name[-4:].lower()
-    if extension == 'json':
+    print(extension)
+    if extension == b('json'):
         data = json.loads(data)
-    elif extension == 'yaml':
+    elif extension == b('yaml'):
         data = yaml.full_load(data)
-    elif extension == '.yml':
+    elif extension == b('.yml'):
         data = yaml.full_load(data)
     f.close()
     return data
