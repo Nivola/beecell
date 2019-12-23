@@ -7,40 +7,37 @@ import socket
 import os
 import paramiko
 from logging import getLogger
-import httplib2
-import httplib
-import urllib2
+from six.moves import http_client
 import urllib3
 import ujson as json
-from time import time
 import base64
 import ssl
 import re
 from beecell.simple import truncate
 from urllib3.util.ssl_ import create_urllib3_context
 from sys import version_info
-from urlparse import urlparse
+from six.moves.urllib.parse import urlparse
 
 urllib3.disable_warnings()
 
 
-class Urllib2MethodRequest(urllib2.Request):
-    """Inizialize a request method
-
-    http://stackoverflow.com/questions/21243834/doing-put-using-python-urllib2
-    """
-    def __init__(self, *args, **kwargs):
-        if u'method' in kwargs:
-            self._method = kwargs[u'method']
-            del kwargs[u'method']
-        else:
-            self._method = None
-        return urllib2.Request.__init__(self, *args, **kwargs)
-
-    def get_method(self, *args, **kwargs):
-        if self._method is not None:
-            return self._method
-        return urllib2.Request.get_method(self, *args, **kwargs)
+# class Urllib2MethodRequest(urllib2.Request):
+#     """Inizialize a request method
+#
+#     http://stackoverflow.com/questions/21243834/doing-put-using-python-urllib2
+#     """
+#     def __init__(self, *args, **kwargs):
+#         if u'method' in kwargs:
+#             self._method = kwargs[u'method']
+#             del kwargs[u'method']
+#         else:
+#             self._method = None
+#         return urllib2.Request.__init__(self, *args, **kwargs)
+#
+#     def get_method(self, *args, **kwargs):
+#         if self._method is not None:
+#             return self._method
+#         return urllib2.Request.get_method(self, *args, **kwargs)
 
 
 class RemoteException(Exception):
@@ -254,7 +251,7 @@ class RemoteClient(object):
                 path = u'%s://%s:%s%s' % (proto, host, port, path)
             
             if proto == u'http':       
-                conn = httplib.HTTPConnection(_host, _port, timeout=timeout)
+                conn = http_client.HTTPConnection(_host, _port, timeout=timeout)
             else:
                 if self.keyfile is None:
                     # python >= 2.7.9
@@ -268,7 +265,7 @@ class RemoteClient(object):
                     else:
                         ssl._create_default_https_context = None
 
-                conn = httplib.HTTPSConnection(_host, _port, timeout=timeout, key_file=self.keyfile,
+                conn = http_client.HTTPSConnection(_host, _port, timeout=timeout, key_file=self.keyfile,
                                                cert_file=self.certfile)
             if self.proxy is not None:
                 conn.set_tunnel(host, port=port, headers=headers)
@@ -280,7 +277,7 @@ class RemoteClient(object):
             content_type = response.getheader(u'content-type')
             self.logger.info(u'Response status: %s %s' % (response.status, response.reason))
             
-        except httplib.HTTPException as ex:
+        except http_client.HTTPException as ex:
             self.logger.error(ex, exc_info=True)
             raise BadRequestException(ex)
         except Exception as ex:

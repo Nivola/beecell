@@ -126,13 +126,12 @@ def posix_shell(chan, log, trace, trace_func):
                             if len(data) > 0:
                                 trace_cmd(data)
                 except socket.timeout:
-                    logger.error('', exc_info=1)
+                    logger.error('', exc_info=True)
                 except Exception:
-                    logger.error('', exc_info=1)
-                sleep(0.01)
+                    logger.error('', exc_info=True)
+                sleep(0.005)
 
     def get_input():
-        cmd = ''
         cmd_ord = []
         while chan.closed is False:
             try:
@@ -145,11 +144,11 @@ def posix_shell(chan, log, trace, trace_func):
                 if chan.send_ready():
                     chan.send(x)
             except socket.timeout:
-                logger.error('', exc_info=1)
+                logger.error('', exc_info=True)
             except Exception:
-                logger.error('', exc_info=1)
+                logger.error('', exc_info=True)
                 break
-            sleep(0.01)
+            sleep(0.005)
 
     joinall([
         spawn(get_input),
@@ -157,7 +156,7 @@ def posix_shell(chan, log, trace, trace_func):
     ])
 
     termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old_stdin)
-    nb_write(sys.stdout.fileno(), '\n')
+    nb_write(sys.stdout.fileno(), b('\n'))
     logger.info('Close shell to ssh channel: %s' % chan)
 
 
