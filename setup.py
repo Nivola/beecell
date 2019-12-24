@@ -90,7 +90,7 @@ if __name__ == '__main__':
             "PrettyTable==0.7.2",
             "paramiko==2.6.0",
             "httplib2==0.13.1",
-            "urllib3==1.25.3",
+            "urllib3==1.25.7",
             "pymongo==3.9.0",
             "pika==1.1.0",
             "Flask-Login==0.4.1",
