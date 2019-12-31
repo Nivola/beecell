@@ -6,7 +6,7 @@
 import inspect
 import yaml
 from struct import pack
-from six import b, u, PY2, PY3, ensure_text
+from six import b, u, PY2, PY3, ensure_text, ensure_binary
 import ujson as json
 import os, random, subprocess, logging
 from socket import inet_ntoa
@@ -71,8 +71,8 @@ def encrypt_data(fernet_key, data):
     if PY2:
         data = str(data)
 
-    cipher_suite = Fernet(b(fernet_key))
-    cipher_data = cipher_suite.encrypt(b(data))
+    cipher_suite = Fernet(ensure_binary(fernet_key))
+    cipher_data = cipher_suite.encrypt(ensure_binary(data))
     return '$BEEHIVE_VAULT;AES128 | %s' % cipher_data
 
 
@@ -88,11 +88,8 @@ def decrypt_data(fernet_key, data):
 
     if data.find('$BEEHIVE_VAULT;AES128 | ') == 0:
         data = data.replace('$BEEHIVE_VAULT;AES128 | ', '')
-        logger.warning(type(fernet_key))
-        logger.warning(b(fernet_key))
-        logger.warning(type(data))
-        cipher_suite = Fernet(b(fernet_key))
-        cipher_data = cipher_suite.decrypt(b(data))
+        cipher_suite = Fernet(ensure_binary(fernet_key))
+        cipher_data = cipher_suite.decrypt(ensure_binary(data))
     else:
         cipher_data = data
     return cipher_data
@@ -647,7 +644,7 @@ def format_date(date, format=None, microsec=False):
     Ref. https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html
 
     :param date: datetime object
-    :param format: ormat date ex: %Y-%m-%dT%H:%M
+    :param format: format date ex: %Y-%m-%dT%H:%M
     :return: formatted date
     """
 

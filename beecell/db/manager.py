@@ -13,7 +13,7 @@ from sqlalchemy import create_engine, exc, event
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 from beecell.simple import truncate
-from rediscluster import RedisCluster
+# from rediscluster import RedisCluster
 
 
 class SqlManagerError(Exception):
@@ -73,21 +73,21 @@ class RedisManager(ConnectionManager):
 
         # redis_uri = redis_uri.decode('utf-8')
 
-        # redis cluster
-        if redis_uri.find('redis-cluster') >= 0:
-            self.is_cluster = True
-            redis_uri = redis_uri.replace('redis-cluster://', '')
-            host_ports = redis_uri.split(',')
-            cluster_nodes = []
-            for host_port in host_ports:
-                host, port = host_port.split(':')
-                cluster_nodes.append({'host': host, 'port': port})
-                self.hosts.append(host_port)
-            self.server = RedisCluster(startup_nodes=cluster_nodes, decode_responses=True, socket_timeout=timeout,
-                                       retry_on_timeout=False, max_connections=max_connections)
+        # # redis cluster
+        # if redis_uri.find('redis-cluster') >= 0:
+        #     self.is_cluster = True
+        #     redis_uri = redis_uri.replace('redis-cluster://', '')
+        #     host_ports = redis_uri.split(',')
+        #     cluster_nodes = []
+        #     for host_port in host_ports:
+        #         host, port = host_port.split(':')
+        #         cluster_nodes.append({'host': host, 'port': port})
+        #         self.hosts.append(host_port)
+        #     self.server = RedisCluster(startup_nodes=cluster_nodes, decode_responses=True, socket_timeout=timeout,
+        #                                retry_on_timeout=False, max_connections=max_connections)
             
         # single redis node
-        elif redis_uri.find('redis') >= 0:
+        if redis_uri.find('redis') >= 0:
             self.is_single = True            
             pwd = None
             if redis_uri.find('@') > 0:
