@@ -183,16 +183,20 @@ class LdapAuth(AbstractAuth):
         try:
             self.conn.simple_bind_s(username, ensure_str(password))
         except (ldap.TIMEOUT, ldap.TIMELIMIT_EXCEEDED):
+            self.logger.error('Ldap connection timeout')
+            self.close()
+            self.conn = None
             raise AuthError('', 'Connection error. Timeout limit was exceeded', code=7)
+        except ldap.CONNECT_ERROR:
+            self.logger.error('Ldap connection error')
+            self.close()
+            self.conn = None
+            raise AuthError('', 'Connection error', code=7)
         except ldap.LDAPError as ex:
             self.logger.error('Ldap authentication error: %s' % ex)
             self.close()
             self.conn = None
-
-            if 'info' in ex[0]:
-                raise AuthError(ex[0]['info'], ex[0]['desc'])
-            else:
-                raise AuthError('', 'Connection error: %s' % ex[0]['desc'], code=7)
+            raise AuthError('', 'Ldap authentication error: %s' % ex, code=7)
 
         return True
 

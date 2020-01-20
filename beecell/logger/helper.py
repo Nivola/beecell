@@ -13,6 +13,8 @@ from beecell.logger.elasticsearch import ElasticsearchHandler, ElasticsearchForm
 DEBUG2 = -10
 DEBUG3 = -20
 
+module_logger = logging.getLogger(__name__)
+
 
 class ExtendedLogger(logging.Logger):
     def debug2(self, msg, *args, **kwargs):

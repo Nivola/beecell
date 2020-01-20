@@ -2,7 +2,7 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
-
+import logging
 import threading
 import urllib
 from datetime import datetime
@@ -14,6 +14,9 @@ import json
 from beecell.formatter import StringFormatter
 
 from beecell.simple import format_date
+
+
+logger = logging.getLogger(__name__)
 
 
 class ElasticsearchFormatter(Formatter):
@@ -31,7 +34,7 @@ class ElasticsearchFormatter(Formatter):
         it is formatted using formatException() and appended to the message.
         """
         message = record.message
-        record.message = u''
+        record.message = ''
 
         if self.usesTime():
             record.asctime = self.formatTime(record, self.datefmt)
@@ -55,17 +58,17 @@ class ElasticsearchFormatter(Formatter):
 
         # add exception trace to error message
         if record.exc_text:
-            message += u' | ' + record.exc_text.replace(u'\n', u' | ')
+            message += ' | ' + record.exc_text.replace('\n', ' | ')
 
         # add message to fianle record
-        s[u'message'] = message
+        s['message'] = message
         # StringFormatter().replace(message)
 
         return s
 
 
 class ElasticsearchHandler(Handler):
-    def __init__(self, client, index=u'log', tags=[], **custom_fields):
+    def __init__(self, client, index='log', tags=[], **custom_fields):
         """Initialize the handler.
 
         :param client: elasticsearch.Elasticsearch class instance
@@ -76,7 +79,7 @@ class ElasticsearchHandler(Handler):
         Handler.__init__(self)
 
         if client is None:
-            raise Exception(u'elasticsearch.Elasticsearch class instance must be specified')
+            raise Exception('elasticsearch.Elasticsearch class instance must be specified')
 
         self.client = client
         self.index = index
@@ -95,15 +98,15 @@ class ElasticsearchHandler(Handler):
         has an 'encoding' attribute, it is used to determine how to do the
         output to the stream.
         """
+        record.api_id = getattr(record, 'api_id', '')
         msg = self.format(record)
-        # msg = json.loads(msg)
         date = datetime.now()
-        msg[u'date'] = date
-        msg[u'tags'] = self.tags
+        msg['date'] = date
+        msg['tags'] = self.tags
         msg.update(self.custom_fields)
         # ex. logstash-2024.03.23
-        index = u'%s-%s' % (self.index, date.strftime(u'%Y.%m.%d'))
-        self.client.index(index=index, body=msg, request_timeout=5, doc_type=u'doc')
+        index = '%s-%s' % (self.index, date.strftime('%Y.%m.%d'))
+        self.client.index(index=index, body=msg, request_timeout=5, doc_type='doc')
 
     def emit(self, record):
         """

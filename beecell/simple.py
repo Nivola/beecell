@@ -656,7 +656,7 @@ def format_date(date, format=None, microsec=False):
         time_format = format
     res = None
     if date is not None:
-        res = str2uni(date.strftime(time_format))
+        res = ensure_text(date.strftime(time_format))
     return res
 
 
