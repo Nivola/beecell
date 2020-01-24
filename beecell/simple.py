@@ -96,7 +96,7 @@ def decrypt_data(fernet_key, data):
 
 
 def flatten_dict(d, delimiter=":", loopArray=True):
-    """ Flat dictionary conversion
+    """Flat dictionary conversion
 
     :param loopArray: If True execute loop unrolling array items in keys. False otherwise
     :param delimiter: delimiter char
@@ -340,6 +340,7 @@ def getmembers(obj, predicate=None):
     """Return all members of an object as (name, value) pairs sorted by name.
     Optionally, only return members that satisfy a given predicate.
 
+    :param obj:
     :param predicate: predicate to satisfy
     :return: list of members
     """
@@ -664,7 +665,6 @@ def compat(data):
     try:
         if isinstance(data, list):
             data = '[..]'
-            # data = map(lambda x: compat(x), data)
         elif isinstance(data, dict):
             newdata = {}
             for k, v in data.items():
@@ -675,7 +675,7 @@ def compat(data):
         else:
             data = truncate(data, 30)
     except:
-        logger.warning('compat data %s error' % data, exc_info=1)
+        logger.warning('compat data %s error' % data, exc_info=True)
         data = None
     return data
 
@@ -700,23 +700,17 @@ def isNotBlank(myString):
     return bool(myString and myString.strip())
 
 
-# def is_py3():
-#     return version_info.major == 3
-#
-#
-# def is_py2():
-#     return version_info.major == 2
-
-
-def obscure_data(data, fields=['password', 'pwd', 'passwd', 'pass']):
+def obscure_data(data, fields=None):
     """Obscure some fields in data, fields can be password.
 
     :param data: data to check
     :param fields: list of fields to obfuscate. default=['password', 'pwd', 'passwd']
     :return: obscured data
     """
+    if fields is None:
+        fields = ['password', 'pwd', 'passwd', 'pass']
+
     if PY2:
-    # if is_py2():
         if isinstance(data, str) or isinstance(data, unicode):
             return obscure_string(data, fields)
 
@@ -728,7 +722,6 @@ def obscure_data(data, fields=['password', 'pwd', 'passwd', 'pass']):
                     if key.lower().find(field) >= 0:
                         data[key] = 'xxxxxx'
     elif PY3:
-    # elif is_py3():
         if isinstance(data, str) or isinstance(data, bytes):
             return obscure_string(data, fields)
 
@@ -743,13 +736,16 @@ def obscure_data(data, fields=['password', 'pwd', 'passwd', 'pass']):
     return data
 
 
-def obscure_string(data, fields=['password', 'pwd', 'passwd', 'pass']):
+def obscure_string(data, fields=None):
     """Obscure entire string if it contains passwords.
 
     :param data: data to check
     :param fields: list of fields to obfuscate. default=['password', 'pwd', 'passwd']
-    :return: obscured strinng
+    :return: obscured string
     """
+    if fields is None:
+        fields = ['password', 'pwd', 'passwd', 'pass']
+
     for field in fields:
         if data.lower().find(field) >= 0:
             data = 'xxxxxx'
@@ -759,11 +755,9 @@ def obscure_string(data, fields=['password', 'pwd', 'passwd', 'pass']):
 def is_string(data):
     res = False
     if PY2:
-    # if is_py2():
         if isinstance(data, str) or isinstance(data, unicode):
             res = True
     elif PY3:
-    # elif is_py3():
         if isinstance(data, str) or isinstance(data, bytes):
             res = True
     return res
@@ -896,4 +890,19 @@ def read_file(file_name):
     elif extension == b('.yml') or extension == '.yml':
         data = yaml.full_load(data)
     f.close()
+    return data
+
+
+def set_request_params(kwargs, supported):
+    """Set params in request data
+
+    :param dict kwargs: input params
+    :param list supported: list of supperted param names
+    :return: dict with params that are not None
+    """
+    data = {}
+    for key in supported:
+        val = kwargs.get(key, None)
+        if val is not None:
+            data[key] = val
     return data
