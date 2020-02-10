@@ -31,11 +31,11 @@ def check_vault(data, key):
     if PY2:
         data = str(data)
 
-    data = b(data)
+    data = ensure_binary(data)
     if data.find(b('$BEEHIVE_VAULT;AES128 | ')) == 0:
         if key is None:
             raise Exception('Fernet key must be provided')        
-        cipher_suite = Fernet(b(key))
+        cipher_suite = Fernet(ensure_binary(key))
         data = data.replace(b('$BEEHIVE_VAULT;AES128 | '), b(''))
         data = cipher_suite.decrypt(data)
     data = data.decode('utf-8')
@@ -70,7 +70,6 @@ def encrypt_data(fernet_key, data):
     """
     if PY2:
         data = str(data)
-
     cipher_suite = Fernet(ensure_binary(fernet_key))
     cipher_data = cipher_suite.encrypt(ensure_binary(data))
     return '$BEEHIVE_VAULT;AES128 | %s' % cipher_data
@@ -897,7 +896,7 @@ def set_request_params(kwargs, supported):
     """Set params in request data
 
     :param dict kwargs: input params
-    :param list supported: list of supperted param names
+    :param list supported: list of supported param names
     :return: dict with params that are not None
     """
     data = {}

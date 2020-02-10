@@ -9,7 +9,7 @@ from time import sleep
 import redis
 import os
 import ujson as json
-from sqlalchemy import create_engine, exc, event
+from sqlalchemy import create_engine, exc, event, text
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 from beecell.simple import truncate
@@ -420,28 +420,71 @@ class SqlManager(ConnectionManager):
                                         'from information_schema.tables group by table_schema')
             for row in result:
                 res[row[0]] = {
-                    'schema':row[0],
-                    'tables':row[1]
+                    'schema': row[0],
+                    'tables': row[1]
                 }
             # add empty schema
             result = connection.execute('show databases')
             for row in result:
                 if row[0] not in res.keys():
                     res[row[0]] = {
-                        'schema':row[0],
-                        'tables':0
+                        'schema': row[0],
+                        'tables': 0
                     }
             res = res.values()
             self.logger.debug('Get schema list: %s' % res)
             
         except Exception as ex:
-            self.logger.error(ex, exc_info=1)
+            self.logger.error(ex, exc_info=True)
             raise
         finally:
             if connection is not None:
                 connection.close()
         return res
-    
+
+    def add_schema(self, db_name, charset=None):
+        """Add schema
+
+        :param db_name: schema name
+        :param charset: charset [optional]
+        """
+        connection = None
+        res = {}
+        try:
+            connection = self.engine.connect()
+            stm = 'CREATE DATABASE IF NOT EXISTS %s' % db_name
+            if charset is not None:
+                stm += 'CHARACTER SET = %s' % charset
+            res = connection.execute(stm)
+            self.logger.debug('Create schema %s: %s' % (db_name, res))
+        except Exception as ex:
+            self.logger.error(ex, exc_info=True)
+            raise
+        finally:
+            if connection is not None:
+                connection.close()
+        return res
+
+    def drop_schema(self, db_name):
+        """Drop schema
+
+        :param db_name: schema name
+        """
+        connection = None
+        res = {}
+        try:
+            connection = self.engine.connect()
+            stm = 'DROP DATABASE IF EXISTS %s' % db_name
+            res = connection.execute(stm)
+            self.logger.debug('Drop schema %s: %s' % (db_name, res))
+        except Exception as ex:
+            self.logger.error(ex, exc_info=True)
+            raise
+        finally:
+            if connection is not None:
+                connection.close()
+        return res
+
     def get_users(self):
         """Get users list
         """
@@ -451,16 +494,80 @@ class SqlManager(ConnectionManager):
             connection = self.engine.connect()
             result = connection.execute('select Host, User from mysql.user')
             for row in result:
-                res.append({'host':row[0], 'user':row[1]})
+                res.append({'host': row[0], 'user': row[1]})
             self.logger.debug('Get users list: %s' % res)
             
         except Exception as ex:
-            self.logger.error(ex, exc_info=1)
+            self.logger.error(ex, exc_info=True)
             raise
         finally:
             if connection is not None:
                 connection.close()
-        return res    
+        return res
+
+    def add_user(self, name, host, password):
+        """Add user
+
+        :param name: user name
+        :param host: user host
+        :param password: user password
+        """
+        connection = None
+        res = {}
+        try:
+            connection = self.engine.connect()
+            stm = text("CREATE USER IF NOT EXISTS '%s'@'%s' IDENTIFIED BY '%s'" % (name, host, password))
+            connection.execute(stm)
+            self.logger.debug('Create user %s: %s' % (name, res))
+        except Exception as ex:
+            self.logger.error(ex, exc_info=True)
+            raise
+        finally:
+            if connection is not None:
+                connection.close()
+        return True
+
+    def grant_schema_to_user(self, name, host, schema):
+        """Grant schema to user
+
+        :param name: user name
+        :param host: user host
+        :param schema: schema name to grant
+        """
+        connection = None
+        res = {}
+        try:
+            connection = self.engine.connect()
+            stm = text("GRANT ALL privileges ON `%s`.* TO '%s'@'%s'" % (schema, name, host))
+            connection.execute(stm)
+            self.logger.debug('Grat schema %s to user %s: %s' % (schema, name, res))
+        except Exception as ex:
+            self.logger.error(ex, exc_info=True)
+            raise
+        finally:
+            if connection is not None:
+                connection.close()
+        return True
+
+    def drop_user(self, db_name):
+        """Drop user
+
+        :param db_name: user name
+        """
+        connection = None
+        res = {}
+        try:
+            connection = self.engine.connect()
+            stm = 'DROP USER IF EXISTS %s' % db_name
+            res = connection.execute(stm)
+            self.logger.debug('Drop user %s: %s' % (db_name, res))
+        except Exception as ex:
+            self.logger.error(ex, exc_info=True)
+            raise
+        finally:
+            if connection is not None:
+                connection.close()
+        return res
         
     def get_tables_names(self):
         """Get list of tables name """
@@ -481,7 +588,7 @@ class SqlManager(ConnectionManager):
             connection = self.engine.connect()
             sql = u"select table_name, table_rows, data_length, index_length, "\
                   u"auto_increment from information_schema.tables where "\
-                  u"table_schema='%s'"
+                  u"table_schema='%s' order by table_name"
             result = connection.execute(sql % schema)
             for row in result:
                 res.append({
@@ -494,7 +601,7 @@ class SqlManager(ConnectionManager):
             self.logger.debug('Get tables for schema %s: %s' % (schema, res))
             
         except Exception as ex:
-            self.logger.error(ex, exc_info=1)
+            self.logger.error(ex, exc_info=True)
             raise
         finally:
             if connection is not None:
@@ -521,14 +628,15 @@ class SqlManager(ConnectionManager):
             'is_primary_key': c.primary_key,
             'is_unique': c.unique} for c in table_obj.columns]
     
-    def query_table(self, table_name, where=None, fields="*", rows=20, offset=0):
+    def query_table(self, table_name, where=None, fields="*", rows=20, offset=0, order=None):
         """Query a table
         
         :param table_name: name of the table to query [optional]
         :param where: query filter [optional]
         :param fields: list of fields to include in table qeury [optional]
         :param rows: number of rows to fetch [default=100]
-        :param offset: row fecth offset [default=0]
+        :param offset: row fetch offset [default=0]
+        :param order: field used to order records [default=None]
         :return: query rows
         :raise SqlManagerError:
         """
@@ -536,12 +644,19 @@ class SqlManager(ConnectionManager):
         
         if fields is not None:
             fields = ",".join(fields)
-        
+
+        query_count = "SELECT count(*) as count FROM %s" % table_name
+        if where is not None:
+            query_count = "%s WHERE %s" % (query_count, where)
+
         query = "SELECT %s FROM %s" % (fields, table_name)
         if where is not None:
             query = "%s WHERE %s" % (query, where)
 
-        query = "%s ORDER BY id LIMIT %s OFFSET %s" % (query, rows, offset)
+        if order is not None:
+            query = "%s ORDER BY %s" % order
+
+        query = "%s LIMIT %s OFFSET %s" % (query, rows, offset)
         
         # get columns name
         col_names = [c['name'] for c in self.get_table_description(table_name)]
@@ -549,6 +664,7 @@ class SqlManager(ConnectionManager):
         try:
             # query tables
             connection = self.engine.connect()
+            total = connection.execute(query_count).fetchone()[0]
             result = connection.execute(query)
             for row in result:
                 cols = {}
@@ -562,7 +678,6 @@ class SqlManager(ConnectionManager):
                     i += 1
                 res.append(cols)
             self.logger.debug("Execute query %s: %s" % (query, truncate(res)))
-            
         except Exception as ex:
             err = 'Mysql query %s error: %s' % (query, ex)
             self.logger.error(err)
@@ -570,7 +685,7 @@ class SqlManager(ConnectionManager):
         finally:
             if connection is not None:
                 connection.close()
-        return res   
+        return res, total
     
     def get_connection(self):
         try:
@@ -728,7 +843,7 @@ class MysqlManager(SqlManager):
             trans.commit()
         except:
             trans.rollback()
-            self.logger.error('Error during drop all', exc_info=1)
+            self.logger.error('Error during drop all', exc_info=True)
             raise SqlManagerError('Error during drop all')
         finally:
             if connection is not None:
@@ -753,7 +868,7 @@ class MysqlManager(SqlManager):
             self.logger.debug('Get mysql cluster status: %s' % res)
 
         except Exception as ex:
-            self.logger.error(ex, exc_info=1)
+            self.logger.error(ex, exc_info=True)
             raise
         finally:
             if connection is not None:
