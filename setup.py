@@ -80,7 +80,7 @@ if __name__ == '__main__':
             "redis-py-cluster==2.0.0",
             "Flask==1.1.1",
             "anyjson==0.3.3",
-            "psutil==5.6.3",
+            "psutil==5.6.6",
             "redis==3.0.1",
             "passlib==1.7.1",
             "pymysql==0.9.3",
