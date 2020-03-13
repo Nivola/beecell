@@ -511,7 +511,7 @@ def get_remote_ip(request):
         return None
 
 
-def truncate(msg, size=200):
+def truncate(msg, size=200, replace_new_line=True):
     """Truncate message to fixed size.
 
     :param str msg: message to truncate
@@ -519,7 +519,8 @@ def truncate(msg, size=200):
     :return: truncated Message with ...
     """
     msg = str(msg)
-    msg = msg.replace('\n', ' | ')
+    if replace_new_line is True:
+        msg = msg.replace('\n', ' | ')
 
     if len(msg) > size:
         return msg[0:size] + '...'

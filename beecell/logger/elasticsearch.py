@@ -58,7 +58,7 @@ class ElasticsearchFormatter(Formatter):
 
         # add exception trace to error message
         if record.exc_text:
-            message += ' | ' + record.exc_text.replace('\n', ' | ')
+            message += ' | ' + record.exc_text #.replace('\n', ' | ')
 
         # add message to fianle record
         s['message'] = message
