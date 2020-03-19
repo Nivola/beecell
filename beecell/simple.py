@@ -84,6 +84,8 @@ def decrypt_data(fernet_key, data):
     """
     if PY2:
         data = str(data)
+    else:
+        data = ensure_text(data)
 
     if data.find('$BEEHIVE_VAULT;AES128 | ') == 0:
         data = data.replace('$BEEHIVE_VAULT;AES128 | ', '')
