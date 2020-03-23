@@ -3,17 +3,10 @@
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
 import logging
-import threading
-import urllib
+import gevent
 from datetime import datetime
 from logging import Handler, Formatter
-from re import escape
-import sys
-# import ujson as json
 import json
-from beecell.formatter import StringFormatter
-
-from beecell.simple import format_date
 
 
 logger = logging.getLogger(__name__)
@@ -106,6 +99,7 @@ class ElasticsearchHandler(Handler):
         msg.update(self.custom_fields)
         # ex. logstash-2024.03.23
         index = '%s-%s' % (self.index, date.strftime('%Y.%m.%d'))
+        # print('$$$$$$$$$$$ %s %s' % (gevent.getcurrent().name, msg['message']))
         self.client.index(index=index, body=msg, request_timeout=5, doc_type='doc')
 
     def emit(self, record):
@@ -120,7 +114,8 @@ class ElasticsearchHandler(Handler):
         output to the stream.
         """
         try:
-            self._emit(record)
+            gevent.spawn(self._emit, record)
+            # self._emit(record)
         except (KeyboardInterrupt, SystemExit):
             raise
         except:

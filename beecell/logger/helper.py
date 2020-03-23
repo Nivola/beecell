@@ -27,8 +27,8 @@ class ExtendedLogger(logging.Logger):
 
 
 logging.setLoggerClass(ExtendedLogger)
-logging.addLevelName(DEBUG2, u'DEBUG2')
-logging.addLevelName(DEBUG3, u'DEBUG3')
+logging.addLevelName(DEBUG2, 'DEBUG2')
+logging.addLevelName(DEBUG3, 'DEBUG3')
 
 
 class CustomFormatter(logging.Formatter):
@@ -45,13 +45,13 @@ class ColorFormatter(CeleryColorFormatter):
     #: Loglevel -> Color mapping.
     COLORS = colored().names
     colors = {
-        u'DEBUG': COLORS[u'blue'], 
-        u'WARNING': COLORS[u'yellow'],
-        u'WARN': COLORS[u'yellow'],
-        u'ERROR': COLORS[u'red'], 
-        u'CRITICAL': COLORS[u'magenta'],
-        u'DEBUG2': COLORS[u'green'],
-        u'DEBUG3': COLORS[u'cyan']
+        'DEBUG': COLORS['blue'], 
+        'WARNING': COLORS['yellow'],
+        'WARN': COLORS['yellow'],
+        'ERROR': COLORS['red'], 
+        'CRITICAL': COLORS['magenta'],
+        'DEBUG2': COLORS['green'],
+        'DEBUG3': COLORS['cyan']
     }  
 
 
@@ -110,7 +110,7 @@ class LoggerHelper(object):
                              formatter=ColorFormatter, propagate=False):
         if frmt is None:
             frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] %(name)s:%(funcName)s:%(lineno)d - %(message)s"
-        handler = logging.handlers.RotatingFileHandler(file_name, mode=u'a', maxBytes=maxBytes, backupCount=backupCount)
+        handler = logging.handlers.RotatingFileHandler(file_name, mode='a', maxBytes=maxBytes, backupCount=backupCount)
         handler.setLevel(logging_level)
         if formatter is None:
             handler.setFormatter(logging.Formatter(frmt))
@@ -126,7 +126,7 @@ class LoggerHelper(object):
     def file_handler(loggers, logging_level, file_name, frmt=None, formatter=ColorFormatter, propagate=False):
         if frmt is None:
             frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] %(name)s:%(funcName)s:%(lineno)d - %(message)s"
-        handler = logging.FileHandler(file_name, mode=u'a')
+        handler = logging.FileHandler(file_name, mode='a')
         handler.setLevel(logging_level)
         if formatter is None:
             handler.setFormatter(logging.Formatter(frmt))
@@ -139,7 +139,7 @@ class LoggerHelper(object):
             logger.propagate = propagate
 
     @staticmethod
-    def elastic_handler(loggers, logging_level, client, frmt=None, propagate=False, index=u'log', tags=[],
+    def elastic_handler(loggers, logging_level, client, frmt=None, propagate=False, index='log', tags=[],
                         **custom_fields):
         """Configure a logging handler that use elasticsearch as backend.
 
@@ -152,9 +152,9 @@ class LoggerHelper(object):
         :param custom_fields: custom fields as key=value
         """
         if frmt is None:
-            frmt = u'{"timestamp":"%(asctime)s","levelname":"%(levelname)s","process":"%(process)s",' \
-                   u'"thread":"%(thread)s","module":"%(name)s","func":"%(funcName)s","lineno":"%(lineno)d",' \
-                   u'"message":"%(message)s"}'
+            frmt = '{"timestamp":"%(asctime)s","levelname":"%(levelname)s","process":"%(process)s",' \
+                   '"thread":"%(thread)s","module":"%(name)s","func":"%(funcName)s","lineno":"%(lineno)d",' \
+                   '"message":"%(message)s"}'
         handler = ElasticsearchHandler(client, index=index, tags=tags, **custom_fields)
         handler.setLevel(logging_level)
         handler.setFormatter(ElasticsearchFormatter(frmt))
