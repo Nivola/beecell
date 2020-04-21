@@ -5,48 +5,48 @@
 
 
 class ModelError(Exception):
-    def __init__(self, desc, code=404):
+    def __init__(self, value, code=404, *arg, **kw):
         """
         """
-        self.desc = str(desc)
+        self.value = str(value)
         self.code = code
-        Exception.__init__(self, desc)
+        super(Exception, self).__init__(self.value, *arg, **kw)
         
     def __repr__(self):
-        return "ModelError: %s" % self.desc
+        return "ModelError: %s" % self.value
 
     def __str__(self):
-        return self.desc
+        return self.value
 
 
 class TransactionError(Exception):
-    def __init__(self, desc, code=0):
+    def __init__(self, value, code=0, *arg, **kw):
         """
         """
-        self.desc = str(desc)
+        self.value = str(value)
         self.code = code
-        Exception.__init__(self, desc)
+        super(Exception, self).__init__(self.value, *arg, **kw)
         
     def __repr__(self):
-        return "TransactionError: %s" % self.desc
+        return "TransactionError: %s" % self.value
 
     def __str__(self):
-        return self.desc
+        return '%s' % self.value
 
 
 class QueryError(Exception):
-    def __init__(self, desc, code=0):
+    def __init__(self, value, code=0, *arg, **kw):
         """
         """
-        self.desc = str(desc)
+        self.value = str(value)
         self.code = code
-        Exception.__init__(self, desc)
+        super(Exception, self).__init__(self.value, *arg, **kw)
         
     def __repr__(self):
-        return "QueryError: %s" % self.desc
+        return "QueryError: %s" % self.value
 
     def __str__(self):
-        return self.desc
+        return self.value
 
 
 from .manager import MysqlManager

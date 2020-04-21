@@ -71,7 +71,7 @@ def encrypt_data(fernet_key, data):
     if PY2:
         data = str(data)
     cipher_suite = Fernet(ensure_binary(fernet_key))
-    cipher_data = cipher_suite.encrypt(ensure_binary(data))
+    cipher_data = ensure_text(cipher_suite.encrypt(ensure_binary(data)))
     return '$BEEHIVE_VAULT;AES128 | %s' % cipher_data
 
 
@@ -86,7 +86,6 @@ def decrypt_data(fernet_key, data):
         data = str(data)
     else:
         data = ensure_text(data)
-
     if data.find('$BEEHIVE_VAULT;AES128 | ') == 0:
         data = data.replace('$BEEHIVE_VAULT;AES128 | ', '')
         cipher_suite = Fernet(ensure_binary(fernet_key))
@@ -513,7 +512,7 @@ def get_remote_ip(request):
         return None
 
 
-def truncate(msg, size=200, replace_new_line=True):
+def truncate(msg, size=400, replace_new_line=True):
     """Truncate message to fixed size.
 
     :param str msg: message to truncate
