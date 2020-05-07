@@ -55,7 +55,8 @@ def posix_shell(chan, log, trace, trace_func):
             # filtered_string = filter(lambda x: x in string.printable, cmd)
             logger.debug({'cmd': cmd})
             if trace_func is not None and len(cmd) > 0:
-               trace_func(status=None, cmd=cmd, elapsed=0)
+                spawn(trace_func, status=None, cmd=cmd, elapsed=0)
+                # trace_func(status=None, cmd=cmd, elapsed=0)
 
     def string_parser(data):
         """List of ord(character)
@@ -107,7 +108,7 @@ def posix_shell(chan, log, trace, trace_func):
             if chan is not None:
                 try:
                     if chan.recv_ready():
-                        x = chan.recv(4096)
+                        x = chan.recv(65535)
                         if log is True:
                             logger.info('OUT: %s' % x)
                         nb_write(sys.stdout.fileno(), x)
