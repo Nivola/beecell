@@ -6,6 +6,8 @@
 from flex.core import validate_api_call
 from logging import getLogger
 from apispec import APISpec
+from apispec.ext.marshmallow import MarshmallowPlugin
+from apispec_webframeworks.flask import FlaskPlugin
 from marshmallow.validate import OneOf
 from copy import deepcopy
 
@@ -14,7 +16,10 @@ logger = getLogger(__name__)
 
 class SwaggerHelper(object):
     def __init__(self):
-        self.spec = APISpec(title=u'', version=u'', plugins=[u'apispec.ext.flask', u'apispec.ext.marshmallow'])
+        # self.spec = APISpec(title=u'', version=u'', plugins=['apispec.ext.flask', 'apispec.ext.marshmallow'],
+        #                     openapi_version='2.0')
+        self.spec = APISpec(title=u'', version=u'', plugins=[FlaskPlugin(), MarshmallowPlugin()],
+                            openapi_version='2.0')
 
     @staticmethod
     def responses(orig, data):
@@ -28,53 +33,54 @@ class SwaggerHelper(object):
         :param schema: marshmallow schema
         :param where: can be path or query
         """
-        fields = schema.__dict__.get(u'_declared_fields', [])
+        fields = schema.__dict__.get('_declared_fields', [])
         res = []
         kvargs = {}
         for field, value in fields.items():
-            if value.load_from is not None:
+            if getattr(value, 'load_from', None) is not None:
                 field = value.load_from
             
-            context = value.metadata.get(u'context', None)
+            context = value.metadata.get('context', None)
             if context is not None:
-                if context == u'body':
+                if context == 'body':
                     kvargs = {
-                        u'in': u'body',
-                        u'name': u'body',
-                        u'schema': {u'$ref': u'#/definitions/%s' % value.nested.__name__}
+                        'in': 'body',
+                        'name': 'body',
+                        'schema': {'$ref': '#/definitions/%s' % value.nested.__name__}
                     }
                 else:
                     kvargs = {
-                        u'in': context,
-                        u'name': field,
-                        u'required': value.required,
-                        u'description': value.metadata.get(u'description', u''),
+                        'in': context,
+                        'name': field,
+                        'required': value.required,
+                        'description': value.metadata.get('description', u''),
                     }                    
                       
                     field_type = value.__class__.__name__.lower()
                     # logger.warn(value)
                     # logger.warn(field_type)
-                    if field_type == u'date':
-                        kvargs[u'type'] = u'string'
-                        kvargs[u'format'] = u'date'
-                    elif field_type == u'datetime':
-                        kvargs[u'type'] = u'string'
-                        kvargs[u'format'] = u'datetime'
-                    elif field_type == u'list':
+                    if field_type == 'date':
+                        kvargs['type'] = 'string'
+                        kvargs['format'] = 'date'
+                    elif field_type == 'datetime':
+                        kvargs['type'] = 'string'
+                        kvargs['format'] = 'datetime'
+                    elif field_type == 'list':
                         try:
-                            kvargs[u'type'] = u'array'
-                            kvargs[u'collectionFormat'] = value.metadata.get(u'collection_format', u'')
-                            subfield_type = value.container.__class__.__name__.lower()
-                            kvargs[u'items'] = {u'type': subfield_type}
-                            kvargs[u'name'] = kvargs[u'name'].replace(u'_N', u'.N')
+                            kvargs['type'] = 'array'
+                            kvargs['collectionFormat'] = value.metadata.get('collection_format', u'')
+                            # subfield_type = value.container.__class__.__name__.lower()
+                            subfield_type = value.inner.__class__.__name__.lower()
+                            kvargs['items'] = {'type': subfield_type}
+                            kvargs['name'] = kvargs['name'].replace('_N', '.N')
                         except:
                             logger.warn(u'', exc_info=1)
                     else:
-                        kvargs[u'type'] = field_type
+                        kvargs['type'] = field_type
                     if bool(value.default) is not False:
-                        kvargs[u'default'] = value.default
+                        kvargs['default'] = value.default
                     if value.validate is not None and isinstance(value.validate, OneOf):
-                        kvargs[u'enum'] = value.validate.choices
+                        kvargs['enum'] = value.validate.choices
         
             res.append(kvargs)
         return res
@@ -82,7 +88,7 @@ class SwaggerHelper(object):
 
 class ApiValidator():
     def __init__(self, schema, uri, method):
-        self.logger = getLogger(self.__class__.__module__+ u'.' + self.__class__.__name__)
+        self.logger = getLogger(self.__class__.__module__+ '.' + self.__class__.__name__)
         
         self.data = None
         self.code = None
@@ -102,7 +108,7 @@ class ApiValidator():
             for key,value in data.items():
                 if required is None or key in required:
                     if parent is not None:
-                        key = u'%s.%s' % (parent, key)
+                        key = '%s.%s' % (parent, key)
                     else:
                         key = key
                     
@@ -113,8 +119,8 @@ class ApiValidator():
                         if len(value) > 0:
                             self.get_keys(s, value[0], key, s[key][1][0]) 
                         elif len(value) == 0:
-                            if s[key][1][1]==True and s[key][0] == u'array':
-                                self.logger.debug(u'this is not valid key:%s' %key)
+                            if s[key][1][1]==True and s[key][0] == 'array':
+                                self.logger.debug('this is not valid key:%s' %key)
                                 self.removed_keys.append(key)
                             
         return self.keys
@@ -122,57 +128,57 @@ class ApiValidator():
     def parse_data(self, s):
         if s != {}:
             self.get_keys(s, self.data)
-            self.logger.debug(u'Get all response keys: %s' % self.keys)
+            self.logger.debug('Get all response keys: %s' % self.keys)
             return self.keys
         return []
     
     def get_schema_keys(self, data, parent=None, required=[]):
-        if u'$ref' in data:
+        if '$ref' in data:
             # #/responses/NotFound
-            data = data[u'$ref']
-            section, ref = data[2:].split(u'/')
+            data = data['$ref']
+            section, ref = data[2:].split('/')
             data = self.master_schema[section][ref]            
             self.get_schema_keys(data, parent)
-        elif u'schema' in data: 
-            data = data[u'schema']
+        elif 'schema' in data: 
+            data = data['schema']
             self.get_schema_keys(data, parent)
-        elif u'items' in data: 
-            data = data[u'items']
+        elif 'items' in data: 
+            data = data['items']
             self.get_schema_keys(data, parent)
-        elif u'properties' in data:
-            required = data.get(u'required', [])
-            data = data[u'properties']
+        elif 'properties' in data:
+            required = data.get('required', [])
+            data = data['properties']
             for key,value in data.items():
                 if key in required:
-                    next_required = value.get(u'required', [])
-                    if value[u'type'] == u'array':
-                        next_required = [value.get(u'items').get(u'required', []), value.get(u'x-nullable')] 
-                        allow_empty = value.get(u'x-nullable')
+                    next_required = value.get('required', [])
+                    if value['type'] == 'array':
+                        next_required = [value.get('items').get('required', []), value.get('x-nullable')] 
+                        allow_empty = value.get('x-nullable')
                     
                     if parent is not None:
-                        self.schema_keys[u'%s.%s' % (parent, key)] = \
-                            [str(value[u'type']), next_required]
-                        key = u'%s.%s' % (parent, key)
+                        self.schema_keys['%s.%s' % (parent, key)] = \
+                            [str(value['type']), next_required]
+                        key = '%s.%s' % (parent, key)
                     else:
-                        self.schema_keys[u'%s' % (key)] = \
-                            [str(value[u'type']), next_required]
+                        self.schema_keys['%s' % (key)] = \
+                            [str(value['type']), next_required]
                     
-                    if value[u'type'] == u'object':
+                    if value['type'] == 'object':
                         self.get_schema_keys(value, key)
-                    elif value[u'type'] == u'array':
+                    elif value['type'] == 'array':
                         self.get_schema_keys(value, key)                    
                     
     def parse_schema(self):
         self.get_schema_keys(self.schema[self.code])
-        self.logger.debug(u'Get all schema keys: %s' % self.schema_keys)   
+        self.logger.debug('Get all schema keys: %s' % self.schema_keys)   
         return self.schema_keys
     
     def get_schema(self):
-        if self.uri in self.master_schema[u'paths']:
-            self.base_schema = self.master_schema[u'paths'][self.uri][self.method][u'parameters']
-            self.schema = self.base_schema[u'responses']
+        if self.uri in self.master_schema['paths']:
+            self.base_schema = self.master_schema['paths'][self.uri][self.method]['parameters']
+            self.schema = self.base_schema['responses']
         else:
-            raise Exception(u'Swager schema for %s is not defined' % self.uri)
+            raise Exception('Swager schema for %s is not defined' % self.uri)
     
     def compare(self):
         s = self.parse_schema()
@@ -183,14 +189,14 @@ class ApiValidator():
         key = set()
         for k in s:
             for r in self.removed_keys: 
-                if k.startswith(u'%s.' % r):
+                if k.startswith('%s.' % r):
                     key.add(k)
         
         res = s.symmetric_difference(t).symmetric_difference(key)
         if len(res) > 0:
-            self.logger.error(u'Schema and data does not superimpose for keys: %s' % u', '.join(res))
-            raise Exception(u'Schema and data does not superimpose for keys: %s' % u', '.join(res))
-        self.logger.debug(u'Schema and response keys are the same')
+            self.logger.error('Schema and data does not superimpose for keys: %s' % ', '.join(res))
+            raise Exception('Schema and data does not superimpose for keys: %s' % ', '.join(res))
+        self.logger.debug('Schema and response keys are the same')
 
     def validate(self, response):
         validate_api_call(self.master_schema, raw_request=response.request, raw_response=response)
@@ -198,5 +204,5 @@ class ApiValidator():
         if response.content != u'':
             self.data = response.json()
             self.compare()
-            self.logger.debug(u'Api request %s is valid' % self.uri)
+            self.logger.debug('Api request %s is valid' % self.uri)
         return True
