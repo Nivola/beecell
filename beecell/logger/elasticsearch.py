@@ -26,7 +26,10 @@ class ElasticsearchFormatter(Formatter):
         called to format the event time. If there is exception information,
         it is formatted using formatException() and appended to the message.
         """
-        message = record.message
+        try:
+            message = record.message
+        except:
+            logger.warn(type(record))
         record.message = ''
 
         if self.usesTime():

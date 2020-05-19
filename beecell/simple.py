@@ -662,6 +662,20 @@ def format_date(date, format=None, microsec=False):
     return res
 
 
+def get_date_from_timestamp(date):
+    if date is not None:
+        return datetime.datetime.fromtimestamp(date)
+    else:
+        return None
+
+
+def get_timestamp_from_date(date):
+    if date is not None:
+        return datetime.datetime.timestamp(date)
+    else:
+        return None
+
+
 def compat(data):
     try:
         if isinstance(data, list):

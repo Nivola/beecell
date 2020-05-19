@@ -11,13 +11,13 @@ from beecell.simple import truncate
 
 class CacheClient(object):
     """ """
-    def __init__(self, redis, prefix=u'cache.'):
+    def __init__(self, redis, prefix='cache.'):
         """Initialize cache client
 
         :param redis: redis manager reference (redis.StrictRedis or StrictRedisCluster instance)
         :param prefix: chache key prefix
         """
-        self.logger = logging.getLogger(self.__class__.__module__ + u'.' + self.__class__.__name__)
+        self.logger = logging.getLogger(self.__class__.__module__ + '.' + self.__class__.__name__)
 
         self.redis = redis
         self.prefix = prefix
@@ -30,9 +30,9 @@ class CacheClient(object):
         :param ttl: item time to live [default=600s]
         :return: True
         """
-        value = json.dumps({u'data': value})
+        value = json.dumps({'data': value})
         self.redis.setex(self.prefix + key, ttl, value)
-        self.logger.debug(u'Set cache item %s:%s [%ss]' % (key, truncate(value), ttl))
+        self.logger.debug('Set cache item %s:%s [%ss]' % (key, truncate(value), ttl))
         return True
 
     def get(self, key):
@@ -43,8 +43,8 @@ class CacheClient(object):
         """
         value = self.redis.get(self.prefix + key)
         if value is not None:
-            value = json.loads(value).get(u'data')
-        self.logger.debug(u'Get cache item %s:%s' % (key, truncate(value)))
+            value = json.loads(value).get('data')
+        self.logger.debug('Get cache item %s:%s' % (key, truncate(value)))
         return value
 
     def expire(self, key, ttl=600):
@@ -55,7 +55,7 @@ class CacheClient(object):
         :return: True
         """
         value = self.redis.expire(self.prefix + key, ttl)
-        self.logger.debug(u'Set cache item %s expire to %s' % (key, ttl))
+        self.logger.debug('Set cache item %s expire to %s' % (key, ttl))
         return True
 
     def delete(self, key):
@@ -65,7 +65,20 @@ class CacheClient(object):
         :return: True
         """
         value = self.redis.delete(self.prefix + key)
-        self.logger.debug(u'Delete cache item %s' % key)
+        self.logger.debug('Delete cache item %s' % key)
+        return True
+
+    def delete_by_pattern(self, pattern):
+        """Delete keys by pattern
+
+        :param pattern: key search pattern
+        :return: True
+        """
+        keys = self.redis.keys(self.prefix + pattern)
+        self.logger.warn(keys)
+        if len(keys) > 0:
+            res = self.redis.delete(*keys)
+            return res
         return True
 
     def extend_ttl(self, key, ttl=600):
@@ -75,5 +88,5 @@ class CacheClient(object):
         :return: True
         """
         value = self.redis.expire(self.prefix + key, ttl)
-        self.logger.debug(u'Extend cache item %s ttl to %s' % (key, ttl))
+        self.logger.debug('Extend cache item %s ttl to %s' % (key, ttl))
         return True
