@@ -89,7 +89,7 @@ if __name__ == '__main__':
             "gevent==1.4.0",
             "PrettyTable==0.7.2",
             "paramiko==2.6.0",
-            "httplib2==0.13.1",
+            "httplib2==0.18.0",
             "urllib3==1.25.7",
             "pymongo==3.9.0",
             "pika==1.1.0",
