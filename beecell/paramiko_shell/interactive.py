@@ -108,7 +108,7 @@ def posix_shell(chan, log, trace, trace_func):
             if chan is not None:
                 try:
                     if chan.recv_ready():
-                        x = chan.recv(65535)
+                        x = chan.recv(1024)
                         if log is True:
                             logger.info('OUT: %s' % x)
                         nb_write(sys.stdout.fileno(), x)
@@ -133,13 +133,9 @@ def posix_shell(chan, log, trace, trace_func):
                 sleep(0.005)
 
     def get_input():
-        cmd_ord = []
         while chan.closed is False:
             try:
-                x = nb_read(sys.stdin.fileno(), 1)
-                ordx = ord(x)
-                cmd_ord.append(ordx)
-
+                x = nb_read(sys.stdin.fileno(), 1024)
                 if log is True:
                     logger.debug('IN : %s' % x)
                 if chan.send_ready():
