@@ -917,7 +917,7 @@ def set_request_params(kwargs, supported):
     """
     data = {}
     for key in supported:
-        val = kwargs.get(key, None)
+        val = getattr(kwargs, key, None)
         if val is not None:
             data[key] = val
     return data

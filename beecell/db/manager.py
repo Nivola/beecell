@@ -875,6 +875,47 @@ class MysqlManager(SqlManager):
                 connection.close()
         return res
 
+    def get_galera_cluster_status(self):
+        """Get galera cluster status
+        """
+        connection = None
+        res = {}
+        try:
+            connection = self.engine.connect()
+            result = connection.execute('SHOW GLOBAL STATUS LIKE \'wsrep_cluster_status\';')
+            for row in result:
+                res[row[0]] = row[1]
+
+            result = connection.execute('SHOW GLOBAL STATUS LIKE \'wsrep_cluster_size\';')
+            for row in result:
+                res[row[0]] = row[1]
+
+            result = connection.execute('SHOW STATUS LIKE \'wsrep_local_state_comment\';')
+            for row in result:
+                res[row[0]] = row[1]
+
+            self.logger.debug('Get mariadb galera cluster status: %s' % res)
+
+        except Exception as ex:
+            self.logger.error(ex, exc_info=True)
+            raise
+        finally:
+            if connection is not None:
+                connection.close()
+        return res
+
+    '''
+SHOW GLOBAL STATUS LIKE 'wsrep_cluster_status'; 
+Deve essere Primary
+
+SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size'; 
+Deve riportare il numero totale di nodi del cluster (3)
+
+SHOW STATUS LIKE 'wsrep_local_state_comment';  
+I nodi appena aggiunti sono Joined e quindi Synced
+Quindi in una situazione normale tutti i nodi debbono restiuire Synced    
+    '''
+
 
 class PostgresManager(SqlManager):
     def __init__(self, mysql_id, db_uri, connect_timeout=5):

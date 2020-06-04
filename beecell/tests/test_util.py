@@ -25,61 +25,61 @@ logger = logging.getLogger(__name__)
 class BeecellTestCase(unittest.TestCase):
     """Helper class to run test
     """
-    logger = logging.getLogger(u'beecell.test.log')
-    runlogger = logging.getLogger(u'beecell.test.run')
+    logger = logging.getLogger('beecell.test.log')
+    runlogger = logging.getLogger('beecell.test.run')
     pp = pprint.PrettyPrinter(width=200)
-    logging.addLevelName(60, u'TESTPLAN')
-    logging.addLevelName(70, u'TEST')
+    logging.addLevelName(60, 'TESTPLAN')
+    logging.addLevelName(70, 'TEST')
 
     main_config_file = None
     spec_config_file = None
     validation_active = False
-    run_test_user = u'test1'
+    run_test_user = 'test1'
 
     @classmethod
     def setUpClass(cls):
-        logger.log(60, u'#################### Testplan %s - START ####################' % cls.__name__)
+        logger.log(60, '#################### Testplan %s - START ####################' % cls.__name__)
         self = cls
 
         # load configs
         try:
-            home = os.path.expanduser(u'~')
+            home = os.path.expanduser('~')
             if self.main_config_file is None:
-                config_file = u'%s/beecell.yml' % home
+                config_file = '%s/beecell.yml' % home
                 self.main_config_file = config_file
             else:
                 config_file = self.main_config_file
             config = self.load_file(config_file)
-            logger.info(u'Get beecell test configuration: %s' % config_file)
+            logger.info('Get beecell test configuration: %s' % config_file)
         except Exception as ex:
-            raise Exception(u'Error loading config file. Search in user home. %s' % ex)
+            raise Exception('Error loading config file. Search in user home. %s' % ex)
 
         self.test_config = config
 
     @classmethod
     def tearDownClass(cls):
-        logger.log(60, u'#################### Testplan %s - STOP ####################' % cls.__name__)
+        logger.log(60, '#################### Testplan %s - STOP ####################' % cls.__name__)
 
     def setUp(self):
-        logger.log(70, u'========== %s ==========' % self.id()[9:])
+        logger.log(70, '========== %s ==========' % self.id()[9:])
         self.start = time.time()
 
     def tearDown(self):
         elapsed = round(time.time() - self.start, 4)
-        logger.log(70, u'========== %s ========== : %ss' % (self.id()[9:], elapsed))
+        logger.log(70, '========== %s ========== : %ss' % (self.id()[9:], elapsed))
 
     @classmethod
     def load_file(cls, file_config):
-        f = open(file_config, u'r')
+        f = open(file_config, 'r')
         config = f.read()
-        if file_config.find(u'.json') > 0:
+        if file_config.find('.json') > 0:
             config = json.loads(config)
-        elif file_config.find(u'.yml') > 0:
+        elif file_config.find('.yml') > 0:
             config = yaml.load(config, Loader=yaml.Loader)
         f.close()
         return config
 
-    def convert(self, data, separator=u'.'):
+    def convert(self, data, separator='.'):
         if isinstance(data, dict):
             for k, v in data.items():
                 data[k] = self.convert(v, separator)
@@ -91,12 +91,12 @@ class BeecellTestCase(unittest.TestCase):
             data = datal
 
         elif isinstance(data, str) or isinstance(data, unicode):
-            if data.find(u'$REF$') == 0:
-                data = dict_get(self.test_config, data.lstrip(u'$REF$'), separator)
+            if data.find('$REF$') == 0:
+                data = dict_get(self.test_config, data.lstrip('$REF$'), separator)
 
         return data
 
-    def conf(self, key, separator=u'.'):
+    def conf(self, key, separator='.'):
         res = dict_get(self.test_config, key, separator)
         if isinstance(res, dict):
             for k, v in res.items():
@@ -114,7 +114,7 @@ class BeecellTestCase(unittest.TestCase):
         f = urlopen(base_url, req_params, timeout)
         response = f.read()
         f.close()
-        self.logger.debug(u'Send http request to %s' % base_url)
+        self.logger.debug('Send http request to %s' % base_url)
         return response
 
     def http_client2(self, proto, host, path, method, data='', headers={}, port=80, timeout=30):
@@ -135,22 +135,22 @@ class BeecellTestCase(unittest.TestCase):
             '@number': 12524, '@type': 'issue', '@action': 'show'}
         :param timeout: Request timeout. [default=30s]
         """
-        self.logger.debug(u'Send http %s request to %s://%s:%s%s' % (method, proto, host, port, path))
-        if proto == u'http':       
+        self.logger.debug('Send http %s request to %s://%s:%s%s' % (method, proto, host, port, path))
+        if proto == 'http':       
             conn = http_client.HTTPConnection(host, port, timeout=timeout)
         else:
             conn = http_client.HTTPSConnection(host, port, timeout=timeout)
         conn.request(method, path, data, headers)
         response = conn.getresponse()
-        self.logger.debug(u'Response status: %s %s' % (response.status, response.reason))
+        self.logger.debug('Response status: %s %s' % (response.status, response.reason))
         if response.status in [200, 400]:
             res = response.read()
-            if headers[u'Accept'] == u'json':
+            if headers['Accept'] == 'json':
                 res_dict = json.loads(res)
-                self.logger.debug(u'Response data: \n %s' % self.pp.pformat(res_dict))
+                self.logger.debug('Response data: \n %s' % self.pp.pformat(res_dict))
                 return res_dict
             else:
-                self.logger.debug(u'Response data: \n %s' % res)
+                self.logger.debug('Response data: \n %s' % res)
                 return res
         conn.close()
         return None
@@ -160,32 +160,32 @@ class BeecellTestCase(unittest.TestCase):
         return res
 
 
-def configure_test(log_file_name=u'test'):
+def configure_test(log_file_name='test'):
     """Configure est
 
     :param log_file_name: log file name
     """
-    home = os.path.expanduser(u'~')
-    log_file = u'%s/%s.log' % (home, log_file_name)
-    watch_file = u'%s/%s.watch' % (home, log_file_name)
-    # run_file = u'%s/%s.run' % (home, log_file_name)
+    home = os.path.expanduser('~')
+    log_file = '%s/%s.log' % (home, log_file_name)
+    watch_file = '%s/%s.watch' % (home, log_file_name)
+    # run_file = '%s/%s.run' % (home, log_file_name)
 
     logging.captureWarnings(True)
 
     loggers = [
-        logging.getLogger(u'beecell.perf'),
+        logging.getLogger('beecell.perf'),
     ]
-    LoggerHelper.file_handler(loggers, logging.DEBUG, watch_file, frmt=u'%(message)s')
+    LoggerHelper.file_handler(loggers, logging.DEBUG, watch_file, frmt='%(message)s')
 
     # loggers = [
-    #     logging.getLogger(u'beecell.test.run'),
+    #     logging.getLogger('beecell.test.run'),
     # ]
-    # LoggerHelper.file_handler(loggers, logging.DEBUG, run_file, frmt=u'%(message)s')
+    # LoggerHelper.file_handler(loggers, logging.DEBUG, run_file, frmt='%(message)s')
 
     # setting logger
-    frmt = u'%(asctime)s - %(levelname)s - %(message)s'
+    frmt = '%(asctime)s - %(levelname)s - %(message)s'
     loggers = [
-        logging.getLogger(u'beecell')
+        logging.getLogger('beecell')
     ]
     LoggerHelper.file_handler(loggers, logging.DEBUG, log_file, frmt=frmt)
 
