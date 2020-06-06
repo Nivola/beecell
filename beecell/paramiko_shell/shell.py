@@ -6,7 +6,7 @@
 from paramiko.client import SSHClient, MissingHostKeyPolicy
 from paramiko import RSAKey
 from logging import getLogger
-from six import StringIO
+from six import StringIO, ensure_text
 import fcntl
 import termios
 import struct
@@ -35,7 +35,8 @@ class ParamikoShell(object):
         self.keepalive = 30
 
         if keystring is not None:
-            keystring_io = StringIO(keystring.decode('utf-8'))
+            key = ensure_text(keystring)
+            keystring_io = StringIO(key)
             pkey = RSAKey.from_private_key(keystring_io)
             keystring_io.close()
         else:
@@ -80,7 +81,7 @@ class ParamikoShell(object):
             res[u'stdout'].append(line.strip(u'\n'))
         self.client.close()
         if self.post_action is not None:
-            self.post_action(cmd=cmd, elapsed=0)
+            self.post_action(status=None, cmd=cmd, elapsed=0)
         if self.post_logout is not None:
             self.post_logout()
         return res
@@ -118,6 +119,10 @@ class ParamikoShell(object):
         ftp_client = self.client.open_sftp()
         res = ftp_client.listdir_attr(path)
         ftp_client.close()
+        if self.post_action is not None:
+            self.post_action(status=None, cmd='ls -al %s' % path, elapsed=0)
+        if self.post_logout is not None:
+            self.post_logout()
         return res
 
     def open_file(self, filename):

@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 1.6.1 (  , 2020)
+
+* Added ...
+* Fixed ...
+* Integrated ...
+* Various bugfixes
+    * fixed some bugs in paramiko_shell
+
 ## Version 1.6.0 (Nov 08 , 2019)
 
 * Added ...

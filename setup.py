@@ -26,7 +26,7 @@ class install(_install):
 if __name__ == '__main__':
     setup(
         name='beecell',
-        version='1.6',
+        version='1.6.1',
         description='Utility',
         long_description='Utility',
         author='CSI Piemonte',

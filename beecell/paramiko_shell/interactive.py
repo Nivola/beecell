@@ -8,8 +8,7 @@ import sys
 from gevent import spawn, joinall, sleep, socket, queue
 from gevent.os import make_nonblocking, nb_read, nb_write
 import re
-from six import b, u
-
+from six import b, u, ensure_text
 
 logger = getLogger(__name__)
 
@@ -44,7 +43,7 @@ def posix_shell(chan, log, trace, trace_func):
         'del': [27, 91, 75],
         'move': [27, 91, 67],
         'ctrl': [[27, 91, 49, 80], [27, 91, 50, 80], [27, 91, 51, 80], [27, 91, 52, 80], [27, 91, 53, 80],
-                  [27, 91, 54, 80]]
+                 [27, 91, 54, 80]]
 
     }
 
@@ -112,10 +111,9 @@ def posix_shell(chan, log, trace, trace_func):
                         if log is True:
                             logger.info('OUT: %s' % x)
                         nb_write(sys.stdout.fileno(), x)
-                        cmd += str(x)
+                        cmd += ensure_text(x)
                         # cmd = filter(lambda x: x in string.printable, cmd)
 
-                        # logger.warn(cmd)
                         m = re.search(r'[\#\$]\s.*[\r\n]', cmd)
                         if m is not None:
                             cmd = cmd[-10:]
@@ -124,6 +122,7 @@ def posix_shell(chan, log, trace, trace_func):
                             data = u(data.replace('# ', '').replace('$ ', '').rstrip())
                             # data = unicode(data.replace('# ', '').replace('$ ', '').rstrip())
                             data = string_parser([ord(i) for i in data])
+
                             if len(data) > 0:
                                 trace_cmd(data)
                 except socket.timeout:
