@@ -25,8 +25,8 @@ def compact(vals):
     """ """
     if '*' in vals.keys():
         return explore(vals['*'])
-    elif type(vals.values()[0]) in [str, unicode]:
-        return vals.values()
+    elif type(list(vals.values())[0]) in [str, bytes]:
+        return list(vals.values())
     else:
         res = []
         for key, item in vals.items():
@@ -56,6 +56,6 @@ def extract(perms):
     rows = [r.split('//') for r in perms]
     vals = group(rows, 0, len(perms[0].split('//')))
     res = compact(vals)
-    if type(res) is str or type(res) is unicode:
+    if type(res) is str or type(res) is bytes:
         res = [res]
     return res
