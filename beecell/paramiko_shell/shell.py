@@ -54,7 +54,7 @@ class ParamikoShell(object):
             raise
 
     def terminal_size(self):
-        th, tw, hp, wp = struct.unpack('HHHH', fcntl.ioctl(0, termios.TIOCGWINSZ, struct.pack(u'HHHH', 0, 0, 0, 0)))
+        th, tw, hp, wp = struct.unpack('HHHH', fcntl.ioctl(0, termios.TIOCGWINSZ, struct.pack('HHHH', 0, 0, 0, 0)))
         return tw, th
 
     def run(self):
@@ -63,8 +63,8 @@ class ParamikoShell(object):
         tw, th = self.terminal_size()
         self.client.get_transport().set_keepalive(self.keepalive)
         channel = self.client.get_transport().open_session()
-        channel.get_pty(term=u'xterm', width=tw, height=th, width_pixels=0, height_pixels=0)
-        # channel.get_pty(term=u'xterm')
+        channel.get_pty(term='xterm', width=tw, height=th, width_pixels=0, height_pixels=0)
+        # channel.get_pty(term='xterm')
         channel.invoke_shell()
         interactive.interactive_shell(channel, log=False, trace=True, trace_func=self.post_action)
         channel.close()
@@ -76,9 +76,9 @@ class ParamikoShell(object):
         """Execute command in shell
         """
         stdin, stdout, stderr = self.client.exec_command(cmd, timeout=timeout)
-        res = {u'stdout': [], u'stderr': stderr.read()}
+        res = {'stdout': [], 'stderr': ensure_text(stderr.read())}
         for line in stdout:
-            res[u'stdout'].append(line.strip(u'\n'))
+            res['stdout'].append(line.strip('\n'))
         self.client.close()
         if self.post_action is not None:
             self.post_action(status=None, cmd=cmd, elapsed=0)
@@ -138,7 +138,7 @@ class ParamikoShell(object):
         channel = transport.open_session()
         channel.settimeout(self.timeout)
 
-        cmd = u'tail -f %s' % filename
+        cmd = 'tail -f %s' % filename
         channel.exec_command(cmd)
 
         make_nonblocking(sys.stdin.fileno())
