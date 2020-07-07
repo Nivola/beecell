@@ -2,6 +2,7 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
+
 import logging
 import gevent
 from datetime import datetime
@@ -29,7 +30,7 @@ class ElasticsearchFormatter(Formatter):
         try:
             message = record.message
         except:
-            logger.warn(type(record))
+            logger.warning(type(record))
         record.message = ''
 
         if self.usesTime():
@@ -54,7 +55,7 @@ class ElasticsearchFormatter(Formatter):
 
         # add exception trace to error message
         if record.exc_text:
-            message += ' | ' + record.exc_text #.replace('\n', ' | ')
+            message += ' | ' + record.exc_text
 
         # add message to fianle record
         s['message'] = message
@@ -102,7 +103,6 @@ class ElasticsearchHandler(Handler):
         msg.update(self.custom_fields)
         # ex. logstash-2024.03.23
         index = '%s-%s' % (self.index, date.strftime('%Y.%m.%d'))
-        # print('$$$$$$$$$$$ %s %s' % (gevent.getcurrent().name, msg['message']))
         self.client.index(index=index, body=msg, request_timeout=5, doc_type='doc')
 
     def emit(self, record):

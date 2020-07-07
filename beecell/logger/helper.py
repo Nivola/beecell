@@ -89,7 +89,7 @@ class LoggerHelper(object):
             logger.propagate = False
     
     @staticmethod
-    def simple_handler(loggers, logging_level, frmt=None, formatter=ColorFormatter):
+    def simple_handler(loggers, logging_level, frmt=None, formatter=ColorFormatter, propagate=False):
         if frmt is None:
             frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] %(name)s:%(funcName)s:%(lineno)d - %(message)s"
 
@@ -103,7 +103,7 @@ class LoggerHelper(object):
         for logger in loggers:
             logger.addHandler(handler)
             logger.setLevel(logging_level)
-            logger.propagate = False  
+            logger.propagate = propagate
     
     @staticmethod
     def rotatingfile_handler(loggers, logging_level, file_name, maxBytes=104857600, backupCount=10, frmt=None,
