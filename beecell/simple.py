@@ -499,7 +499,6 @@ def get_remote_ip(request):
     :param request: request to do
     :return:  remote ip
     """
-    print(request.environ)
     try:
         try:
             # get remote ip when use nginx as balancer
