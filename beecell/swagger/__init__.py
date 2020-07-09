@@ -16,9 +16,9 @@ logger = getLogger(__name__)
 
 class SwaggerHelper(object):
     def __init__(self):
-        # self.spec = APISpec(title=u'', version=u'', plugins=['apispec.ext.flask', 'apispec.ext.marshmallow'],
+        # self.spec = APISpec(title='', version='', plugins=['apispec.ext.flask', 'apispec.ext.marshmallow'],
         #                     openapi_version='2.0')
-        self.spec = APISpec(title=u'', version=u'', plugins=[FlaskPlugin(), MarshmallowPlugin()],
+        self.spec = APISpec(title='', version='', plugins=[FlaskPlugin(), MarshmallowPlugin()],
                             openapi_version='2.0')
 
     @staticmethod
@@ -53,12 +53,12 @@ class SwaggerHelper(object):
                         'in': context,
                         'name': field,
                         'required': value.required,
-                        'description': value.metadata.get('description', u''),
+                        'description': value.metadata.get('description', ''),
                     }                    
                       
                     field_type = value.__class__.__name__.lower()
-                    # logger.warn(value)
-                    # logger.warn(field_type)
+                    # logger.warning(value)
+                    # logger.warning(field_type)
                     if field_type == 'date':
                         kvargs['type'] = 'string'
                         kvargs['format'] = 'date'
@@ -68,13 +68,13 @@ class SwaggerHelper(object):
                     elif field_type == 'list':
                         try:
                             kvargs['type'] = 'array'
-                            kvargs['collectionFormat'] = value.metadata.get('collection_format', u'')
+                            kvargs['collectionFormat'] = value.metadata.get('collection_format', '')
                             # subfield_type = value.container.__class__.__name__.lower()
                             subfield_type = value.inner.__class__.__name__.lower()
                             kvargs['items'] = {'type': subfield_type}
                             kvargs['name'] = kvargs['name'].replace('_N', '.N')
                         except:
-                            logger.warn(u'', exc_info=1)
+                            logger.warning('', exc_info=True)
                     else:
                         kvargs['type'] = field_type
                     if bool(value.default) is not False:
@@ -201,7 +201,7 @@ class ApiValidator():
     def validate(self, response):
         validate_api_call(self.master_schema, raw_request=response.request, raw_response=response)
         self.code = str(response.status_code)
-        if response.content != u'':
+        if response.content != '':
             self.data = response.json()
             self.compare()
             self.logger.debug('Api request %s is valid' % self.uri)

@@ -9,8 +9,7 @@ import time
 
 class Watch(object):
     def __init__(self, f):
-        self.logger = logging.getLogger(self.__class__.__module__+ \
-                                        '.'+self.__class__.__name__)        
+        self.logger = logging.getLogger(self.__class__.__module__ + '.'+self.__class__.__name__)
         
         self.cls = f.__class__
         self.name = f.__name__

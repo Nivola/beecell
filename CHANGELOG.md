@@ -1,14 +1,14 @@
 # Changelog
 
-## Version 1.6.1 (  , 2020)
+## Version 1.6.1 (Jun 21, 2020)
 
 * Added ...
 * Fixed ...
 * Integrated ...
 * Various bugfixes
-    * fixed some bugs in paramiko_shell
+    * fixed some bugs
 
-## Version 1.6.0 (Nov 08 , 2019)
+## Version 1.6.0 (Nov 08, 2019)
 
 * Added ...
     * add method multi_get

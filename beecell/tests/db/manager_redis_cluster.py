@@ -20,7 +20,7 @@ class RedisManagerTestCase(BeecellTestCase):
     def setUp(self):
         BeecellTestCase.setUp(self)
 
-        self.redis_uri = self.conf(u'redis.cluster')
+        self.redis_uri = self.conf('redis.cluster')
         self.manager = RedisManager(self.redis_uri)
 
     def tearDown(self):
@@ -45,5 +45,5 @@ class RedisManagerTestCase(BeecellTestCase):
         self.manager.inspect(pattern='*', debug=False)
 
 
-if __name__ == u'__main__':
+if __name__ == '__main__':
     runtest(RedisManagerTestCase, tests)

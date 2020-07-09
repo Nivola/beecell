@@ -20,7 +20,7 @@ class UwsgiManager(object):
     """
     """
     def __init__(self):
-        self.logger = getLogger(self.__class__.__module__+ u'.' + self.__class__.__name__)
+        self.logger = getLogger(self.__class__.__module__+ '.' + self.__class__.__name__)
 
     def _get_proc_infos(self, p, extended=False):
         """Internal function to get process infos
@@ -32,81 +32,81 @@ class UwsgiManager(object):
             io_counters = p.io_counters()
             mem = p.memory_full_info()
             files = p.open_files()
-            conns = p.connections(kind=u'all')
+            conns = p.connections(kind='all')
             
-            res = {u'type': u'process',
-                   u'pid': p.pid,
-                   u'ppid': p.ppid(),
-                   u'name': p.name(),
-                   u'exe': p.exe(),
-                   u'cmdline': p.cmdline(),
-                   u'environ': p.environ(),
-                   u'create_time': datetime.fromtimestamp(p.create_time()).strftime(u'%Y-%m-%d %H:%M:%S'),
-                   u'status': p.status(),
-                   u'state': p.is_running(),
-                   u'cwd': p.cwd(),
-                   u'user': {
-                       u'name': p.username(),
-                       u'uids': p.uids,
-                       u'gids': p.gids},
-                   u'stats': {
-                       u'io': {
-                           u'read': {
-                               u'count': io_counters.read_count,
-                               u'bytes': io_counters.read_bytes
+            res = {'type': 'process',
+                   'pid': p.pid,
+                   'ppid': p.ppid(),
+                   'name': p.name(),
+                   'exe': p.exe(),
+                   'cmdline': p.cmdline(),
+                   'environ': p.environ(),
+                   'create_time': datetime.fromtimestamp(p.create_time()).strftime('%Y-%m-%d %H:%M:%S'),
+                   'status': p.status(),
+                   'state': p.is_running(),
+                   'cwd': p.cwd(),
+                   'user': {
+                       'name': p.username(),
+                       'uids': p.uids,
+                       'gids': p.gids},
+                   'stats': {
+                       'io': {
+                           'read': {
+                               'count': io_counters.read_count,
+                               'bytes': io_counters.read_bytes
                            },
-                           u'write': {
-                               u'count': io_counters.write_count,
-                               u'bytes': io_counters.write_bytes
+                           'write': {
+                               'count': io_counters.write_count,
+                               'bytes': io_counters.write_bytes
                            }
                        }
                    },
-                   u'ctx_switches': p.num_ctx_switches(),
-                   u'cpu': p.cpu_percent(interval=0.1),
-                   u'mem': {
-                       u'rss': mem.rss,
-                       u'vms': mem.vms,
-                       u'shared': mem.shared,
-                       u'text': mem.text,
-                       u'lib': mem.lib,
-                       u'data': mem.data,
-                       u'dirty': mem.dirty,
-                       u'uss': mem.uss,
-                       u'pss': mem.pss,
-                       u'swap': mem.swap
+                   'ctx_switches': p.num_ctx_switches(),
+                   'cpu': p.cpu_percent(interval=0.1),
+                   'mem': {
+                       'rss': mem.rss,
+                       'vms': mem.vms,
+                       'shared': mem.shared,
+                       'text': mem.text,
+                       'lib': mem.lib,
+                       'data': mem.data,
+                       'dirty': mem.dirty,
+                       'uss': mem.uss,
+                       'pss': mem.pss,
+                       'swap': mem.swap
                    },
-                   u'fds': {
-                       u'num': p.num_fds(),
-                       u'files': [{
-                           u'path': f.path,
-                           u'fd': f.fd,
-                           u'position': f.position,
-                           u'mode': f.mode,
-                           u'flags': f.flags
+                   'fds': {
+                       'num': p.num_fds(),
+                       'files': [{
+                           'path': f.path,
+                           'fd': f.fd,
+                           'position': f.position,
+                           'mode': f.mode,
+                           'flags': f.flags
                        } for f in files]},
-                   u'cpu': {
-                       u'affinity': p.cpu_affinity()},
-                   u'mem': {
-                       u'use': p.memory_percent(memtype=u'rssu')},
-                   u'conn': [{
-                       u'fd': c.fd,
-                       u'family': c.family,
-                       u'laddr': c.laddr,
-                       u'raddr': c.raddr,
-                       u'status': c.status
+                   'cpu': {
+                       'affinity': p.cpu_affinity()},
+                   'mem': {
+                       'use': p.memory_percent(memtype='rss')},
+                   'conn': [{
+                       'fd': c.fd,
+                       'family': c.family,
+                       'laddr': c.laddr,
+                       'raddr': c.raddr,
+                       'status': c.status
                    } for c in conns],
-                   u'threads': {u'num': p.num_threads(), u'list': p.threads()},
-                   u'children': []}
+                   'threads': {'num': p.num_threads(), 'list': p.threads()},
+                   'children': []}
             if extended is True:
-                res[u'mem'][u'maps'] = p.memory_maps()
+                res['mem']['maps'] = p.memory_maps()
             
-            self.logger.debug(u'Get process: %s' % p)
+            self.logger.debug('Get process: %s' % p)
             for child in p.children(False):
-                res[u'children'].append(self._get_proc_infos(child, extended=extended))
+                res['children'].append(self._get_proc_infos(child, extended=extended))
             return res
         except:
             self.logger.error(traceback.format_exc())
-            raise UwsgiManagerError(u'Can not get process %s info' % p)
+            raise UwsgiManagerError('Can not get process %s info' % p)
             
     def info(self, extended=False):
         """Get uwsgi instance infos
@@ -144,7 +144,7 @@ class UwsgiManager(object):
             type: the address type, either SOCK_STREAM or SOCK_DGRAM.
             laddr: the local address as a (ip, port) tuple or a path in case of AF_UNIX sockets.
             raddr: the remote address as a (ip, port) tuple or an absolute path in case of UNIX sockets. When the r
-                   emote endpoint is not connected you'll get an empty tuple (AF_INET) or None (AF_UNIX). On Linux
+                   emote endpoint is not connected yo'll get an empty tuple (AF_INET) or None (AF_UNIX). On Linux
                    AF_UNIX sockets will always have this set to None.
             status: represents the status of a TCP connection. The return value is one of the psutil.CONN_* constants.
                     For UDP and UNIX sockets this is always going to be psutil.CONN_NONE.
@@ -154,7 +154,7 @@ class UwsgiManager(object):
         """
         master_proc = psutil.Process(int(uwsgi_util.masterpid()))
         resp = self._get_proc_infos(master_proc, extended=extended)
-        self.logger.debug(u'Get uwsgi processes: %s' % truncate(resp))
+        self.logger.debug('Get uwsgi processes: %s' % truncate(resp))
         return resp
     
     def stats(self):
@@ -163,18 +163,18 @@ class UwsgiManager(object):
         :raise UwsgiManagerError:
         """
         try:
-            timestamp = strftime(u'%d %b %Y %H:%M:%S +0000', gmtime())
+            timestamp = strftime('%d %b %Y %H:%M:%S +0000', gmtime())
             
             resp = {
-                u'timestamp': timestamp,
-                u'workers': uwsgi_util.workers(),
-                u'masterpid': uwsgi_util.masterpid(),
-                u'tot_requests': uwsgi_util.total_requests(),
-                u'mem': uwsgi_util.mem()}
-            self.logger.debug(u'Get uwsgi workers stats: %s' % truncate(resp))
+                'timestamp': timestamp,
+                'workers': uwsgi_util.workers(),
+                'masterpid': uwsgi_util.masterpid(),
+                'tot_requests': uwsgi_util.total_requests(),
+                'mem': uwsgi_util.mem()}
+            self.logger.debug('Get uwsgi workers stats: %s' % truncate(resp))
             return resp
         except:
-            raise UwsgiManagerError(u'Can not get info for uwsgi server')
+            raise UwsgiManagerError('Can not get info for uwsgi server')
 
     def reload(self):
         """Reload uwsgi instance
@@ -183,11 +183,11 @@ class UwsgiManager(object):
         """
         try:
             pid = uwsgi_util.masterpid()
-            timestamp = strftime(u'%d %b %Y %H:%M:%S +0000', gmtime())
+            timestamp = strftime('%d %b %Y %H:%M:%S +0000', gmtime())
             reloadState = uwsgi_util.reload()
-            resp = {u'timestamp': timestamp, u'msg': str(reloadState)}
+            resp = {'timestamp': timestamp, 'msg': str(reloadState)}
         
-            self.logger.debug(u'Reload uwsgi instance %s: %s' % (pid, resp))
+            self.logger.debug('Reload uwsgi instance %s: %s' % (pid, resp))
             return resp
         except:
-            raise UwsgiManagerError(u'Can not reload uwsgi server')
+            raise UwsgiManagerError('Can not reload uwsgi server')

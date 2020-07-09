@@ -7,7 +7,7 @@ from beecell.auth import extract
 from beecell.tests.test_util import BeecellTestCase, runtest
 
 tests = [
-    u'test_extract'
+    'test_extract'
 ]
 
 
@@ -30,5 +30,5 @@ class PermTestCase(BeecellTestCase):
         self.logger.debug(res)
 
 
-if __name__ == u'__main__':
+if __name__ == '__main__':
     runtest(PermTestCase, tests)

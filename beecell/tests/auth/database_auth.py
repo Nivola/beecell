@@ -13,7 +13,7 @@ import bcrypt
 
 
 tests = [
-    u'test_login'
+    'test_login'
 ]
 
 session = None
@@ -23,7 +23,7 @@ Base = declarative_base()
 class User(Base):
     """User
     """
-    __tablename__ = u'user'
+    __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
     uuid = Column(String(50), unique=True)
@@ -59,11 +59,11 @@ class DbAuthTestCase(BeecellTestCase):
     def setUp(self):
         BeecellTestCase.setUp(self)
 
-        self.manager = SqlManager(1, self.conf(u'authdb.conn'), connect_timeout=self.conf(u'authdb.timeout'))
+        self.manager = SqlManager(1, self.conf('authdb.conn'), connect_timeout=self.conf('authdb.timeout'))
         self.manager.create_simple_engine()
         self.auth_provider = DatabaseAuth(AuthDbManager, self.manager, SystemUser)
-        self.user = self.conf(u'authdb.user')
-        self.password = self.conf(u'authdb.pwd')
+        self.user = self.conf('authdb.user')
+        self.password = self.conf('authdb.pwd')
 
     def tearDown(self):
         BeecellTestCase.tearDown(self)
@@ -76,5 +76,5 @@ class DbAuthTestCase(BeecellTestCase):
         self.manager.release_session(session)
 
 
-if __name__ == u'__main__':
+if __name__ == '__main__':
     runtest(DbAuthTestCase, tests)

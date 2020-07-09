@@ -28,9 +28,8 @@ class RedisSessionInterface(SessionInterface):
     session_class = RedisSession
     session_duration = 1800
 
-    def __init__(self, redis=None, prefix=u'session:'):
-        self.logger = logging.getLogger(self.__class__.__module__+ \
-                                        u'.'+self.__class__.__name__)        
+    def __init__(self, redis=None, prefix='session:'):
+        self.logger = logging.getLogger(self.__class__.__module__ + '.'+self.__class__.__name__)
         
         if redis is None:
             redis = Redis()

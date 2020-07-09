@@ -9,7 +9,7 @@ from beecell.tests.test_util import BeecellTestCase
 
 
 tests = [
-    u'test_send'
+    'test_send'
 ]
 
 
@@ -17,7 +17,7 @@ class MailerTestCase(BeecellTestCase):
     def setUp(self):
         BeecellTestCase.setUp(self)
 
-        self.mailer = Mailer(self.conf(u'sendmail.mailer'))
+        self.mailer = Mailer(self.conf('sendmail.mailer'))
 
     def tearDown(self):
         BeecellTestCase.tearDown(self)
@@ -37,12 +37,12 @@ class MailerTestCase(BeecellTestCase):
         </html>
         """
         # me == the sender's email address
-        me = self.conf(u'sendmail.sender')
+        me = self.conf('sendmail.sender')
         # you == the recipient's email address
-        you = self.conf(u'sendmail.receiver')
+        you = self.conf('sendmail.receiver')
         
-        self.mailer.send(me, you, u'test', text, html)
+        self.mailer.send(me, you, 'test', text, html)
 
 
-if __name__ == u'__main__':
+if __name__ == '__main__':
     runtest(MailerTestCase, tests)

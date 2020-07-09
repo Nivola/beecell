@@ -5,13 +5,13 @@
 
 import sys
 
-from cement.core.controller import expose
+from cement.ext.ext_argparse import expose
 from beecell.cement_cmd.foundation import CementCmdBaseController, CementCmd
 from beecell.tests.test_util import runtest
 from beecell.tests.test_util import BeecellTestCase
 
 tests = [
-    u'test_create'
+    'test_create'
 ]
 
 
@@ -48,7 +48,7 @@ class MyApp(CementCmd):
         label = 'beehive'
         base_controller = 'base'
         handlers = [MyBaseController, MySecondController]
-        prompt = u'beehive> '
+        prompt = 'beehive> '
         ignore_unknown_arguments = True
 
 
@@ -60,12 +60,12 @@ class CementTestCase(BeecellTestCase):
         BeecellTestCase.tearDown(self)
 
     def test_create(self):
-        app = MyApp(u'prova')
+        app = MyApp('prova')
         # app.setup()
         app.run()
         # app.run_forever()
         app.close()
 
 
-if __name__ == u'__main__':
+if __name__ == '__main__':
     runtest(CementTestCase, tests)

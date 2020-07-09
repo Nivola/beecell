@@ -31,10 +31,10 @@ def watch(func):
         elapsed = round(time.time() - start, 5)
 
         # log execution info in watch logger
-        info = u'%s:%s - %s %s %s - %s:%s - %s' % (cp.ident, ct.ident, uw_pid, uw_mid, uw_rid, func.__module__,
-                                                   func.func_name, elapsed)
+        info = '%s:%s - %s %s %s - %s:%s - %s' % (cp.ident, ct.ident, uw_pid, uw_mid, uw_rid, func.__module__,
+                                                  func.func_name, elapsed)
 
         # log info in runtime logger
-        logging.getLogger(u'gibbon.util.watch').info(info)
+        logging.getLogger('beehive.util.watch').info(info)
         return ret
     return inner

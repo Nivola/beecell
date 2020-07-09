@@ -1,23 +1,24 @@
 # beecell
-__beecell__ is a project that contains various python 2 utility modules. Utility are useful to manage password, connect to a sql db
-and manage a remote ssh connection.
+__beecell__ is a project that contains various python 2 utility modules. Utility are useful to manage password, connect 
+to a sql db and manage a remote ssh connection.
 
 Here a more specific description of packages and modules.
 
 Utility file that include variuos function:
 - __simple.py__: general function for password encryption and decryption, dictionary utility, print data etc.
-- __remote.py__: varius class create remote client, run ssh command, run tcp command, make http request, install software in a remote portal
+- __remote.py__: varius class create remote client, run ssh command, run tcp command, make http request, install 
+  software in a remote portal
 
 Utility package:
-- __paramiko_shell__: Python implementation of SSHv2. This package run and interactive shell and offers utility to handle it
+- __paramiko_shell__: Python implementation of SSHv2. This package run and interactive shell and offers utility to 
+  handle it
 - __networkx__: utility for handle  network
 - __db__: database manager for mysql, postgress and redis
 - __auth__: authentication manager based on database and on ldap
 - __logger__: logging helper
-- __cement_cmd__: cement 2 (https://pypi.org/project/cement/2.2.2/) extensions
 
 ## Prerequisites
-Fundamental requirements is python 2.7.
+Fundamental requirements is python 3.5>.
 
 First of all you have to install some package:
 
@@ -29,14 +30,14 @@ $ sudo apt-get install -y python-dev libldap2-dev libsasl2-dev libssl-dev
 At this point create a virtual env
 
 ```
-$ virtualenv venv
-$ source venv/bin/activate
+$ python3 -m venv /tmp/beehive-py3-test-env
+$ source /tmp/beehive-py3-test-env/bin/activate
 ```
 
 ## Installing
 
 ```
-$ pip install git+https://github.com/Nivola/beecell.git
+$ pip install -U git+https://github.com/Nivola/beecell.git
 ```
 
 ## Running the tests
@@ -45,7 +46,7 @@ Results of vulnerability assessment and/or penetration test.
 - Activate virtual env
 
 ```
-$ source venv/bin/activate
+$ source /tmp/beehive-py3-test-env/bin/activate
 ```
 
 - Open tests directory __beecell/tests__

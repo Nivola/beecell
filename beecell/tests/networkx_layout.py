@@ -9,7 +9,7 @@ from beecell.tests.test_util import runtest
 from beecell.tests.test_util import BeecellTestCase
 
 tests = [
-    u'test_grid_layout'
+    'test_grid_layout'
 ]
 
 
@@ -27,9 +27,9 @@ class LayoutTestCase(BeecellTestCase):
         layout.generate_grid(1000, 500, 160, 70)
         layout.place_nodes()
         res = layout.print_grid()
-        with open(u'graph.svg', u'w') as text_file:
+        with open('graph.svg', 'w') as text_file:
             text_file.write(res)
 
 
-if __name__ == u'__main__':
+if __name__ == '__main__':
     runtest(LayoutTestCase, tests)
