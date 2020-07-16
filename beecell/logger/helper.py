@@ -5,6 +5,8 @@
 
 import sys
 import logging
+from socket import SOCK_STREAM, SOCK_DGRAM
+
 from celery.utils.log import ColorFormatter as CeleryColorFormatter
 from celery.utils.term import colored
 
@@ -133,6 +135,20 @@ class LoggerHelper(object):
         else:
             handler.setFormatter(formatter(frmt))        
         
+        for logger in loggers:
+            logger.addHandler(handler)
+            logger.setLevel(logging_level)
+            logger.propagate = propagate
+
+    @staticmethod
+    def syslog_handler(loggers, logging_level, syslog_server, facility, frmt=None, propagate=False, syslog_port=514):
+        if frmt is None:
+            frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] %(name)s:%(funcName)s:%(lineno)d - %(message)s"
+        handler = logging.handlers.SysLogHandler(address=(syslog_server, syslog_port), facility=facility,
+                                                 socktype=SOCK_DGRAM)
+        handler.setLevel(logging_level)
+        handler.setFormatter(logging.Formatter(frmt))
+
         for logger in loggers:
             logger.addHandler(handler)
             logger.setLevel(logging_level)
