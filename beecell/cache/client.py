@@ -75,7 +75,6 @@ class CacheClient(object):
         :return: True
         """
         keys = self.redis.keys(self.prefix + pattern)
-        self.logger.warn(keys)
         if len(keys) > 0:
             res = self.redis.delete(*keys)
             return res
