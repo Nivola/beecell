@@ -23,7 +23,7 @@ logger = getLogger(__name__)
 
 class ParamikoShell(object):
     def __init__(self, host, user, port=22, pwd=None, keyfile=None, keystring=None, pre_login=None, post_logout=None,
-                 post_action=None):
+                 post_action=None, **kwargs):
         self.post_logout = post_logout
         self.post_action = post_action
 
@@ -47,7 +47,7 @@ class ParamikoShell(object):
         try:
             self.client.connect(host, port, username=user, password=pwd, key_filename=keyfile, pkey=pkey,
                                 look_for_keys=False, compress=True, timeout=self.timeout, auth_timeout=self.timeout,
-                                banner_timeout=self.timeout)
+                                banner_timeout=self.timeout, **kwargs)
         except Exception as ex:
             if self.post_logout is not None:
                 self.post_logout(status=str(ex))
@@ -72,14 +72,55 @@ class ParamikoShell(object):
         if self.post_logout is not None:
             self.post_logout()
 
-    def cmd(self, cmd, timeout=1.0):
+    def cmd1(self, cmd):
+        from six import b, u, ensure_text
+        try:
+            import termios
+            import tty
+            has_termios = True
+        except ImportError:
+            has_termios = False
+
+        channel = self.client.get_transport().open_session()
+        channel.settimeout(5)
+        channel.setblocking(1)
+        send_ready = channel.send_ready()
+        print(send_ready)
+        while send_ready is False:
+            send_ready = channel.send_ready()
+            print(send_ready)
+        channel.send(cmd)
+        print(cmd)
+        # while channel.closed is False:
+        if channel.recv_ready():
+            x = channel.recv(1024)
+            print(x)
+        channel.close()
+
+        # old_stdin = termios.tcgetattr(sys.stdin.fileno())
+        # tty.setraw(sys.stdin.fileno())
+        # tty.setcbreak(sys.stdin.fileno())
+        # channel.settimeout(0.0)
+        # channel.setblocking(0)
+        # make_nonblocking(sys.stdin.fileno())
+        # termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old_stdin)
+        # # nb_write(sys.stdout.fileno(), b('\n'))
+        # channel.send(cmd)
+        #
+        # if chan.recv_ready():
+        #     x = chan.recv(1024)
+        #     if log is True:
+        #         logger.info('OUT: %s' % x)
+        #     nb_write(sys.stdout.fileno(), x)
+
+    def cmd(self, cmd, timeout=1.0, **kwargs):
         """Execute command in shell
         """
-        stdin, stdout, stderr = self.client.exec_command(cmd, timeout=timeout)
+        stdin, stdout, stderr = self.client.exec_command(cmd, timeout=timeout, **kwargs)
         res = {'stdout': [], 'stderr': ensure_text(stderr.read())}
         for line in stdout:
             res['stdout'].append(line.strip('\n'))
-        self.client.close()
+        # self.client.close()
         if self.post_action is not None:
             self.post_action(status=None, cmd=cmd, elapsed=0)
         if self.post_logout is not None:
