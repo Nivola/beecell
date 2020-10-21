@@ -68,6 +68,18 @@ class CacheClient(object):
         self.logger.debug('Delete cache item %s' % key)
         return True
 
+    def get_by_pattern(self, pattern):
+        """Get keys by pattern
+
+        :param pattern: key search pattern
+        :return: list of items
+        """
+        keys = self.redis.keys(self.prefix + pattern)
+        res = []
+        for key in keys:
+            res.append({'key': key, 'value': self.redis.get(key)})
+        return res
+
     def delete_by_pattern(self, pattern):
         """Delete keys by pattern
 
