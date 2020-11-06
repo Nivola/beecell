@@ -26,7 +26,6 @@ class SwaggerHelper(object):
         new = deepcopy(orig)
         new.update(data)
         return new
-
     def get_parameters(self, schema):
         """Get swagger query parameters from schema
         
@@ -37,9 +36,9 @@ class SwaggerHelper(object):
         res = []
         kvargs = {}
         for field, value in fields.items():
-            if getattr(value, 'load_from', None) is not None:
-                field = value.load_from
-            
+            if getattr(value, 'data_key', None) is not None:
+                field = value.data_key    
+
             context = value.metadata.get('context', None)
             if context is not None:
                 if context == 'body':
@@ -72,7 +71,7 @@ class SwaggerHelper(object):
                             # subfield_type = value.container.__class__.__name__.lower()
                             subfield_type = value.inner.__class__.__name__.lower()
                             kvargs['items'] = {'type': subfield_type}
-                            kvargs['name'] = kvargs['name'].replace('_N', '.N')
+                            # kvargs['name'] = kvargs['name'].replace('_N', '.N')
                         except:
                             logger.warning('', exc_info=True)
                     else:
