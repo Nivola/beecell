@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 1.6.2 (, 2020)
+
+* Added ...
+    * added mysql manager methods to manage mysql replica
+* Fixed ...
+* Integrated ...
+* Various bugfixes
+
 ## Version 1.6.1 (Jun 21, 2020)
 
 * Added ...

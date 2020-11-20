@@ -904,17 +904,104 @@ class MysqlManager(SqlManager):
                 connection.close()
         return res
 
-    '''
-SHOW GLOBAL STATUS LIKE 'wsrep_cluster_status'; 
-Deve essere Primary
+    def get_replica_master_status(self):
+        """Get replica master status
+        """
+        connection = None
+        res = {}
+        try:
+            connection = self.engine.connect()
+            result = connection.execute('SHOW MASTER STATUS;')
+            for row in result:
+                res[row[0]] = row[1]
 
-SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size'; 
-Deve riportare il numero totale di nodi del cluster (3)
+            self.logger.debug('Get mariadb replica master status: %s' % res)
 
-SHOW STATUS LIKE 'wsrep_local_state_comment';  
-I nodi appena aggiunti sono Joined e quindi Synced
-Quindi in una situazione normale tutti i nodi debbono restiuire Synced    
-    '''
+        except Exception as ex:
+            self.logger.error(ex, exc_info=True)
+            raise
+        finally:
+            if connection is not None:
+                connection.close()
+        return res
+
+    def get_replica_slave_status(self):
+        """Get replica slave status
+        """
+        connection = None
+
+        desc = [
+            'Slave_IO_State', 'Master_Host', 'Master_User', 'Master_Port', 'Connect_Retry', 'Master_Log_File',
+            'Read_Master_Log_Pos', 'Relay_Log_File', 'Relay_Log_Pos', 'Relay_Master_Log_File', 'Slave_IO_Running',
+            'Slave_SQL_Running', 'Replicate_Do_DB', 'Replicate_Ignore_DB', 'Replicate_Do_Table',
+            'Replicate_Ignore_Table', 'Replicate_Wild_Do_Table', 'Replicate_Wild_Ignore_Table', 'Last_Errno',
+            'Last_Error', 'Skip_Counter', 'Exec_Master_Log_Pos', 'Relay_Log_Space', 'Until_Condition', 'Until_Log_File',
+            'Until_Log_Pos', 'Master_SSL_Allowed', 'Master_SSL_CA_File', 'Master_SSL_CA_Path', 'Master_SSL_Cert',
+            'Master_SSL_Cipher', 'Master_SSL_Key', 'Seconds_Behind_Master', 'Master_SSL_Verify_Server_Cert',
+            'Last_IO_Errno', 'Last_IO_Error', 'Last_SQL_Errno', 'Last_SQL_Error', 'Replicate_Ignore_Server_Ids',
+            'Master_Server_Id', 'Master_SSL_Crl', 'Master_SSL_Crlpath', 'Using_Gtid', 'Gtid_IO_Pos',
+            'Replicate_Do_Domain_Ids', 'Replicate_Ignore_Domain_Ids', 'Parallel_Mode', 'SQL_Delay',
+            'SQL_Remaining_Delay', 'Slave_SQL_Running_State', 'Slave_DDL_Groups', 'Slave_Non_Transactional_Groups',
+            'Slave_Transactional_Groups'
+        ]
+
+        res = []
+        try:
+            connection = self.engine.connect()
+            result = connection.execute('SHOW SLAVE STATUS;')
+            for row in result:
+                item = {}
+                for i in range(len(row)):
+                    item[desc[i]] = row[i]
+                res.append(item)
+
+            self.logger.debug('Get mariadb replica slave status: %s' % res)
+
+        except Exception as ex:
+            self.logger.error(ex, exc_info=True)
+            raise
+        finally:
+            if connection is not None:
+                connection.close()
+        return res
+
+    def stop_replica_on_slave(self):
+        """stop replica on slave
+        """
+        connection = None
+
+        res = []
+        try:
+            connection = self.engine.connect()
+            connection.execute('STOP SLAVE;')
+            self.logger.debug('stop replica on slave')
+
+        except Exception as ex:
+            self.logger.error(ex, exc_info=True)
+            raise
+        finally:
+            if connection is not None:
+                connection.close()
+        return res
+
+    def start_replica_on_slave(self):
+        """start replica on slave
+        """
+        connection = None
+
+        res = []
+        try:
+            connection = self.engine.connect()
+            connection.execute('START SLAVE;')
+            self.logger.debug('start replica on slave')
+
+        except Exception as ex:
+            self.logger.error(ex, exc_info=True)
+            raise
+        finally:
+            if connection is not None:
+                connection.close()
+        return res
 
 
 class PostgresManager(SqlManager):
