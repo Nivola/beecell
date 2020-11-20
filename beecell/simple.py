@@ -920,3 +920,13 @@ def set_request_params(kwargs, supported):
         if val is not None:
             data[key] = val
     return data
+
+
+def get_line(size, char='-'):
+    """Create a string of size char
+
+    :param size: line lenght
+    :param char: character used to create string
+    """
+    res = char * size
+    return res
