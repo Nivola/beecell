@@ -127,6 +127,43 @@ class ParamikoShell(object):
             self.post_logout()
         return res
 
+    def mkdir(self, dirname):
+        """Create e directory in remote server
+
+        :param dirname: nameof the directory
+        :return: True if all is ok
+        """
+        res = self.cmd('mkdir -p %s' % dirname, timeout=5.0)
+        if res.get('stderr') != '':
+            return False
+        return True
+
+    def chown(self, dirname, user='root', group='root'):
+        """Change owner of a directory in remote server
+
+        :param dirname: nameof the directory
+        :param user: directory user owner
+        :param group: directory group owner
+        :return: True if all is ok
+        """
+        res = self.cmd('chown -R $(id -u %s):%s %s' % (user, group, dirname), timeout=5.0)
+        # res = self.cmd('chown -R $(id -u %s) %s' % (user, dirname), timeout=5.0)
+        if res.get('stderr') != '':
+            return False
+        return True
+
+    def chmod(self, dirname, acl='700'):
+        """Change acl of a directory in remote server
+
+        :param dirname: nameof the directory
+        :param acl: directory acl
+        :return: True if all is ok
+        """
+        res = self.cmd('chmod -R %s %s' % (acl, dirname), timeout=5.0)
+        if res.get('stderr') != '':
+            return False
+        return True
+
     def file_put(self, source, dest):
         """Put a local file to remote server
 
