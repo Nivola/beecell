@@ -112,7 +112,6 @@ def posix_shell(chan, log, trace, trace_func):
                             logger.info('OUT: %s' % x)
                         nb_write(sys.stdout.fileno(), x)
                         cmd += ensure_text(x)
-                        # cmd = filter(lambda x: x in string.printable, cmd)
 
                         m = re.search(r'[\#\$]\s.*[\r\n]', cmd)
                         if m is not None:
@@ -120,31 +119,36 @@ def posix_shell(chan, log, trace, trace_func):
                             m.group(0)
                             data = m.group(0)
                             data = u(data.replace('# ', '').replace('$ ', '').rstrip())
-                            # data = unicode(data.replace('# ', '').replace('$ ', '').rstrip())
                             data = string_parser([ord(i) for i in data])
 
                             if len(data) > 0:
                                 trace_cmd(data)
+                                cmd = ''
+                except socket.timeout:
+                    logger.error('', exc_info=True)
+                except:
+                    logger.error('', exc_info=True)
+                sleep(0.005)
+            if chan.exit_status_ready() is True:
+                break
+
+    def get_input():
+        while chan.closed is False:
+            if chan is not None:
+                try:
+                    x = nb_read(sys.stdin.fileno(), 1024)
+                    if log is True:
+                        logger.debug('IN : %s' % x)
+                    if chan.send_ready():
+                        chan.send(x)
                 except socket.timeout:
                     logger.error('', exc_info=True)
                 except Exception:
                     logger.error('', exc_info=True)
+                    break
                 sleep(0.005)
-
-    def get_input():
-        while chan.closed is False:
-            try:
-                x = nb_read(sys.stdin.fileno(), 1024)
-                if log is True:
-                    logger.debug('IN : %s' % x)
-                if chan.send_ready():
-                    chan.send(x)
-            except socket.timeout:
-                logger.error('', exc_info=True)
-            except Exception:
-                logger.error('', exc_info=True)
+            if chan.exit_status_ready() is True:
                 break
-            sleep(0.005)
 
     joinall([
         spawn(get_input),
