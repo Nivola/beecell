@@ -930,3 +930,14 @@ def get_line(size, char='-'):
     """
     res = char * size
     return res
+
+
+def get_pretty_size(data):
+    """Convert size in pritty string"""
+    if 1024 < data <= 1048576:
+        data = '%sKB' % round(data / 1024, 2)
+    elif 1048576 < data <= 1073741824:
+        data = '%sMB' % round(data / 1048576, 2)
+    elif data > 1073741824:
+        data = '%sGB' % round(data / 1073741824, 2)
+    return data

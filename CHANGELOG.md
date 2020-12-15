@@ -4,8 +4,8 @@
 
 * Added ...
     * added mysql manager methods to manage mysql replica
-    * added method get_line
-    * add ParamikoShell commands mkdir, chown, chmod
+    * added methods get_line, get_pretty_size
+    * add ParamikoShell commands mkdir, chown, chmod   
 * Fixed ...
     * correct some bugs in ParamikoShell: exit sometimes was not captured, command trace run twice.
 * Integrated ...
