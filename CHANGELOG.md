@@ -8,6 +8,7 @@
     * add ParamikoShell commands mkdir, chown, chmod   
 * Fixed ...
     * correct some bugs in ParamikoShell: exit sometimes was not captured, command trace run twice.
+    * correct connection release in MysqlManager
 * Integrated ...
 * Various bugfixes
 

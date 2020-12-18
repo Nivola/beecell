@@ -405,6 +405,7 @@ class SqlManager(ConnectionManager):
         finally:
             if connection is not None:
                 connection.close()
+                self.engine.dispose()
                 
     def invalidate_connection_pool(self):
         self.engine.dispose()
@@ -440,6 +441,7 @@ class SqlManager(ConnectionManager):
         finally:
             if connection is not None:
                 connection.close()
+                self.engine.dispose()
         return res
 
     def add_schema(self, db_name, charset=None):
@@ -463,6 +465,7 @@ class SqlManager(ConnectionManager):
         finally:
             if connection is not None:
                 connection.close()
+                self.engine.dispose()
         return res
 
     def drop_schema(self, db_name):
@@ -483,6 +486,7 @@ class SqlManager(ConnectionManager):
         finally:
             if connection is not None:
                 connection.close()
+                self.engine.dispose()
         return res
 
     def get_users(self):
@@ -503,6 +507,7 @@ class SqlManager(ConnectionManager):
         finally:
             if connection is not None:
                 connection.close()
+                self.engine.dispose()
         return res
 
     def add_user(self, name, host, password):
@@ -525,6 +530,7 @@ class SqlManager(ConnectionManager):
         finally:
             if connection is not None:
                 connection.close()
+                self.engine.dispose()
         return True
 
     def grant_schema_to_user(self, name, host, schema):
@@ -547,6 +553,7 @@ class SqlManager(ConnectionManager):
         finally:
             if connection is not None:
                 connection.close()
+                self.engine.dispose()
         return True
 
     def drop_user(self, db_name):
@@ -567,6 +574,7 @@ class SqlManager(ConnectionManager):
         finally:
             if connection is not None:
                 connection.close()
+                self.engine.dispose()
         return res
         
     def get_tables_names(self):
@@ -586,9 +594,9 @@ class SqlManager(ConnectionManager):
         res = []
         try:
             connection = self.engine.connect()
-            sql = u"select table_name, table_rows, data_length, index_length, "\
-                  u"auto_increment from information_schema.tables where "\
-                  u"table_schema='%s' order by table_name"
+            sql = "select table_name, table_rows, data_length, index_length, "\
+                  "auto_increment from information_schema.tables where "\
+                  "table_schema='%s' order by table_name"
             result = connection.execute(sql % schema)
             for row in result:
                 res.append({
@@ -606,6 +614,7 @@ class SqlManager(ConnectionManager):
         finally:
             if connection is not None:
                 connection.close()
+                self.engine.dispose()
         return res      
 
     def get_table_description(self, table_name):
@@ -685,6 +694,7 @@ class SqlManager(ConnectionManager):
         finally:
             if connection is not None:
                 connection.close()
+                self.engine.dispose()
         return res, total
     
     def get_connection(self):
@@ -848,6 +858,7 @@ class MysqlManager(SqlManager):
         finally:
             if connection is not None:
                 connection.close()
+                self.engine.dispose()
         return None
 
     def get_cluster_status(self):
@@ -873,6 +884,7 @@ class MysqlManager(SqlManager):
         finally:
             if connection is not None:
                 connection.close()
+                self.engine.dispose()
         return res
 
     def get_galera_cluster_status(self):
@@ -902,6 +914,7 @@ class MysqlManager(SqlManager):
         finally:
             if connection is not None:
                 connection.close()
+                self.engine.dispose()
         return res
 
     def get_replica_master_status(self):
@@ -923,6 +936,7 @@ class MysqlManager(SqlManager):
         finally:
             if connection is not None:
                 connection.close()
+                self.engine.dispose()
         return res
 
     def get_replica_slave_status(self):
@@ -963,6 +977,7 @@ class MysqlManager(SqlManager):
         finally:
             if connection is not None:
                 connection.close()
+                self.engine.dispose()
         return res
 
     def stop_replica_on_slave(self):
@@ -982,6 +997,7 @@ class MysqlManager(SqlManager):
         finally:
             if connection is not None:
                 connection.close()
+                self.engine.dispose()
         return res
 
     def start_replica_on_slave(self):
@@ -1001,6 +1017,7 @@ class MysqlManager(SqlManager):
         finally:
             if connection is not None:
                 connection.close()
+                self.engine.dispose()
         return res
 
 
