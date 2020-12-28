@@ -47,7 +47,9 @@ if __name__ == '__main__':
         author_email='nivola.engineering@csi.it',
         license='GPL v3',
         url='',
-        scripts=[],
+        scripts=[
+            'VERSION'
+        ],
         packages=[
             'beecell.amqp',
             'beecell.auth',
@@ -86,12 +88,8 @@ if __name__ == '__main__':
             'Programming Language :: Python'
         ],
         entry_points={},
-        data_files=[
-            ('.', ['beecell/VERSION']),
-        ],
-        package_data={
-            'VERSION'
-        },
+        data_files=[],
+        package_data={},
         install_requires=load_requires(),
         dependency_links=[],
         zip_safe=True,
