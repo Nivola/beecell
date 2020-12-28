@@ -86,7 +86,9 @@ if __name__ == '__main__':
             'Programming Language :: Python'
         ],
         entry_points={},
-        data_files=[],
+        data_files=[
+            ('.', ['beehive/VERSION']),
+        ],
         package_data={},
         install_requires=load_requires(),
         dependency_links=[],
