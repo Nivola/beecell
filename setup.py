@@ -89,7 +89,9 @@ if __name__ == '__main__':
         data_files=[
             ('.', ['beecell/VERSION']),
         ],
-        package_data={},
+        package_data={
+            'VERSION'
+        },
         install_requires=load_requires(),
         dependency_links=[],
         zip_safe=True,
