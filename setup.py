@@ -88,7 +88,7 @@ if __name__ == '__main__':
         entry_points={},
         data_files=[],
         package_dir={
-            'beecell': 'beecell/beecell'
+            'beecell': 'beecell'
         },
         package_data={
             'beecell': ['VERSION']
