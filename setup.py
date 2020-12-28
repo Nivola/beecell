@@ -31,7 +31,7 @@ def load_requires():
 
 
 def load_version():
-    with open('./%s/VERSION' % __name__) as f:
+    with open('./beecell/VERSION') as f:
         version = f.read()
     return version
 
