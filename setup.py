@@ -49,6 +49,7 @@ if __name__ == '__main__':
         url='',
         scripts=[],
         packages=[
+            'beecell',
             'beecell.amqp',
             'beecell.auth',
             'beecell.cache',
