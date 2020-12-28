@@ -88,7 +88,7 @@ if __name__ == '__main__':
         entry_points={},
         data_files=[],
         package_data={
-            '': ['VERSION']
+            'beecell': ['VERSION']
         },
         install_requires=load_requires(),
         dependency_links=[],
