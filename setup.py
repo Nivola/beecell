@@ -87,7 +87,7 @@ if __name__ == '__main__':
         ],
         entry_points={},
         data_files=[
-            ('.', ['beehive/VERSION']),
+            ('.', ['beecell/VERSION']),
         ],
         package_data={},
         install_requires=load_requires(),
