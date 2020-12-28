@@ -31,7 +31,7 @@ def load_requires():
 
 
 def load_version():
-    with open('./VERSION.md') as f:
+    with open('./%s/VERSION' % __name__) as f:
         version = f.read()
     return version
 

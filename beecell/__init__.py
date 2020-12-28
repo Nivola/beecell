@@ -5,7 +5,7 @@
 # (C) Copyright 2020-2021 CSI-Piemonte
 
 import os.path
-with open('./VERSION.md') as f:
+with open('%sVERSION' % __file__.replace('__init__.py', '')) as f:
     __version__ = f.read()
 
 version_file = os.path.join(os.path.abspath(__file__).rstrip('__init__.pyc'), 'VERSION')

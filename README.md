@@ -23,16 +23,23 @@ Fundamental requirements is python 3.5>.
 First of all you have to install some package and create a python virtual env:
 
 ```
-$ sudo apt-get install gcc
-$ sudo apt-get install -y python-dev libldap2-dev libsasl2-dev libssl-dev
+$ sudo apt -y install gcc python-dev sshpass rsync mariadb-client git libldap2-dev libffi-dev libssl-dev libsasl2-dev pkg-config libvirt-dev
 $ python3 -m venv /tmp/py3-test-env
 $ source /tmp/py3-test-env/bin/activate
 ```
 
 ## Installing
 
+Public packages:
+
 ```
 $ pip install -U git+https://github.com/Nivola/beecell.git
+```
+
+CSI Internal packages:
+
+```
+$ pip3 install -U git+https://gitlab.csi.it/nivola/cmp3/beecell.git@devel
 ```
 
 ## Running the tests
