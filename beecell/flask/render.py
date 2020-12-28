@@ -2,6 +2,7 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
+# (C) Copyright 2020-2021 CSI-Piemonte
 
 import logging
 from flask import render_template as flask_render_template
@@ -15,7 +16,7 @@ def _inner_render(url, *argc, **argv):
     try:
         res = flask_render_template(url, *argc, **argv)
     except Exception as ex:
-        logger.warning('Template %s error' % (url), exc_info=1)
+        logger.warning('Template %s error' % url, exc_info=True)
         res = ''
     
     return res 

@@ -2,6 +2,7 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
+# (C) Copyright 2020-2021 CSI-Piemonte
 
 
 import logging
@@ -36,10 +37,7 @@ class AsyncConsumer(object):
         except KeyboardInterrupt:
             example.stop()
     """
-    logger = logging.getLogger('gibbon.util.amqp')
-
-    def __init__(self, name, amqp_params, callback=None, 
-                 auto_reconnect=False, reconnect_after=60):
+    def __init__(self, name, amqp_params, callback=None, auto_reconnect=False, reconnect_after=60):
         """Create a new instance of the consumer class, passing in the AMQP
         URL used to connect to RabbitMQ.
 
@@ -54,6 +52,8 @@ class AsyncConsumer(object):
         :param reconnect_after: when connection goes down it tries to reconnect 
                                 after this time indefinitely [default = 60s]
         """
+        self.logger = logging.getLogger(self.__class__.__module__ + '.' + self.__class__.__name__)
+
         self._name = name
         self._connection = None
         self._channel = None
@@ -323,10 +323,7 @@ class AsyncSubscriber(object):
         except KeyboardInterrupt:
             example.stop()
     """
-    logger = logging.getLogger('gibbon.util.amqp')
-
-    def __init__(self, name, amqp_params, callback=None, 
-                 auto_reconnect=False, reconnect_after=60):
+    def __init__(self, name, amqp_params, callback=None, auto_reconnect=False, reconnect_after=60):
         """Create a new instance of the consumer class, passing in the AMQP
         URL used to connect to RabbitMQ.
 
@@ -342,6 +339,8 @@ class AsyncSubscriber(object):
         :param reconnect_after: when connection goes down it tries to reconnect 
                                 after this time indefinitely [default = 60s]
         """
+        self.logger = logging.getLogger(self.__class__.__module__ + '.' + self.__class__.__name__)
+
         self._name = name
         self._connection = None
         self._channel = None

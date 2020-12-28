@@ -2,6 +2,7 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
+# (C) Copyright 2020-2021 CSI-Piemonte
 
 import logging
 import sys
@@ -154,9 +155,7 @@ class TestRunner(object):
 
         expectedFails = unexpectedSuccesses = skipped = 0
         try:
-            results = map(len, (result.expectedFailures,
-                                result.unexpectedSuccesses,
-                                result.skipped))
+            results = map(len, (result.expectedFailures, result.unexpectedSuccesses, result.skipped))
         except AttributeError:
             pass
         else:

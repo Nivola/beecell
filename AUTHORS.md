@@ -5,3 +5,4 @@ beecell is written and maintained by:
 * Antonio Brasile
 * Gianni Doria
 * Daniela Ferrarini
+* Davide Sacchetto

@@ -2,11 +2,10 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
+# (C) Copyright 2020-2021 CSI-Piemonte
 
 import logging
 from flask_login import UserMixin
-from beecell.perf import watch
-from beecell.db import TransactionError, QueryError
 
 
 class SystemUser(UserMixin):
@@ -20,7 +19,7 @@ class SystemUser(UserMixin):
     login_count = None
     
     def __init__(self, uid, email, password, active, login_ip=None, domain=None):
-        self.logger = logging.getLogger(self.__class__.__module__ + u'.' + self.__class__.__name__)
+        self.logger = logging.getLogger(self.__class__.__module__ + '.' + self.__class__.__name__)
         
         self.id = uid
         self.email = email
@@ -32,20 +31,20 @@ class SystemUser(UserMixin):
         self._attrib = None
         self.current_login_ip = login_ip
         
-        self.logger.debug(u'Create flask_login user instance: %s, %s' % (uid, email))
+        self.logger.debug('Create flask_login user instance: %s, %s' % (uid, email))
 
     def __str__(self):
-        return u'<SystemUser id: %s, name: %s, active: %s ip= %s>' % \
+        return '<SystemUser id: %s, name: %s, active: %s ip= %s>' % \
                (self.id, self.email, self.active, self.current_login_ip)
 
     def get_dict(self):
         return {
-            u'id': self.id,
-            u'name': self.email,
-            u'domain': self.domain,
-            u'active': self.active,
-            u'roles': self._roles,
-            u'perms': self._perms
+            'id': self.id,
+            'name': self.email,
+            'domain': self.domain,
+            'active': self.active,
+            'roles': self._roles,
+            'perms': self._perms
         }
 
     def set_groups(self, groups):
@@ -105,23 +104,23 @@ class AuthError(Exception):
         self.desc = desc
         self.code = code
         
-        if info.find(u'52e, v23f0') > 0:
+        if info.find('52e, v23f0') > 0:
             # wrong password, wrong user
             self.code = 1
-            self.desc = u'Invalid credentials'
-        elif info.find(u'533, v23f0') > 0:
+            self.desc = 'Invalid credentials'
+        elif info.find('533, v23f0') > 0:
             # disabled user
             self.code = 2
-            self.desc = u'User is disabled'
-        elif info.find(u'773, v23f0') > 0:
+            self.desc = 'User is disabled'
+        elif info.find('773, v23f0') > 0:
             # password elapsed
             self.code = 3
-            self.desc = u'Password is expired'
+            self.desc = 'Password is expired'
         else:
             self.code = code
     
     def __str__(self):
-        return u'code: %s, info: %s, desc: %s' % (self.code, self.info, self.desc)
+        return 'code: %s, info: %s, desc: %s' % (self.code, self.info, self.desc)
 
 
 class AbstractAuth(object):
@@ -131,7 +130,7 @@ class AbstractAuth(object):
         that extend this one.
     """
     def __init__(self, user_class):
-        self.logger = logging.getLogger(self.__class__.__module__ + u'.' + self.__class__.__name__)
+        self.logger = logging.getLogger(self.__class__.__module__ + '.' + self.__class__.__name__)
         
         self.user_class = user_class
 
@@ -155,12 +154,12 @@ class AbstractAuth(object):
         :rtype: :class:`SystemUser`
         :raises AuthError: raise :class:`AuthError`
         """
-        self.logger.debug(u'Check user: %s' % username)
+        self.logger.debug('Check user: %s' % username)
 
         # create final user object
         user = self.user_class(user_uuid, username, None, True)
 
-        self.logger.debug(u'Login succesfully: %s' % user)
+        self.logger.debug('Login succesfully: %s' % user)
 
         return user
 
@@ -175,5 +174,5 @@ class AbstractAuth(object):
         """
         # create final user object
         user = self.user_class(uid, username, None, True)
-        self.logger.debug(u'Refresh %s successfully' % user)
+        self.logger.debug('Refresh %s successfully' % user)
         return user

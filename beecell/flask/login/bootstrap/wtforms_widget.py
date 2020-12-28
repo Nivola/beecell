@@ -2,10 +2,11 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
+# (C) Copyright 2020-2021 CSI-Piemonte
 
 from __future__ import unicode_literals
 from cgi import escape
-from wtforms.compat import text_type, string_types, iteritems
+from wtforms.compat import text_type, iteritems
 
 __all__ = (
     'CheckboxInput', 'FileInput', 'HiddenInput', 'ListWidget', 'PasswordInput',

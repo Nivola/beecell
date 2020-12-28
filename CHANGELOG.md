@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.6.2 (, 2020)
+## Version 1.7.0 (Dec 31, 2020)
 
 * Added ...
     * added mysql manager methods to manage mysql replica
@@ -10,7 +10,11 @@
     * correct some bugs in ParamikoShell: exit sometimes was not captured, command trace run twice.
     * correct connection release in MysqlManager
 * Integrated ...
+    * update Copyright to 2020-2021
 * Various bugfixes
+* Removed
+    * removed cement_cmd package. Compatible only with python 2
+    * removed module server.gevent_ssl
 
 ## Version 1.6.1 (Jun 21, 2020)
 

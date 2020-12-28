@@ -2,6 +2,7 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
+# (C) Copyright 2020-2021 CSI-Piemonte
 
 from functools import wraps
 import logging
@@ -10,10 +11,12 @@ from sqlalchemy.exc import IntegrityError, DBAPIError
 logger = logging.getLogger(__name__)
 
 
-class TransactionError(Exception): pass
+class TransactionError(Exception):
+    pass
 
 
-class QueryError(Exception): pass
+class QueryError(Exception):
+    pass
 
 
 def transaction(manager):

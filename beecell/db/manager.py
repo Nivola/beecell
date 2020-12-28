@@ -2,10 +2,10 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
+# (C) Copyright 2020-2021 CSI-Piemonte
 
 import logging
 from time import sleep
-
 import redis
 import os
 import ujson as json
@@ -13,7 +13,6 @@ from sqlalchemy import create_engine, exc, event, text
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 from beecell.simple import truncate
-# from rediscluster import RedisCluster
 
 
 class SqlManagerError(Exception):
@@ -71,21 +70,6 @@ class RedisManager(ConnectionManager):
         self.is_sentinel = False
         self.hosts = []
 
-        # redis_uri = redis_uri.decode('utf-8')
-
-        # # redis cluster
-        # if redis_uri.find('redis-cluster') >= 0:
-        #     self.is_cluster = True
-        #     redis_uri = redis_uri.replace('redis-cluster://', '')
-        #     host_ports = redis_uri.split(',')
-        #     cluster_nodes = []
-        #     for host_port in host_ports:
-        #         host, port = host_port.split(':')
-        #         cluster_nodes.append({'host': host, 'port': port})
-        #         self.hosts.append(host_port)
-        #     self.server = RedisCluster(startup_nodes=cluster_nodes, decode_responses=True, socket_timeout=timeout,
-        #                                retry_on_timeout=False, max_connections=max_connections)
-            
         # single redis node
         if redis_uri.find('redis') >= 0:
             self.is_single = True            
@@ -763,24 +747,6 @@ class MysqlManager(SqlManager):
         :return: True
         :raise SqlManagerError:
         """
-        stmp = ["SET FOREIGN_KEY_CHECKS = 0;",
-                "SET @tables = '';",
-                "SET @views = '';",
-                "SET SESSION group_concat_max_len = 10240;",
-                "SELECT GROUP_CONCAT(table_schema, '.', table_name) INTO @tables FROM information_schema.tables "
-                "WHERE table_type='BASE TABLE' and table_schema = '%s';" % schema,
-                "SELECT GROUP_CONCAT(table_schema, '.', table_name) INTO @views FROM information_schema.tables "
-                "WHERE table_type='VIEW' and table_schema = '%s';" % schema,
-                "SET @tables = CONCAT('DROP TABLE ', @tables);",
-                "PREPARE stmt FROM @tables;",
-                "EXECUTE stmt;",
-                "DEALLOCATE PREPARE stmt;",
-                "SET @views = CONCAT('DROP VIEW ', @views);",
-                "PREPARE stmt FROM @views;",
-                "EXECUTE stmt;",
-                "DEALLOCATE PREPARE stmt;",
-                "SET FOREIGN_KEY_CHECKS = 1"]
-
         start = [
             "SET FOREIGN_KEY_CHECKS = 0;",
             "SET @tables = '';",

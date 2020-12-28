@@ -2,11 +2,12 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
+# (C) Copyright 2020-2021 CSI-Piemonte
 
 import json
 import sqlalchemy
 from sqlalchemy.types import TypeDecorator
-from beecell.simple import isNotBlank
+from beecell.simple import is_not_blank
 
 
 class TextDictType(TypeDecorator):
@@ -20,7 +21,7 @@ class TextDictType(TypeDecorator):
         return value
 
     def process_result_value(self, value, dialect):
-        if isNotBlank(value):
+        if is_not_blank(value):
             value = json.loads(value)
         else:
             value = {}

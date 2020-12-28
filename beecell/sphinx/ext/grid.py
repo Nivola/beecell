@@ -2,6 +2,7 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
+# (C) Copyright 2020-2021 CSI-Piemonte
 
 from docutils import nodes
 from docutils.parsers.rst import directives, Directive
@@ -49,7 +50,7 @@ def visit_apinode_html(self, node):
             '<i class="link">%s</i></div>' % (node['uri']),
             '<div class="col-5">%s%s</div>' % (title, node['desc']),
             '<div class="col-1"><button type="button" name="details" id="%s" class="btn btn-info">'
-            'Detail</button></div>' %  node['targetid'],
+            'Detail</button></div>' % node['targetid'],
             ]
 
     self.body.append('\n'.join(html))

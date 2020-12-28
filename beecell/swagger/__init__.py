@@ -2,6 +2,7 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
+# (C) Copyright 2020-2021 CSI-Piemonte
 
 from flex.core import validate_api_call
 from logging import getLogger
@@ -16,8 +17,6 @@ logger = getLogger(__name__)
 
 class SwaggerHelper(object):
     def __init__(self):
-        # self.spec = APISpec(title='', version='', plugins=['apispec.ext.flask', 'apispec.ext.marshmallow'],
-        #                     openapi_version='2.0')
         self.spec = APISpec(title='', version='', plugins=[FlaskPlugin(), MarshmallowPlugin()],
                             openapi_version='2.0')
 
@@ -26,6 +25,7 @@ class SwaggerHelper(object):
         new = deepcopy(orig)
         new.update(data)
         return new
+
     def get_parameters(self, schema):
         """Get swagger query parameters from schema
         
@@ -85,9 +85,9 @@ class SwaggerHelper(object):
         return res
 
 
-class ApiValidator():
+class ApiValidator(object):
     def __init__(self, schema, uri, method):
-        self.logger = getLogger(self.__class__.__module__+ '.' + self.__class__.__name__)
+        self.logger = getLogger(self.__class__.__module__ + '.' + self.__class__.__name__)
         
         self.data = None
         self.code = None
@@ -104,7 +104,7 @@ class ApiValidator():
         
     def get_keys(self, s, data, parent=None, required=None):
         if isinstance(data, dict):
-            for key,value in data.items():
+            for key, value in data.items():
                 if required is None or key in required:
                     if parent is not None:
                         key = '%s.%s' % (parent, key)

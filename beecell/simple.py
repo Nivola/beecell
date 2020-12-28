@@ -2,11 +2,12 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
+# (C) Copyright 2020-2021 CSI-Piemonte
 
 import inspect
 import yaml
 from struct import pack
-from six import b, u, PY2, PY3, ensure_text, ensure_binary
+from six import b, ensure_text, ensure_binary
 import ujson as json
 import os, random, subprocess, logging
 from socket import inet_ntoa
@@ -28,9 +29,6 @@ def check_vault(data, key):
     :param key: fernet key
     :return: decrypted key
     """
-    if PY2:
-        data = str(data)
-
     data = ensure_binary(data)
     if data.find(b('$BEEHIVE_VAULT;AES128 | ')) == 0:
         if key is None:
@@ -68,8 +66,6 @@ def encrypt_data(fernet_key, data):
     :param data: data to encrypt
     :return: encrypted data
     """
-    if PY2:
-        data = str(data)
     cipher_suite = Fernet(ensure_binary(fernet_key))
     cipher_data = ensure_text(cipher_suite.encrypt(ensure_binary(data)))
     return '$BEEHIVE_VAULT;AES128 | %s' % cipher_data
@@ -82,10 +78,7 @@ def decrypt_data(fernet_key, data):
     :param data: data to decrypt
     :return: decrypted data
     """
-    if PY2:
-        data = str(data)
-    else:
-        data = ensure_text(data)
+    data = ensure_text(data)
     if data.find('$BEEHIVE_VAULT;AES128 | ') == 0:
         data = data.replace('$BEEHIVE_VAULT;AES128 | ', '')
         cipher_suite = Fernet(ensure_binary(fernet_key))
@@ -694,7 +687,7 @@ def compat(data):
     return data
 
 
-def isBlank(myString):
+def is_blank(myString):
     """Test if string is blank
 
     :param myString: string to test
@@ -704,7 +697,7 @@ def isBlank(myString):
     return not (myString and myString.strip())
 
 
-def isNotBlank(myString):
+def is_not_blank(myString):
     """Test if string is not blank
 
     :param myString: string to test
@@ -724,28 +717,16 @@ def obscure_data(data, fields=None):
     if fields is None:
         fields = ['password', 'pwd', 'passwd', 'pass']
 
-    if PY2:
-        if isinstance(data, str) or isinstance(data, unicode):
-            return obscure_string(data, fields)
+    if isinstance(data, str) or isinstance(data, bytes):
+        return obscure_string(data, fields)
 
-        for key, value in data.items():
-            if isinstance(value, dict):
-                obscure_data(value, fields)
-            elif isinstance(value, str) or isinstance(value, unicode):
-                for field in fields:
-                    if key.lower().find(field) >= 0:
-                        data[key] = 'xxxxxx'
-    elif PY3:
-        if isinstance(data, str) or isinstance(data, bytes):
-            return obscure_string(data, fields)
-
-        for key, value in data.items():
-            if isinstance(value, dict):
-                obscure_data(value, fields)
-            elif isinstance(data, str) or isinstance(data, bytes):
-                for field in fields:
-                    if key.lower().find(field) >= 0:
-                        data[key] = 'xxxxxx'
+    for key, value in data.items():
+        if isinstance(value, dict):
+            obscure_data(value, fields)
+        elif isinstance(data, str) or isinstance(data, bytes):
+            for field in fields:
+                if key.lower().find(field) >= 0:
+                    data[key] = 'xxxxxx'
 
     return data
 
@@ -768,12 +749,8 @@ def obscure_string(data, fields=None):
 
 def is_string(data):
     res = False
-    if PY2:
-        if isinstance(data, str) or isinstance(data, unicode):
-            res = True
-    elif PY3:
-        if isinstance(data, str) or isinstance(data, bytes):
-            res = True
+    if isinstance(data, str) or isinstance(data, bytes):
+        res = True
     return res
 
 
@@ -894,7 +871,7 @@ def read_file(file_name):
     :param file_cname: file name
     :return: data
     """
-    f = open(file_name, u'r')
+    f = open(file_name, 'r')
     data = f.read()
     extension = file_name[-4:].lower()
     if extension == b('json') or extension == 'json':

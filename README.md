@@ -1,12 +1,12 @@
 # beecell
-__beecell__ is a project that contains various python 2 utility modules. Utility are useful to manage password, connect 
+__beecell__ is a project that contains various python 3 utility modules. Utility are useful to manage password, connect 
 to a sql db and manage a remote ssh connection.
 
 Here a more specific description of packages and modules.
 
 Utility file that include variuos function:
 - __simple.py__: general function for password encryption and decryption, dictionary utility, print data etc.
-- __remote.py__: varius class create remote client, run ssh command, run tcp command, make http request, install 
+- __remote.py__: various class create remote client, run ssh command, run tcp command, make http request, install 
   software in a remote portal
 
 Utility package:
@@ -20,18 +20,13 @@ Utility package:
 ## Prerequisites
 Fundamental requirements is python 3.5>.
 
-First of all you have to install some package:
+First of all you have to install some package and create a python virtual env:
 
 ```
 $ sudo apt-get install gcc
 $ sudo apt-get install -y python-dev libldap2-dev libsasl2-dev libssl-dev
-```
-
-At this point create a virtual env
-
-```
-$ python3 -m venv /tmp/beehive-py3-test-env
-$ source /tmp/beehive-py3-test-env/bin/activate
+$ python3 -m venv /tmp/py3-test-env
+$ source /tmp/py3-test-env/bin/activate
 ```
 
 ## Installing
@@ -41,17 +36,16 @@ $ pip install -U git+https://github.com/Nivola/beecell.git
 ```
 
 ## Running the tests
-Results of vulnerability assessment and/or penetration test.
-
-- Activate virtual env
+Activate virtual env
 
 ```
-$ source /tmp/beehive-py3-test-env/bin/activate
+$ source /tmp/py3-test-env/bin/activate
 ```
 
-- Open tests directory __beecell/tests__
-- Copy file beecell.yml in your home directory. Open the file and set correctly all the <BLANK> variables.
-- Run some tests:
+Open tests directory __beecell/tests__. Copy file beecell.yml in your home directory. Open the file and set correctly 
+all the <BLANK> variables.
+
+### Run some tests:
 
 ```
 $ python sendmail.py
@@ -76,6 +70,8 @@ See the list of contributors who participated in this project in the file AUTHOR
 CSI Piemonte - 2018-2019
 
 CSI Piemonte - 2019-2020
+
+CSI Piemonte - 2019-2021
 
 ## License
 See the LICENSE.txt file for details

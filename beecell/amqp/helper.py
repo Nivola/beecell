@@ -2,13 +2,14 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
+# (C) Copyright 2020-2021 CSI-Piemonte
 
 
 import pika
 import pickle
 import logging
 
-logger = logging.getLogger('gibbon.util.amqp')
+logger = logging.getLogger(__name__)
 
 
 def open_amqp_channel(queue_conn, queue):

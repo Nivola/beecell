@@ -2,6 +2,7 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
+# (C) Copyright 2020-2021 CSI-Piemonte
 
 import psutil
 from logging import getLogger
@@ -20,7 +21,7 @@ class UwsgiManager(object):
     """
     """
     def __init__(self):
-        self.logger = getLogger(self.__class__.__module__+ '.' + self.__class__.__name__)
+        self.logger = getLogger(self.__class__.__module__ + '.' + self.__class__.__name__)
 
     def _get_proc_infos(self, p, extended=False):
         """Internal function to get process infos

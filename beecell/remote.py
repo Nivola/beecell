@@ -2,6 +2,7 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
+# (C) Copyright 2020-2021 CSI-Piemonte
 
 import socket
 import os
@@ -19,25 +20,6 @@ from sys import version_info
 from six.moves.urllib.parse import urlparse
 
 urllib3.disable_warnings()
-
-
-# class Urllib2MethodRequest(urllib2.Request):
-#     """Inizialize a request method
-#
-#     http://stackoverflow.com/questions/21243834/doing-put-using-python-urllib2
-#     """
-#     def __init__(self, *args, **kwargs):
-#         if u'method' in kwargs:
-#             self._method = kwargs[u'method']
-#             del kwargs[u'method']
-#         else:
-#             self._method = None
-#         return urllib2.Request.__init__(self, *args, **kwargs)
-#
-#     def get_method(self, *args, **kwargs):
-#         if self._method is not None:
-#             return self._method
-#         return urllib2.Request.get_method(self, *args, **kwargs)
 
 
 class RemoteException(Exception):
@@ -125,7 +107,7 @@ class RemoteClient(object):
         
         if isinstance(conn, dict):
             self.conn = conn
-        elif isinstance(conn, str) or isinstance(conn, unicode):
+        elif isinstance(conn, str):
             c = urlparse(conn)
             host, port = c.netloc.split(':')
             self.conn = {

@@ -2,8 +2,8 @@
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
+# (C) Copyright 2020-2021 CSI-Piemonte
 
-import time
 from beecell.simple import run_command
 from sqlalchemy.sql import compiler
 from MySQLdb.converters import conversions, escape
@@ -20,8 +20,9 @@ def compile_query(query):
         v = comp.params[k]
         if isinstance(v, unicode):
             v = v.encode(enc)
-        params.append( escape(v, conversions) )
+        params.append(escape(v, conversions))
     return (comp.string.encode(enc) % tuple(params)).decode(enc)
+
 
 def get_process_list():
     port = 3308
