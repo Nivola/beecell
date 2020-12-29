@@ -20,7 +20,6 @@ mysql:
     schema: <BLANK>
 redis:
   single: redis://<BLANK>:6379/0
-  cluster: redis-cluster://<BLANK>:6379,<BLANK>:6379,<BLANK>:6379
 ldap:
   host: <BLANK>
   port: 389
