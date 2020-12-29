@@ -56,7 +56,6 @@ all the <BLANK> variables.
 
 ```
 $ python sendmail.py
-$ python cement_cmd.py 
 $ python paramiko_shell.py 
 $ python networkx_layout.py
 $ python db/manager_mysql.py 

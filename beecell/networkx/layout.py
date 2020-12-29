@@ -30,11 +30,11 @@ class GridLayout(object):
         self._height = height
         self._node_width = node_width
         self._node_height = node_height          
-        self._rows = height / node_height
-        self._cols = width / node_width
+        self._rows = int(height / node_height)
+        self._cols = int(width / node_width)
         w = 0.5 * node_width
         h = 0.5 * node_height
-        
+
         for i in range(0, self._rows):
             for j in range(0, self._cols):
                 cw = int(round(w*(1+2*j)))
