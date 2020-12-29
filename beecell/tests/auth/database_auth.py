@@ -36,11 +36,10 @@ class User(Base):
 
     def _check_password(self, password):
         # verifying the password
-        # res = bcrypt.checkpw(str(password), str(self.password))
         if is_encrypted(self.password):
-            res = (decrypt_data(self.password) == password)
+            res = (decrypt_data(self.password) == password.encode('utf-8'))
         else:
-            res = bcrypt.checkpw(str(password), str(self.password))
+            res = bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
         return res
 
 

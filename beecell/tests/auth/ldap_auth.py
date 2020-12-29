@@ -9,7 +9,7 @@ from beecell.tests.test_util import BeecellTestCase, runtest
 
 tests = [
     'test_login_ldap',
-    # 'test_login_ad_ldap'
+    'test_login_ad_ldap'
 ]
 
 
@@ -31,7 +31,6 @@ class LdapAuthTestCase(BeecellTestCase):
         self.logger.debug(user.get_groups())
         for k, v in user.get_attributes().items():
             self.logger.debug('%s: %s' % (k, v))
-            # self.logger.debug('%s: %s' % (k, str(v).decode(errors='ignore')))
 
     def test_login_ad_ldap(self):
         self.auth_provider = LdapAuth(self.conf('ldap_ad.host'), SystemUser,
@@ -43,7 +42,7 @@ class LdapAuthTestCase(BeecellTestCase):
         user = self.auth_provider.login(self.conf('ldap_ad.user'), self.conf('ldap_ad.pwd'))
         self.logger.debug(user.get_groups())
         for k, v in user.get_attributes().items():
-            self.logger.debug('%s: %s' % (k, str(v).decode(errors='ignore')))
+            self.logger.debug('%s: %s' % (k, v))
 
 
 if __name__ == '__main__':
