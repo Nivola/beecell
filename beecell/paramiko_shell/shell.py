@@ -3,6 +3,7 @@
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
 # (C) Copyright 2020-2021 CSI-Piemonte
+from os import popen
 
 from paramiko.client import SSHClient, MissingHostKeyPolicy
 from paramiko import RSAKey
@@ -13,6 +14,10 @@ import termios
 import struct
 import sys
 from gevent.os import make_nonblocking, nb_read, nb_write
+try:
+    from scp import SCPClient
+except:
+    pass
 
 try:
     import interactive
@@ -229,3 +234,59 @@ class ParamikoShell(object):
 
         channel.close()
         self.client.close()
+
+    def __scp_progress(self, filename, size, sent):
+        """Define progress callback that prints the current percentage completed for the file"""
+        status = float(sent) / float(size)
+        newline = '\n'
+        if status < 1:
+            newline = '\r'
+        sys.stdout.write('%s progress: %.2f%% %s' % (ensure_text(filename), status * 100, newline))
+
+    def scp(self, local_package_path, remote_package_path):
+        ssh = self.client
+        with SCPClient(ssh.get_transport(), progress=self.__scp_progress) as scp:
+            scp.put(local_package_path, recursive=True, remote_path=remote_package_path)
+
+
+class Rsync(object):
+    def __init__(self, user='root', pwd=None, keyfile=None, keystring=None, **kwargs):
+        self.user = user
+        self.pwd = pwd
+        self.cmd = None
+        self.excludes = []
+
+    def __set_base_command(self):
+        self.cmd = ['rsync -r --delete']
+        rsh_cmd = '/usr/bin/sshpass -p {sshpass} ssh -o StrictHostKeyChecking=no -l {sshuser}'\
+            .format(sshpass=self.pwd, sshuser=self.user)
+        self.cmd.append("--rsh='{cmd}'".format(cmd=rsh_cmd))
+
+    def __get_plain_command(self, from_path, to_path):
+        self.cmd.extend(self.excludes)
+        self.cmd.append(from_path)
+        self.cmd.append(to_path)
+        cmd = ' '.join(self.cmd)
+        return cmd
+
+    def add_exclude(self, pattern):
+        """add exclude file pattern
+
+        :param pattern: file pattern. Ex. *.pyc or *.pyo
+        :return:
+        """
+        self.excludes.append('--exclude={exclude}'.format(exclude=pattern))
+
+    def run(self, from_path, to_path):
+        """Sync local folder with remote folder using rsync protocol
+
+        :param from_path: origin path. Ex. /tmp
+        :param to_path: destination path. Ex. root@localhost:/tmp
+        :return:
+        """
+        self.__set_base_command()
+        cmd = self.__get_plain_command(from_path, to_path)
+        stream = popen(cmd)
+        output = stream.read()
+        logger.debug('run rsync from {fp} to {tp}: {out}'.format(fp=from_path, tp=to_path, out=output))
+        return output

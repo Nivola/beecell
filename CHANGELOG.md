@@ -1,5 +1,22 @@
 # Changelog
 
+## Version 1.7.1 (, 2020)
+
+* Added ...
+    * added command ParamikoShell scp to exec secure copy
+    * added class Rsync to run rsync between folder
+* Fixed ...
+    * correct some bugs in ParamikoShell: exit sometimes was not captured, command trace run twice.
+    * correct connection release in MysqlManager
+    * correct User._check_password 
+* Integrated ...
+    * update Copyright to 2020-2021
+* Various bugfixes
+* Removed
+    * removed cement_cmd package. Compatible only with python 2
+    * removed module server.gevent_ssl
+    * removed test for redis cluster
+
 ## Version 1.7.0 (Dec 31, 2020)
 
 * Added ...

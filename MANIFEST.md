@@ -29,3 +29,4 @@ PyYAML==5.3.1
 dict-recursive-update==1.0.1
 bcrypt==3.2.0
 networkx==2.5
+scp==0.13.3
