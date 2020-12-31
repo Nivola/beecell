@@ -76,7 +76,7 @@ CSI Piemonte - 2018-2019
 
 CSI Piemonte - 2019-2020
 
-CSI Piemonte - 2019-2021
+CSI Piemonte - 2020-2021
 
 ## License
 See the LICENSE.txt file for details
