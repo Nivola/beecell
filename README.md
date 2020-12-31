@@ -66,7 +66,7 @@ $ python auth/database_auth.py
 ```
 
 ## Versioning
-We use Semantic Versioning for versioning. (http://semver.org)
+We use Semantic Versioning for versioning. (https://semver.org)
 
 ## Authors and Contributors
 See the list of contributors who participated in this project in the file AUTHORS.md contained in each specific project.
