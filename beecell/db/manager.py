@@ -11,7 +11,7 @@ import os
 import ujson as json
 from sqlalchemy import create_engine, exc, event, text
 from sqlalchemy.orm import sessionmaker
-from datetime import datetime
+from datetime import datetime, timedelta
 from beecell.simple import truncate
 
 
@@ -976,6 +976,54 @@ class MysqlManager(SqlManager):
             connection = self.engine.connect()
             connection.execute('START SLAVE;')
             self.logger.debug('start replica on slave')
+
+        except Exception as ex:
+            self.logger.error(ex, exc_info=True)
+            raise
+        finally:
+            if connection is not None:
+                connection.close()
+                self.engine.dispose()
+        return res
+
+    def show_binary_log(self):
+        """show binary log
+        """
+        connection = None
+
+        res = {}
+        try:
+            connection = self.engine.connect()
+            result = connection.execute('SHOW BINARY LOGS;')
+            for row in result:
+                res[row[0]] = row[1]
+            self.logger.debug('show binary log: %s' % res)
+
+        except Exception as ex:
+            self.logger.error(ex, exc_info=True)
+            raise
+        finally:
+            if connection is not None:
+                connection.close()
+                self.engine.dispose()
+        return res
+
+    def purge_binary_log(self, date=None):
+        """purge binary log
+
+        :param date: specify date before you want to to make purge. Ex. 2021-01-06 [optional]
+        """
+        connection = None
+
+        res = []
+        try:
+            if date is None:
+                date = datetime.today() - timedelta(days=2)
+                date = '%s-%s-%s' % (date.year, date.month, date.day)
+
+            connection = self.engine.connect()
+            connection.execute("PURGE BINARY LOGS BEFORE '%s';" % date)
+            self.logger.debug('purge binary log')
 
         except Exception as ex:
             self.logger.error(ex, exc_info=True)
