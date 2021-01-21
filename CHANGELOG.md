@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.7.1 (, 2020)
+## Version 1.7.1 (, 2021)
 
 * Added ...
     * added command ParamikoShell scp to exec secure copy
@@ -9,7 +9,9 @@
 * Fixed ...
     * correct some bugs in ParamikoShell: exit sometimes was not captured, command trace run twice.
     * correct connection release in MysqlManager
-    * correct User._check_password 
+    * correct User._check_password
+    * change method LdapAuth.authenticate to authenticate(self, username, password, max_retry=3, cur_retry=0). Add param
+      max_retry to manage some connections retry to ldap
 * Integrated ...
     * update Copyright to 2020-2021
 * Various bugfixes

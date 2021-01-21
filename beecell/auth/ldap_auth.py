@@ -168,7 +168,7 @@ class LdapAuth(AbstractAuth):
 
         return user
 
-    def authenticate(self, username, password):
+    def authenticate(self, username, password, max_retry=3, cur_retry=0):
         """Authenticate a user
 
         :param username: user name
@@ -197,7 +197,15 @@ class LdapAuth(AbstractAuth):
             self.logger.error('Ldap authentication error: %s' % ex)
             self.close()
             self.conn = None
-            raise AuthError('', 'Ldap authentication error: %s' % ex, code=7)
+
+            # check retry
+            if cur_retry < max_retry:
+                # {'desc': "Can't contact LDAP server", 'errno': 104, 'info': 'Connection reset by peer'}
+                if ex.get('errno', 0) == 104:
+                    cur_retry += 1
+                    self.authenticate(username, password, max_retry=max_retry, cur_retry=cur_retry)
+            else:
+                raise AuthError('', 'Ldap authentication error: %s' % ex, code=7)
 
         return True
 
