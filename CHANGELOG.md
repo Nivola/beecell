@@ -6,6 +6,7 @@
     * added command ParamikoShell scp to exec secure copy
     * added class Rsync to run rsync between folder
     * add MysqlManager methods show_binary_log and purge_binary_log to manage binary logs
+    * add method validate_string
 * Fixed ...
     * correct some bugs in ParamikoShell: exit sometimes was not captured, command trace run twice.
     * correct connection release in MysqlManager

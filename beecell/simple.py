@@ -18,6 +18,7 @@ from uuid import uuid4
 from math import ceil
 from cryptography.fernet import Fernet
 import datetime
+from re import compile as re_compile
 
 logger = logging.getLogger(__name__)
 
@@ -918,3 +919,15 @@ def get_pretty_size(data):
     elif data > 1073741824:
         data = '%sGB' % round(data / 1073741824, 2)
     return data
+
+
+def validate_string(data, validation_string=r'[^a-zA-Z0-9\-].'):
+    """Validate a string respect a set of allowed characters
+
+    :param data: data to validate
+    :param validation_string: validation string [deafult=r'[^a-zA-Z0-9\-].']
+    :return: True if validation is OK
+    """
+    char_re = re_compile(validation_string)
+    data = char_re.search(data)
+    return not bool(data)
