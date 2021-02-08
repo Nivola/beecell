@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.7.1 (, 2021)
+## Version 1.7.1 (Feb 05, 2021)
 
 * Added ...
     * added command ParamikoShell scp to exec secure copy
