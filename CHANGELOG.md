@@ -3,7 +3,8 @@
 ## Version 1.8.0 (, 2021)
 
 * Added ...
-    * add support conenction using ssh tunnel to paramiko_shell
+    * add support connection using ssh tunnel to paramiko_shell
+    * add rsync client authentication with ssh key
 * Fixed ...
 * Integrated ...
 * Various bugfixes

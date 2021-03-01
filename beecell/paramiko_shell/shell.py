@@ -5,12 +5,14 @@
 # (C) Copyright 2020-2021 CSI-Piemonte
 
 from os import popen
+from tempfile import NamedTemporaryFile
+
 from paramiko.client import SSHClient, MissingHostKeyPolicy, AutoAddPolicy
 from paramiko import RSAKey, PKey
 from logging import getLogger
 
 from paramiko.hostkeys import HostKeyEntry, HostKeys
-from six import StringIO, ensure_text
+from six import StringIO, ensure_text, ensure_binary
 import fcntl
 import termios
 import struct
@@ -297,14 +299,32 @@ class Rsync(object):
     def __init__(self, user='root', pwd=None, keyfile=None, keystring=None, **kwargs):
         self.user = user
         self.pwd = pwd
+        self.keystring = keystring
         self.cmd = None
         self.excludes = []
+        self.fp = None
+
+    def __create_temp_file(self, data):
+        fp = NamedTemporaryFile()
+        fp.write(ensure_binary(data))
+        fp.seek(0)
+        self.fp = fp
+
+    def __close_temp_file(self):
+        if self.fp is not None:
+            self.fp.close()
 
     def __set_base_command(self):
         self.cmd = ['rsync -r --delete']
-        rsh_cmd = '/usr/bin/sshpass -p {sshpass} ssh -o StrictHostKeyChecking=no -l {sshuser}'\
-            .format(sshpass=self.pwd, sshuser=self.user)
-        self.cmd.append("--rsh='{cmd}'".format(cmd=rsh_cmd))
+        if self.pwd is not None:
+            rsh_cmd = '/usr/bin/sshpass -p {sshpass} ssh -o StrictHostKeyChecking=no -l {sshuser}'\
+                .format(sshpass=self.pwd, sshuser=self.user)
+            self.cmd.append("--rsh='{cmd}'".format(cmd=rsh_cmd))
+        elif self.keystring is not None:
+            self.__create_temp_file(self.keystring)
+            rsh_cmd = 'ssh -o StrictHostKeyChecking=no -l {sshuser} -i {sshkey}'\
+                .format(sshkey=self.fp.name, sshuser=self.user)
+            self.cmd.append("--rsh='{cmd}'".format(cmd=rsh_cmd))
 
     def __get_plain_command(self, from_path, to_path):
         self.cmd.extend(self.excludes)
@@ -332,5 +352,6 @@ class Rsync(object):
         cmd = self.__get_plain_command(from_path, to_path)
         stream = popen(cmd)
         output = stream.read()
+        self.__close_temp_file()
         logger.debug('run rsync from {fp} to {tp}: {out}'.format(fp=from_path, tp=to_path, out=output))
         return output

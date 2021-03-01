@@ -12,6 +12,7 @@ hiredis==1.1.0
 gevent==20.12.1
 PrettyTable==2.0.0
 Paramiko==2.7.2
+sshtunnel==0.4.0
 httplib2==0.18.1
 urllib3==1.26.2
 pymongo==3.11.2
