@@ -3,17 +3,21 @@
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
 # (C) Copyright 2020-2021 CSI-Piemonte
-from os import popen
 
-from paramiko.client import SSHClient, MissingHostKeyPolicy
-from paramiko import RSAKey
+from os import popen
+from paramiko.client import SSHClient, MissingHostKeyPolicy, AutoAddPolicy
+from paramiko import RSAKey, PKey
 from logging import getLogger
+
+from paramiko.hostkeys import HostKeyEntry, HostKeys
 from six import StringIO, ensure_text
 import fcntl
 import termios
 import struct
 import sys
 from gevent.os import make_nonblocking, nb_read, nb_write
+from sshtunnel import SSHTunnelForwarder, create_logger
+
 try:
     from scp import SCPClient
 except:
@@ -29,7 +33,8 @@ logger = getLogger(__name__)
 
 class ParamikoShell(object):
     def __init__(self, host, user, port=22, pwd=None, keyfile=None, keystring=None, pre_login=None, post_logout=None,
-                 post_action=None, **kwargs):
+                 post_action=None, tunnel=None, **kwargs):
+        self.pre_login = pre_login
         self.post_logout = post_logout
         self.post_action = post_action
 
@@ -40,20 +45,34 @@ class ParamikoShell(object):
         self.host_user = user # user used to connect in the host
         self.keepalive = 30
 
+        self.host = host
+        self.user = user
+        self.port = port
+        self.pwd = pwd
+        self.keyfile = keyfile
+        self.tunnel_conf = tunnel
+        self.tunnel = None
+
         if keystring is not None:
             key = ensure_text(keystring)
             keystring_io = StringIO(key)
-            pkey = RSAKey.from_private_key(keystring_io)
+            self.pkey = RSAKey.from_private_key(keystring_io)
             keystring_io.close()
         else:
-            pkey = None
+            self.pkey = None
 
-        if pre_login is not None:
-            pre_login()
+        if self.tunnel_conf is None:
+            self.__create_client(**kwargs)
+
+    def __create_client(self, **kwargs):
+        if self.pre_login is not None:
+            self.pre_login()
         try:
-            self.client.connect(host, port, username=user, password=pwd, key_filename=keyfile, pkey=pkey,
-                                look_for_keys=False, compress=True, timeout=self.timeout, auth_timeout=self.timeout,
-                                banner_timeout=self.timeout, **kwargs)
+            host = kwargs.pop('host', self.host)
+            port = kwargs.pop('port', self.port)
+            self.client.connect(host, port, username=self.user, password=self.pwd, key_filename=self.keyfile,
+                                pkey=self.pkey, look_for_keys=False, compress=True, timeout=self.timeout,
+                                auth_timeout=self.timeout, banner_timeout=self.timeout, **kwargs)
         except Exception as ex:
             if self.post_logout is not None:
                 self.post_logout(status=str(ex))
@@ -63,7 +82,7 @@ class ParamikoShell(object):
         th, tw, hp, wp = struct.unpack('HHHH', fcntl.ioctl(0, termios.TIOCGWINSZ, struct.pack('HHHH', 0, 0, 0, 0)))
         return tw, th
 
-    def run(self):
+    def __run(self):
         """Run interactive shell
         """
         tw, th = self.terminal_size()
@@ -77,6 +96,31 @@ class ParamikoShell(object):
         self.client.close()
         if self.post_logout is not None:
             self.post_logout()
+
+    def run(self):
+        """Run interactive shell
+        """
+        if self.tunnel_conf is not None:
+            self.create_tunnel()
+
+        self.__run()
+
+        if self.tunnel_conf is not None:
+            self.close_tunnel()
+
+    def create_tunnel(self):
+        self.tunnel = SSHTunnelForwarder(
+            logger=logger,
+            ssh_address_or_host=(self.tunnel_conf.get('host'), self.tunnel_conf.get('port')),
+            ssh_username=self.tunnel_conf.get('user'),
+            ssh_password=self.tunnel_conf.get('pwd'),
+            remote_bind_address=(self.host, 22),
+        )
+        self.tunnel.start()
+        self.__create_client(port=self.tunnel.local_bind_port, host='127.0.0.1')
+
+    def close_tunnel(self):
+        self.tunnel.stop()
 
     def cmd1(self, cmd):
         from six import b, u, ensure_text

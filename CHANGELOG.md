@@ -1,5 +1,14 @@
 # Changelog
 
+## Version 1.8.0 (, 2021)
+
+* Added ...
+    * add support conenction using ssh tunnel to paramiko_shell
+* Fixed ...
+* Integrated ...
+* Various bugfixes
+* Removed
+
 ## Version 1.7.1 (Feb 05, 2021)
 
 * Added ...
