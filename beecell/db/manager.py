@@ -505,7 +505,7 @@ class SqlManager(ConnectionManager):
         res = {}
         try:
             connection = self.engine.connect()
-            stm = text("CREATE USER IF NOT EXISTS '%s'@'%s' IDENTIFIED BY '%s'" % (name, host, password))
+            stm = text("CREATE USER '%s'@'%s' IDENTIFIED BY '%s'" % (name, host, password))
             connection.execute(stm)
             self.logger.debug('Create user %s: %s' % (name, res))
         except Exception as ex:
@@ -530,7 +530,7 @@ class SqlManager(ConnectionManager):
             connection = self.engine.connect()
             stm = text("GRANT ALL privileges ON `%s`.* TO '%s'@'%s'" % (schema, name, host))
             connection.execute(stm)
-            self.logger.debug('Grat schema %s to user %s: %s' % (schema, name, res))
+            self.logger.debug('Grant schema %s to user %s: %s' % (schema, name, res))
         except Exception as ex:
             self.logger.error(ex, exc_info=True)
             raise
