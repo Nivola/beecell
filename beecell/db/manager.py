@@ -505,7 +505,7 @@ class SqlManager(ConnectionManager):
         res = {}
         try:
             connection = self.engine.connect()
-            stm = text("CREATE USER '%s'@'%s' IDENTIFIED BY '%s'" % (name, host, password))
+            stm = text("CREATE USER IF NOT EXISTS '%s'@'%s' IDENTIFIED BY '%s'" % (name, host, password))
             connection.execute(stm)
             self.logger.debug('Create user %s: %s' % (name, res))
         except Exception as ex:
