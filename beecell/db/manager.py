@@ -9,6 +9,7 @@ from time import sleep
 import redis
 import os
 import ujson as json
+from redis.sentinel import Sentinel
 from sqlalchemy import create_engine, exc, event, text
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime, timedelta
@@ -53,6 +54,9 @@ class RedisManager(ConnectionManager):
 
     :param str redis_uri: redis connection uri.
     :param int timeout: redis connection timeout [default=2]
+    :param list sentinels: list of (sentinel ip, sentinel port)
+    :param str sentinel_name: sentinel group name
+    :param str sentinel_pwd: sentinel password
     :return: RedisManager instance
 
     :Example:
@@ -62,16 +66,35 @@ class RedisManager(ConnectionManager):
         - ``localhost:6379:1``
         - ``redis-cluster://localhost:6379,localhost:6380``
     """
-    def __init__(self, redis_uri, timeout=2, max_connections=200):
+    def __init__(self, redis_uri, timeout=2, max_connections=200, sentinels=None, sentinel_name=None,
+                 sentinel_pwd=None, db=0, pwd=None):
         ConnectionManager.__init__(self)
         
         self.is_single = False
         self.is_cluster = False
         self.is_sentinel = False
+        self.sentinel_name = sentinel_name
+        self.server = None
+        self.socket_timeout = 0.1
+        self.db = db
+        self.pwd = pwd
+        self.max_connections = max_connections
+        self.timeout = timeout
         self.hosts = []
 
+        # redis sentinels
+        if sentinels is not None:
+            self.is_sentinel = True
+            if sentinel_name is None:
+                raise RedisManagerError('sentinel group name must be specified')
+            if sentinel_pwd is None:
+                raise RedisManagerError('sentinel password must be specified')
+            sentinel_kwargs = {'password': sentinel_pwd}
+            self.sentinel = Sentinel(sentinels, socket_timeout=self.socket_timeout, sentinel_kwargs=sentinel_kwargs)
+            self.sentinel_name = sentinel_name
+
         # single redis node
-        if redis_uri.find('redis') >= 0:
+        elif redis_uri.find('redis') >= 0:
             self.is_single = True            
             pwd = None
             if redis_uri.find('@') > 0:
@@ -99,11 +122,15 @@ class RedisManager(ConnectionManager):
     
     @property
     def conn(self):
+        if self.is_sentinel is True:
+            self.server = self.sentinel.master_for(self.sentinel_name, socket_timeout=self.socket_timeout,
+                                                   db=int(self.db), password=self.pwd, retry_on_timeout=False,
+                                                   connection_pool=None, max_connections=self.max_connections)
         return self.server
-    
+
     def ping(self):
         try:
-            res = self.server.ping()
+            res = self.conn.ping()
             if self.is_cluster is True and res == {}:
                 res = {host: False for host in self.hosts}
             self.logger.debug('Ping redis %s: %s' % (self.conn, res))
@@ -111,14 +138,33 @@ class RedisManager(ConnectionManager):
         except redis.exceptions.ConnectionError as ex:
             self.logger.error(ex)
             return False
-    
+
+    def sentinel_ping(self):
+        try:
+            res = []
+            for conn in self.sentinel.sentinels:
+                conn_args = conn.connection_pool.connection_kwargs
+                res.append(('%s:%s' % (conn_args['host'], conn_args['port']), conn.ping()))
+                self.logger.debug('Ping redis sentinel %s: %s' % (conn, res))
+            return res
+        except redis.exceptions.ConnectionError as ex:
+            self.logger.error(ex)
+            return False
+
+    def sentinel_discover(self):
+        res = {'master': None, 'replica': None}
+        if self.is_sentinel is True:
+            res['master'] = self.sentinel.discover_master(self.sentinel_name)
+            res['replica'] = self.sentinel.discover_slaves(self.sentinel_name)
+        return res
+
     def shutdown(self):
-        res = self.server.shutdown()
+        res = self.conn.shutdown()
         self.logger.debug('Shutdown redis %s: %s' % (self.conn, res))
         return res        
     
     def info(self):
-        res = self.server.info()
+        res = self.conn.info()
         self.logger.debug('Get redis %s info: %s' % (self.conn, res))
         return res
 
@@ -128,16 +174,16 @@ class RedisManager(ConnectionManager):
         :param pattern: configuration search pattern [default='*']
         :return: list of configurations
         """        
-        res = self.server.config_get(pattern=pattern)
+        res = self.conn.config_get(pattern=pattern)
         return res
 
     def size(self):
-        res = self.server.dbsize()
+        res = self.conn.dbsize()
         self.logger.debug('Db size redis %s: %s' % (self.conn, res))
         return res
 
     def cleandb(self):
-        res = self.server.flushdb()
+        res = self.conn.flushdb()
         self.logger.debug('Clean redis %s: %s' % (self.conn, res))
         return res
     
@@ -147,16 +193,15 @@ class RedisManager(ConnectionManager):
         :param pattern: key search pattern [default='*']
         :return: list of tuple (key, type, ttl)
         """
-        keys = self.server.keys(pattern)
-        # self.server.scan()
+        keys = self.conn.keys(pattern)
+        # self.conn.scan()
 
         data = []
         for key in keys:
             if debug is True:
-                data.append((key, self.server.type(key), self.server.ttl(key), 
-                             self.server.debug_object(key)))
+                data.append((key, self.conn.type(key), self.conn.ttl(key), self.conn.debug_object(key)))
             else:
-                data.append((key, self.server.type(key), self.server.ttl(key)))
+                data.append((key, self.conn.type(key), self.conn.ttl(key)))
         return data
 
     def scan(self, pattern='*', cursor=0, count=10):
@@ -167,7 +212,7 @@ class RedisManager(ConnectionManager):
         :param count: keys max number returned [default=10]
         :return: list of tuple (key, type, ttl)
         """
-        keys = self.server.scan(cursor=cursor, match=pattern, count=count)
+        keys = self.conn.scan(cursor=cursor, match=pattern, count=count)
         return keys
     
     def delete(self, pattern='*'):
@@ -176,9 +221,9 @@ class RedisManager(ConnectionManager):
         :param pattern: key search pattern [default='*']
         :return: list of tuple (key, type, ttl)
         """
-        keys = self.server.keys(pattern)
+        keys = self.conn.keys(pattern)
         if len(keys) > 0:
-            res = self.server.delete(*keys)
+            res = self.conn.delete(*keys)
             return res
         return None
 
@@ -188,7 +233,7 @@ class RedisManager(ConnectionManager):
         :param key: redis key
         :return: None
         """
-        res = self.server.delete(key)
+        self.conn.delete(key)
         return None
 
     def query(self, keys, ttl=False):
@@ -211,22 +256,22 @@ class RedisManager(ConnectionManager):
                     return kvalue
             
             if ktype == 'hash':
-                data[kname] = get_value(self.server.hgetall(kname), kttl)
+                data[kname] = get_value(self.conn.hgetall(kname), kttl)
             elif ktype == 'list':
                 items = []
-                for index in range(0, self.server.llen(kname)):
-                    items.append(self.server.lindex(kname, index))
+                for index in range(0, self.conn.llen(kname)):
+                    items.append(self.conn.lindex(kname, index))
                 data[kname] = get_value(items, kttl)
             elif ktype == 'string':
-                data[kname] = get_value(self.server.get(kname), kttl)
+                data[kname] = get_value(self.conn.get(kname), kttl)
             elif ktype == 'set':
                 items = []
-                for item in self.server.sscan_iter(kname):
+                for item in self.conn.sscan_iter(kname):
                     items.append(item)
                 data[kname] = get_value(items, kttl)
             else:
                 try:
-                    data[kname] = get_value(self.server.get(kname), kttl)
+                    data[kname] = get_value(self.conn.get(kname), kttl)
                 except:
                     data[kname] = None
         return data
@@ -237,7 +282,7 @@ class RedisManager(ConnectionManager):
         :param key: key to get
         :return: lists of keys with value
         """
-        return self.server.get(key)
+        return self.conn.get(key)
 
     def ttl(self, key):
         """Query key ttl.
@@ -245,7 +290,7 @@ class RedisManager(ConnectionManager):
         :param keys: key to get
         :return: lists of keys with value
         """
-        return self.server.ttl(key)
+        return self.conn.ttl(key)
 
     def gets(self, keys):
         """Query key list value.
@@ -254,7 +299,7 @@ class RedisManager(ConnectionManager):
         :param keys: keys list from inspect
         :return: lists of keys with value
         """
-        return self.server.mget(keys)
+        return self.conn.mget(keys)
 
     def set(self, key, value):
         """Set key value.
@@ -263,7 +308,7 @@ class RedisManager(ConnectionManager):
         :param value: value to insert
         :return:
         """
-        return self.server.set(key, value)
+        return self.conn.set(key, value)
 
     def get_with_ttl(self, key, max_retry=3, delay=0.01):
         """Get task from redis
@@ -275,8 +320,8 @@ class RedisManager(ConnectionManager):
         :raise RedisManagerError: if key was not found
         """
         def get_data(key):
-            task_data = self.server.get(key)
-            task_ttl = self.server.ttl(key)
+            task_data = self.conn.get(key)
+            task_ttl = self.conn.ttl(key)
             return task_data, task_ttl
 
         retry = 0
