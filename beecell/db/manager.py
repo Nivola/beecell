@@ -152,11 +152,54 @@ class RedisManager(ConnectionManager):
             return False
 
     def sentinel_discover(self):
-        res = {'master': None, 'replica': None}
+        res = {'master': None, 'slave': None}
         if self.is_sentinel is True:
             res['master'] = self.sentinel.discover_master(self.sentinel_name)
-            res['replica'] = self.sentinel.discover_slaves(self.sentinel_name)
+            res['slave'] = self.sentinel.discover_slaves(self.sentinel_name)
         return res
+
+    def sentinel_status(self):
+        '''
+        "role": "master",
+        "connected_slaves": 1,
+        "min_slaves_good_slaves": 1,
+        "slave0": {
+            "ip": "10.138.144.114",
+            "port": 6379,
+            "state": "online",
+            "offset": 83359,
+            "lag": 1
+        },
+        "master_failover_state": "no-failover",
+
+
+        :return:
+        '''
+        resp = {}
+        if self.conn is not None:
+            info = self.info()
+            min_replicas_to_write = int(self.conn.config_get(pattern='min-replicas-to-write')
+                                        .get('min-replicas-to-write', 0))
+            min_slaves_good_slaves = int(info.get('min_slaves_good_slaves'))
+            status = False
+            if min_slaves_good_slaves >= min_replicas_to_write:
+                status = True
+            master = self.sentinel.discover_master(self.sentinel_name)
+            master = {'ip': master[0], 'port': master[1]}
+            connected_slaves = info.get('connected_slaves')
+            slaves = []
+            for i in range(int(connected_slaves)):
+                slaves.append(info.get('slave%s' % i))
+            resp = {
+                'status': status,
+                'master': master,
+                'slaves': slaves,
+                'connected_slaves': info.get('connected_slaves'),
+                'min_slaves_good_slaves': min_slaves_good_slaves,
+                'master_failover_state': info.get('master_failover_state'),
+                'master_repl_offset': info.get('master_repl_offset'),
+            }
+        return resp
 
     def shutdown(self):
         res = self.conn.shutdown()
