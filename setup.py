@@ -65,22 +65,23 @@ if __name__ == '__main__':
             'beecell.server',
             'beecell.server.uwsgi_server',
             'beecell.sphinx',
+            'beecell.sphinx.ext',
             'beecell.sqlalchemy',
             'beecell.swagger',
             'beecell.test',
             'beecell.tests',
-            'beecell.tests.db',
             'beecell.tests.auth',
+            'beecell.tests.db'
         ],
         namespace_packages=[],
         py_modules=[
-            'beecell.simple',
-            'beecell.perf',
-            'beecell.sendmail',
-            'beecell.remote',
             'beecell.formatter',
+            'beecell.__init__',
             'beecell.network',
-            'beecell.__init__'
+            'beecell.perf',
+            'beecell.remote',
+            'beecell.sendmail',
+            'beecell.simple'
         ],
         classifiers=[
             'Development Status :: %s' % version,
