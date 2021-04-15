@@ -5,3 +5,5 @@ _build/
 .pydevproject
 .idea/
 .manage.*
+beecell.egg-info
+build/
