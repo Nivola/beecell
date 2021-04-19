@@ -5,6 +5,7 @@
 # (C) Copyright 2020-2021 CSI-Piemonte
 
 import inspect
+from werkzeug.wrappers import BaseResponse
 import yaml
 from struct import pack
 from six import b, ensure_text, ensure_binary
@@ -931,3 +932,24 @@ def validate_string(data, validation_string=r'[^a-zA-Z0-9\-].'):
     char_re = re_compile(validation_string)
     data = char_re.search(data)
     return not bool(data)
+
+def jsonDumps(data):
+    """Check type of data
+    (in lib ujson 4.0.x reject_bytes is on)
+    (in lib ujson 2.0.x 'reject_bytes=False' is an invalid keyword argument)
+    :return: a json
+    """
+    if type(data) is bytes:
+        resp = json.dumps(ensure_text(data))
+        return resp
+    else:
+        try:
+            resp = json.dumps(data)
+            return resp
+        except Exception as ex:
+            logger.error('jsonDumps data %s type' % type(data), exc_info=True)
+            logger.warning(ex, exc_info=True)
+            print(ex)
+            resp = json.dumps(ensure_text(data))
+            return resp
+
