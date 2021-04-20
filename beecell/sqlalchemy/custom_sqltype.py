@@ -8,14 +8,14 @@ import json
 import sqlalchemy
 from sqlalchemy.types import TypeDecorator
 from beecell.simple import is_not_blank
-
+from beecell.simple import jsonDumps
 
 class TextDictType(TypeDecorator):
     impl = sqlalchemy.Text()
 
     def process_bind_param(self, value, dialect):
         if value is not None:
-            value = json.dumps(value)
+            value = jsonDumps(value)
         else:
             value = '{}'
         return value
