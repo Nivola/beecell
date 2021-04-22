@@ -18,7 +18,7 @@ Utility package:
 - __logger__: logging helper
 
 ## Prerequisites
-Fundamental requirements is python 3.5>.
+Fundamental requirements is python 3.7>.
 
 First of all you have to install some package and create a python virtual env:
 
@@ -64,6 +64,10 @@ $ python auth/perm.py
 $ python auth/ldap_auth.py 
 $ python auth/database_auth.py 
 ```
+
+Test log can be seen in the home directory. 
+Files: 
+- __test.log__
 
 ## Versioning
 We use Semantic Versioning for versioning. (https://semver.org)
