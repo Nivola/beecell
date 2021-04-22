@@ -117,8 +117,6 @@ class RedisManager(ConnectionManager):
             self.server = redis.StrictRedis(host=host, port=int(port), db=int(db), password=None,
                                             socket_timeout=timeout, retry_on_timeout=False, connection_pool=None,
                                             max_connections=max_connections)
-
-        self.logger.debug('Setup redis: %s' % self.server)
     
     @property
     def conn(self):

@@ -566,6 +566,19 @@ def parse_redis_uri(uri):
             cluster_nodes.append({'host': host, 'port': port})
         res = {'type': 'cluster', 'nodes': cluster_nodes}
 
+    # redis with sentinel
+    elif uri.find('redis-sentinel') >= 0:
+        pwd = None
+        if uri.find('@') > 0:
+            redis_uri = uri.replace('redis-sentinel://:', '')
+            pwd, redis_uri = redis_uri.split('@')
+        else:
+            redis_uri = uri.replace('redis-sentinel://', '')
+        hosts, group, port = redis_uri.split(':')
+        port, db = port.split('/')
+        res = {'type': 'sentinel', 'hosts': hosts.split(','), 'port': int(port), 'db': int(db), 'pwd': pwd,
+               'group': group}
+
     # single redis node
     elif uri.find('redis') >= 0:
         pwd = None
