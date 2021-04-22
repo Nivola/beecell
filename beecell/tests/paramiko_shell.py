@@ -12,8 +12,8 @@ from beecell.tests.test_util import BeecellTestCase
 from beecell.paramiko_shell.shell import logger
 
 tests = [
-    'test_run_tunnel_with_password',
-    # 'test_run_with_password',
+    # 'test_run_tunnel_with_password',
+    'test_run_with_password',
     # 'test_run_with_keyfile',
     # 'test_run_with_keystring'
 ]
@@ -30,12 +30,8 @@ class ShellTestCase(BeecellTestCase):
         self.keyfile = self.conf('shell.keyfile')
         self.key_string = '\n'.join(self.conf('shell.key_string').split('\\n'))
 
-        self.port = 22
-        self.user = 'root'
-        self.pwd = '.00y._BH'
-        self.host = '192.168.201.12'
-
-        self.tunnel = {'host': '84.240.174.190', 'port': 11100, 'user': 'gateway', 'pwd': 'MoqJZWfHEApOqh2NeLJD'}
+        #self.port = 22
+        #self.user = 'root'
         LoggerHelper.simple_handler([logger, logging.getLogger('paramiko')], logging.DEBUG)
 
     def tearDown(self):
@@ -49,7 +45,9 @@ class ShellTestCase(BeecellTestCase):
         self.client.close_tunnel()
 
     def test_run_with_password(self):
+        self.logger.info('connecting to host ' + self.host + '...')
         self.client = ParamikoShell(self.host, self.user, pwd=self.pwd)
+        self.logger.info('connection ok')
         res = self.client.cmd('ls', timeout=5.0)
         self.logger.info(res)
 
