@@ -67,7 +67,7 @@ $ python auth/database_auth.py
 
 Test log can be seen in the home directory. 
 Files: 
-- test.log
+- __test.log__
 
 ## Versioning
 We use Semantic Versioning for versioning. (https://semver.org)
