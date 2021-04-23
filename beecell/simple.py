@@ -515,7 +515,7 @@ def truncate(msg, size=600, replace_new_line=True):
     """
     msg = str(msg)
     if replace_new_line is True:
-        msg = msg.replace('\n', ' | ')
+        msg = msg.replace('\n', ' + ')
 
     if len(msg) > size:
         return msg[0:size] + '...'

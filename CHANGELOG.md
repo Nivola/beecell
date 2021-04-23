@@ -8,6 +8,7 @@
     * add management of redis cluster with sentinel
 * Fixed ...
     * fixed parse_redis_uri to parse redis sentinel uri
+    * replaced caracther | with + in simple.truncate
 * Integrated ...
 * Various bugfixes
 * Removed
