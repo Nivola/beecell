@@ -149,7 +149,7 @@ def getkey(data, key, separator='.'):
         else:
             res = res.get(k, {})
     if isinstance(res, list):
-        res = json.dumps(res)
+        res = jsonDumps(res)
     if res is None or res == {}:
         res = '-'
 
@@ -977,9 +977,9 @@ def jsonDumps(data, ensure_ascii=False, indent=2, cls=None):
 
     # this solution doesn't work in case of dict that contains values of type bytes
     # if type(data) is bytes:
-    #     resp = json.dumps(ensure_text(data))
+    #     resp = jsonDumps(ensure_text(data))
     #     return resp
     # else:
-    #     resp = json.dumps(data)
+    #     resp = jsonDumps(data)
     #     return resp
 

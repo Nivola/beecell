@@ -4,6 +4,8 @@
 # (C) Copyright 2019-2020 CSI-Piemonte
 # (C) Copyright 2020-2021 CSI-Piemonte
 
+from beecell.simple import jsonDumps
+
 import logging
 import ujson as json
 from beecell.simple import truncate
@@ -30,7 +32,7 @@ class CacheClient(object):
         :param ttl: item time to live [default=600s]
         :return: True
         """
-        value = json.dumps({'data': value})
+        value = jsonDumps({'data': value})
         self.redis.setex(self.prefix + key, ttl, value)
         self.logger.debug('Set cache item %s:%s [%ss]' % (key, truncate(value), ttl))
         return True

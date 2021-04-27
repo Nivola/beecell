@@ -4,6 +4,8 @@
 # (C) Copyright 2019-2020 CSI-Piemonte
 # (C) Copyright 2020-2021 CSI-Piemonte
 
+from beecell.simple import jsonDumps
+
 import time
 import json
 import logging
@@ -53,7 +55,7 @@ class Event(object):
                'timestamp': self.timestamp, 'proc': self.proc, 'user': self.user,
                'source_addr': self.source_addr, 'dest_addr': self.dest_addr,
                'type': self.type, 'data': self.data}
-        return json.dumps(msg)
+        return jsonDumps(msg)
 
     def publish(self):
         """Publish new event on event logger
