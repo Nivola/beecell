@@ -10,6 +10,7 @@
 * Fixed ...
     * fixed parse_redis_uri to parse redis sentinel uri
     * replaced caracther | with + in simple.truncate
+    * renamed schema in db in SqlManager
 * Integrated ...
 * Various bugfixes
 * Removed

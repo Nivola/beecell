@@ -506,8 +506,8 @@ class SqlManager(ConnectionManager):
     def invalidate_connection_pool(self):
         self.engine.dispose()
     
-    def get_schemas(self):
-        """Get schemas list
+    def get_dbs(self):
+        """Get dbs list
         """
         connection = None
         res = {}
@@ -517,19 +517,19 @@ class SqlManager(ConnectionManager):
                                         'from information_schema.tables group by table_schema')
             for row in result:
                 res[row[0]] = {
-                    'schema': row[0],
+                    'db': row[0],
                     'tables': row[1]
                 }
-            # add empty schema
+            # add empty db
             result = connection.execute('show databases')
             for row in result:
                 if row[0] not in res.keys():
                     res[row[0]] = {
-                        'schema': row[0],
+                        'db': row[0],
                         'tables': 0
                     }
             res = res.values()
-            self.logger.debug('Get schema list: %s' % res)
+            self.logger.debug('Get db list: %s' % res)
             
         except Exception as ex:
             self.logger.error(ex, exc_info=True)
@@ -540,10 +540,10 @@ class SqlManager(ConnectionManager):
                 self.engine.dispose()
         return res
 
-    def add_schema(self, db_name, charset=None):
-        """Add schema
+    def add_db(self, db_name, charset=None):
+        """Add db
 
-        :param db_name: schema name
+        :param db_name: db name
         :param charset: charset [optional]
         """
         connection = None
@@ -554,7 +554,7 @@ class SqlManager(ConnectionManager):
             if charset is not None:
                 stm += 'CHARACTER SET = %s' % charset
             res = connection.execute(stm)
-            self.logger.debug('Create schema %s: %s' % (db_name, res))
+            self.logger.debug('Create db %s: %s' % (db_name, res))
         except Exception as ex:
             self.logger.error(ex, exc_info=True)
             raise
@@ -564,10 +564,10 @@ class SqlManager(ConnectionManager):
                 self.engine.dispose()
         return res
 
-    def drop_schema(self, db_name):
-        """Drop schema
+    def drop_db(self, db_name):
+        """Drop db
 
-        :param db_name: schema name
+        :param db_name: db name
         """
         connection = None
         res = {}
@@ -575,7 +575,7 @@ class SqlManager(ConnectionManager):
             connection = self.engine.connect()
             stm = 'DROP DATABASE IF EXISTS %s' % db_name
             res = connection.execute(stm)
-            self.logger.debug('Drop schema %s: %s' % (db_name, res))
+            self.logger.debug('Drop db %s: %s' % (db_name, res))
         except Exception as ex:
             self.logger.error(ex, exc_info=True)
             raise
@@ -629,20 +629,20 @@ class SqlManager(ConnectionManager):
                 self.engine.dispose()
         return True
 
-    def grant_schema_to_user(self, name, host, schema):
-        """Grant schema to user
+    def grant_db_to_user(self, name, host, db):
+        """Grant db to user
 
         :param name: user name
         :param host: user host
-        :param schema: schema name to grant
+        :param db: db name to grant
         """
         connection = None
         res = {}
         try:
             connection = self.engine.connect()
-            stm = text("GRANT ALL privileges ON `%s`.* TO '%s'@'%s'" % (schema, name, host))
+            stm = text("GRANT ALL privileges ON `%s`.* TO '%s'@'%s'" % (db, name, host))
             connection.execute(stm)
-            self.logger.debug('Grant schema %s to user %s: %s' % (schema, name, res))
+            self.logger.debug('Grant schema %s to user %s: %s' % (db, name, res))
         except Exception as ex:
             self.logger.error(ex, exc_info=True)
             raise
@@ -679,10 +679,10 @@ class SqlManager(ConnectionManager):
         self.logger.debug("Get table list: %s" % tables)
         return tables
     
-    def get_schema_tables(self, schema):
-        """Get schema table list
+    def get_db_tables(self, db):
+        """Get db table list
         
-        :param str schema: schema name
+        :param str db: db name
         :return: entity instance
         :raise Exception:
         """
@@ -693,7 +693,7 @@ class SqlManager(ConnectionManager):
             sql = "select table_name, table_rows, data_length, index_length, "\
                   "auto_increment from information_schema.tables where "\
                   "table_schema='%s' order by table_name"
-            result = connection.execute(sql % schema)
+            result = connection.execute(sql % db)
             for row in result:
                 res.append({
                     'table_name': row[0],
@@ -702,7 +702,7 @@ class SqlManager(ConnectionManager):
                     'index_length': row[3],
                     'auto_increment': row[4]
                 })
-            self.logger.debug('Get tables for schema %s: %s' % (schema, res))
+            self.logger.debug('Get tables for db %s: %s' % (db, res))
             
         except Exception as ex:
             self.logger.error(ex, exc_info=True)
@@ -851,10 +851,10 @@ class MysqlManager(SqlManager):
         
         self.ping_query = "SELECT 1"
 
-    def drop_all_tables(self, schema):
+    def drop_all_tables(self, db):
         """Query a table
 
-        :param schema: schema
+        :param db: db
         :return: True
         :raise SqlManagerError:
         """
@@ -869,10 +869,10 @@ class MysqlManager(SqlManager):
         ]
 
         select_tables = "SELECT GROUP_CONCAT(table_schema, '.', table_name) FROM information_schema.tables " \
-                        "WHERE table_type='BASE TABLE' and table_schema = '%s';" % schema
+                        "WHERE table_type='BASE TABLE' and table_schema = '%s';" % db
 
         select_views = "SELECT GROUP_CONCAT(table_schema, '.', table_name) FROM information_schema.tables " \
-                       "WHERE table_type='VIEW' and table_schema = '%s';" % schema
+                       "WHERE table_type='VIEW' and table_schema = '%s';" % db
 
         set_tables = "SET @tables = '%s';"
         set_views = "SET @views = '%s';"
