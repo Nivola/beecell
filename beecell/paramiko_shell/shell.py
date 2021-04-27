@@ -6,19 +6,16 @@
 
 from os import popen
 from tempfile import NamedTemporaryFile
-
-from paramiko.client import SSHClient, MissingHostKeyPolicy, AutoAddPolicy
-from paramiko import RSAKey, PKey
+from paramiko.client import SSHClient, MissingHostKeyPolicy
+from paramiko import RSAKey
 from logging import getLogger
-
-from paramiko.hostkeys import HostKeyEntry, HostKeys
 from six import StringIO, ensure_text, ensure_binary
 import fcntl
 import termios
 import struct
 import sys
 from gevent.os import make_nonblocking, nb_read, nb_write
-from sshtunnel import SSHTunnelForwarder, create_logger
+from sshtunnel import SSHTunnelForwarder
 
 try:
     from scp import SCPClient
