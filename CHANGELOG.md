@@ -6,6 +6,7 @@
     * add support connection using ssh tunnel to paramiko_shell
     * add rsync client authentication with ssh key
     * add management of redis cluster with sentinel
+    * add tunnel configuration for sql manager
 * Fixed ...
     * fixed parse_redis_uri to parse redis sentinel uri
     * replaced caracther | with + in simple.truncate

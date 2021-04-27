@@ -5,6 +5,7 @@
 # (C) Copyright 2020-2021 CSI-Piemonte
 
 import logging
+from sshtunnel import SSHTunnelForwarder
 from time import sleep
 import redis
 import os
@@ -390,14 +391,39 @@ class SqlManager(ConnectionManager):
         
         self.id = sql_id
         self.db_uri = db_uri
+        self.orig_db_uri = db_uri
         self.connect_timeout = connect_timeout
         
         # engine
         self.engine = None
         self.db_session = None
+
+        # ssh tunnel
+        self.tunnel = None
         
         self.ping_query = "SELECT 1"
-        
+
+    def create_tunnel(self, host, pwd, user='root', port=22):
+        # parse db_uri
+        # mysql+pymysql://<user>:<pwd>@<host>:<port>/<db>
+        db_host, db_port = self.db_uri.split('@')[1].split(':')
+        db_port = int(db_port.split('/')[0])
+
+        self.tunnel = SSHTunnelForwarder(
+            logger=self.logger,
+            ssh_address_or_host=(host, port),
+            ssh_username=user,
+            ssh_password=pwd,
+            remote_bind_address=(db_host, db_port),
+        )
+        self.tunnel.start()
+        self.orig_db_uri = self.db_uri
+        self.db_uri.replace(db_host, '127.0.0.1').replace(db_port, self.tunnel.local_bind_port)
+
+    def close_tunnel(self):
+        self.tunnel.stop()
+        self.db_uri = self.orig_db_uri
+
     def create_simple_engine(self):
         """Create an engine with basic configuration and no connection pool """
         if not self.engine:
@@ -695,8 +721,7 @@ class SqlManager(ConnectionManager):
         """
         from sqlalchemy import Table, MetaData
         metadata = MetaData()
-        table_obj = Table(table_name, metadata, autoload=True, 
-                          autoload_with=self.engine)
+        table_obj = Table(table_name, metadata, autoload=True, autoload_with=self.engine)
         self.logger.debug("Get description for table %s" % (table_name))
         return [{
             'name': c.name,

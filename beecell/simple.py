@@ -946,40 +946,24 @@ def validate_string(data, validation_string=r'[^a-zA-Z0-9\-].'):
     data = char_re.search(data)
     return not bool(data)
 
-def jsonDumps(data, ensure_ascii=False, indent=2, cls=None):
+
+def jsonDumps(data, ensure_ascii=False):
     """Check type of data
     (in lib ujson 4.0.x reject_bytes is on)
     (in lib ujson 2.0.x 'reject_bytes=False' is an invalid keyword argument)
+
+    :param data: data to convert
+    :param ensure_ascii: if True ensure ascii
     :return: a json
     """
-    #logger.warning('____data={},type={}'.format(data, type(data)))
-    params={}
+    params = {}
     if ensure_ascii:
         params['ensure_ascii'] = ensure_ascii
-        #print("+++ ensure_ascii")
-    if indent:
-        params['indent'] = indent
-        #print("+++ indent")
-    #if cls:
-        # 'cls' is an invalid keyword argument for this function
-        #params['cls'] = cls
-        #print("+++ cls")
 
-    versJson=json.__version__
-    #print("versJson: " + versJson)
-    major=versJson.split(".")[0]
-    #print("major: " + major)
+    vers_json = json.__version__
+    major = vers_json.split(".")[0]
     if int(major) >= 3:
         params['reject_bytes'] = False
-    
+
     resp = json.dumps(data, **params)
     return resp
-
-    # this solution doesn't work in case of dict that contains values of type bytes
-    # if type(data) is bytes:
-    #     resp = json.dumps(ensure_text(data))
-    #     return resp
-    # else:
-    #     resp = json.dumps(data)
-    #     return resp
-
