@@ -485,7 +485,28 @@ class SqlManager(ConnectionManager):
 
     def get_engine(self):
         return self.engine
-    
+
+    def exec_statements(self, statements):
+        """Exec statements defined by a function statements(connection)
+
+        :param statements: function with signature statements(connection): ... return res
+        :return: statements execution response
+        """
+        connection = None
+        res = {}
+        try:
+            connection = self.engine.connect()
+            res = statements(connection)
+            self.logger.debug('Exec statements: %s' % truncate(res))
+        except Exception as ex:
+            self.logger.error(ex, exc_info=True)
+            raise
+        finally:
+            if connection is not None:
+                connection.close()
+                self.engine.dispose()
+        return res
+
     def ping(self):
         """Ping dbms engine"""
         connection = None
