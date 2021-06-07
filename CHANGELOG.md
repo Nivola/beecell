@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.8.0 (, 2021)
+## Version 1.8.0 (jun 11, 2021)
 
 * Added ...
     * add support connection using ssh tunnel to paramiko_shell
@@ -10,7 +10,7 @@
     * add method exec_statements in sql manager
 * Fixed ...
     * fixed parse_redis_uri to parse redis sentinel uri
-    * replaced caracther | with + in simple.truncate
+    * replaced character | with + in simple.truncate
     * renamed schema in db in SqlManager
 * Integrated ...
 * Various bugfixes
