@@ -769,6 +769,17 @@ def is_string(data):
     return res
 
 
+def is_int(s):
+    """Check whether string s is a positive or negative integer
+
+    :param s: the string to validate
+    :return: boolean True o False
+    """
+    if s[0] in ('-', '+'):
+        return s[1:].isdigit()
+    return s.isdigit()
+
+
 def dict_get(data, key, separator='.', default=None):
     """Get a value from a dict. Key can be composed to get a field in a complex dict that contains other dict, list and
     string.
