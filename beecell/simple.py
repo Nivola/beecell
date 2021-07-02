@@ -967,3 +967,14 @@ def jsonDumps(data, ensure_ascii=False):
 
     resp = json.dumps(data, **params)
     return resp
+
+
+def split_string_in_chunks(string, pos=100):
+    """split a string in chunks
+
+    :param string: string to split
+    :param pos: position where split
+    :return: list of string chunks
+    """
+    chunks = [string[i:i + pos] for i in range(0, len(string), pos)]
+    return chunks
