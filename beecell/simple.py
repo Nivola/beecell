@@ -4,24 +4,24 @@
 # (C) Copyright 2019-2020 CSI-Piemonte
 # (C) Copyright 2020-2021 CSI-Piemonte
 
-import inspect
-from werkzeug.wrappers import BaseResponse
-import yaml
+from inspect import getmembers, isclass
 from struct import pack
 from six import b, ensure_text, ensure_binary
-import ujson as json
-import os, random, subprocess, logging
+from logging import getLogger
 from socket import inet_ntoa
 from prettytable import PrettyTable
-import string
-import binascii
+from string import ascii_uppercase, ascii_letters, digits, ascii_lowercase
+from binascii import hexlify
 from uuid import uuid4
 from math import ceil
 from cryptography.fernet import Fernet
-import datetime
+from datetime import datetime
 from re import compile as re_compile
+from os import urandom
+from random import SystemRandom, choice
+from subprocess import Popen, PIPE
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 def check_vault(data, key):
@@ -206,29 +206,29 @@ def random_password(length=10, strong=False):
     :param strong: True for generate strong password (include upper/lowercase, digits and random_password character)
     :return: generated password in UNICODE format
     """
-    chars = string.ascii_uppercase + string.digits + string.ascii_lowercase
+    chars = ascii_uppercase + digits + ascii_lowercase
 
     if strong is True:
         punctuation = '()_-.'
-        randomSource = string.ascii_letters + string.digits + punctuation
-        password = random.SystemRandom().choice(string.ascii_lowercase)
-        password += random.SystemRandom().choice(string.ascii_uppercase)
-        password = random.SystemRandom().choice(string.ascii_lowercase)
-        password += random.SystemRandom().choice(string.ascii_uppercase)
-        password += random.SystemRandom().choice(string.digits)
-        password += random.SystemRandom().choice(punctuation)
-        password += random.SystemRandom().choice(punctuation)
+        randomSource = ascii_letters + digits + punctuation
+        password = SystemRandom().choice(ascii_lowercase)
+        password += SystemRandom().choice(ascii_uppercase)
+        password = SystemRandom().choice(ascii_lowercase)
+        password += SystemRandom().choice(ascii_uppercase)
+        password += SystemRandom().choice(digits)
+        password += SystemRandom().choice(punctuation)
+        password += SystemRandom().choice(punctuation)
 
         for i in range(length - 7):
-            password += random.SystemRandom().choice(randomSource)
+            password += SystemRandom().choice(randomSource)
 
         passwordList = list(password)
-        random.SystemRandom().shuffle(passwordList)
+        SystemRandom().shuffle(passwordList)
         password = ''.join(passwordList)
     else:
         password = ''
         for i in range(length):
-            password += chars[ord(os.urandom(1)) % len(chars)]
+            password += chars[ord(urandom(1)) % len(chars)]
 
     return password
 
@@ -241,7 +241,7 @@ def run_command(command):
     :param stderr: pipe to the standard error stream should be opened, default subprocess.PIPE
     :returns tuple of 0 and the output of the command if there is no error, code error and error message otherwise
     """
-    p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p = Popen(command, stdout=PIPE, stderr=PIPE)
     out, err = p.communicate()
     if p.returncode == 0:
         return 0, out
@@ -392,10 +392,8 @@ def print_table_from_dict(list, order_field=None):
 
 def query_python_object(obj):
     import pprint
-    import inspect
-
     pp = pprint.PrettyPrinter(indent=2)
-    pp.pprint(inspect.getmembers(obj))
+    pp.pprint(getmembers(obj))
 
 
 def dynamic_import(name):
@@ -463,7 +461,7 @@ def id_gen(length=10, parent_id=None):
     :param parent_id: root to append in the id
     :return: oid generated
     """
-    oid = binascii.hexlify(os.urandom(int(length / 2)))
+    oid = hexlify(urandom(int(length / 2)))
     if parent_id is not None:
         oid = '%s//%s' % (parent_id, ensure_text(oid))
     return ensure_text(oid)
@@ -482,10 +480,10 @@ def transaction_id_generator(length=20):
     :param length: length of id to generate
     return : random string
     """
-
-    chars = string.ascii_letters + string.digits
-    random.seed = (os.urandom(1024))
-    return ''.join(random.choice(chars) for i in range(length))
+    import random
+    chars = ascii_letters + digits
+    random.seed = (urandom(1024))
+    return ''.join(choice(chars) for i in range(length))
 
 
 def get_remote_ip(request):
@@ -643,7 +641,7 @@ def parse_date(data_str, format=None):
 
     res = None
     if data_str is not None:
-        res = datetime.datetime.strptime(data_str, time_format)
+        res = datetime.strptime(data_str, time_format)
     return res
 
 
@@ -671,14 +669,14 @@ def format_date(date, format=None, microsec=False):
 
 def get_date_from_timestamp(date):
     if date is not None:
-        return datetime.datetime.fromtimestamp(date)
+        return datetime.fromtimestamp(date)
     else:
         return None
 
 
 def get_timestamp_from_date(date):
     if date is not None:
-        return datetime.datetime.timestamp(date)
+        return datetime.timestamp(date)
     else:
         return None
 
@@ -692,7 +690,7 @@ def compat(data):
             for k, v in data.items():
                 newdata[k] = compat(v)
             data = newdata
-        elif inspect.isclass(data) is True:
+        elif isclass(data) is True:
             data = str(data)
         else:
             data = truncate(data, 30)
@@ -891,23 +889,7 @@ def multi_get(data, key, separator='.'):
     return res
 
 
-def read_file(file_name):
-    """Load dict from a json or yaml formatted file.
-
-    :param file_cname: file name
-    :return: data
-    """
-    f = open(file_name, 'r')
-    data = f.read()
-    extension = file_name[-4:].lower()
-    if extension == b('json') or extension == 'json':
-        data = json.loads(data)
-    elif extension == b('yaml') or extension == 'yaml':
-        data = yaml.full_load(data)
-    elif extension == b('.yml') or extension == '.yml':
-        data = yaml.full_load(data)
-    f.close()
-    return data
+from .file import read_file
 
 
 def set_request_params(kwargs, supported):
@@ -967,6 +949,7 @@ def jsonDumps(data, ensure_ascii=False):
     :param ensure_ascii: if True ensure ascii
     :return: a json
     """
+    import ujson as json
     params = {}
     if ensure_ascii:
         params['ensure_ascii'] = ensure_ascii
