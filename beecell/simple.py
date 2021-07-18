@@ -10,7 +10,7 @@ from six import b, ensure_text, ensure_binary
 from logging import getLogger
 from socket import inet_ntoa
 from prettytable import PrettyTable
-from string import ascii_uppercase, ascii_letters, digits, ascii_lowercase
+from string import ascii_letters, digits
 from binascii import hexlify
 from uuid import uuid4
 from math import ceil
@@ -18,7 +18,7 @@ from cryptography.fernet import Fernet
 from datetime import datetime
 from re import compile as re_compile
 from os import urandom
-from random import SystemRandom, choice
+from random import choice
 from subprocess import Popen, PIPE
 
 logger = getLogger(__name__)
@@ -198,39 +198,7 @@ def merge_list(*list_args):
     return result
 
 
-def random_password(length=10, strong=False):
-    """Generate random password
-    inspired to: https://pynative.com/python-generate-random-string/
-
-    :param length: length of string to generate
-    :param strong: True for generate strong password (include upper/lowercase, digits and random_password character)
-    :return: generated password in UNICODE format
-    """
-    chars = ascii_uppercase + digits + ascii_lowercase
-
-    if strong is True:
-        punctuation = '()_-.'
-        randomSource = ascii_letters + digits + punctuation
-        password = SystemRandom().choice(ascii_lowercase)
-        password += SystemRandom().choice(ascii_uppercase)
-        password = SystemRandom().choice(ascii_lowercase)
-        password += SystemRandom().choice(ascii_uppercase)
-        password += SystemRandom().choice(digits)
-        password += SystemRandom().choice(punctuation)
-        password += SystemRandom().choice(punctuation)
-
-        for i in range(length - 7):
-            password += SystemRandom().choice(randomSource)
-
-        passwordList = list(password)
-        SystemRandom().shuffle(passwordList)
-        password = ''.join(passwordList)
-    else:
-        password = ''
-        for i in range(length):
-            password += chars[ord(urandom(1)) % len(chars)]
-
-    return password
+from .password import random_password
 
 
 def run_command(command):
@@ -720,44 +688,8 @@ def is_not_blank(myString):
     return bool(myString and myString.strip())
 
 
-def obscure_data(data, fields=None):
-    """Obscure some fields in data, fields can be password.
-
-    :param data: data to check
-    :param fields: list of fields to obfuscate. default=['password', 'pwd', 'passwd']
-    :return: obscured data
-    """
-    if fields is None:
-        fields = ['password', 'pwd', 'passwd', 'pass']
-
-    if isinstance(data, str) or isinstance(data, bytes):
-        return obscure_string(data, fields)
-
-    for key, value in data.items():
-        if isinstance(value, dict):
-            obscure_data(value, fields)
-        elif isinstance(data, str) or isinstance(data, bytes):
-            for field in fields:
-                if key.lower().find(field) >= 0:
-                    data[key] = 'xxxxxx'
-
-    return data
-
-
-def obscure_string(data, fields=None):
-    """Obscure entire string if it contains passwords.
-
-    :param data: data to check
-    :param fields: list of fields to obfuscate. default=['password', 'pwd', 'passwd']
-    :return: obscured string
-    """
-    if fields is None:
-        fields = ['password', 'pwd', 'passwd', 'pass']
-
-    for field in fields:
-        if data.lower().find(field) >= 0:
-            data = 'xxxxxx'
-    return data
+from .password import obscure_data
+from .password import obscure_string
 
 
 def is_string(data):
