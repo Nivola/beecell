@@ -4,12 +4,10 @@
 # (C) Copyright 2019-2020 CSI-Piemonte
 # (C) Copyright 2020-2021 CSI-Piemonte
 
-import ldap
+# import ldap
 from six import ensure_str
-
 from beecell.simple import truncate
 from .base import AuthError, AbstractAuth
-from beecell.perf import watch
 
 
 class LdapAuth(AbstractAuth):
