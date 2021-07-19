@@ -6,7 +6,7 @@
 
 from inspect import getmembers, isclass
 from struct import pack
-from six import b, ensure_text, ensure_binary
+from six import b, ensure_text
 from logging import getLogger
 from socket import inet_ntoa
 from prettytable import PrettyTable
@@ -14,7 +14,6 @@ from string import ascii_letters, digits
 from binascii import hexlify
 from uuid import uuid4
 from math import ceil
-from cryptography.fernet import Fernet
 from datetime import datetime
 from re import compile as re_compile
 from os import urandom
@@ -24,105 +23,107 @@ from subprocess import Popen, PIPE
 logger = getLogger(__name__)
 
 
-def check_vault(data, key):
-    """Check if data is encrypted with fernet token and AES128
+from.crypto import check_vault, is_encrypted, generate_fernet_key, encrypt_data, decrypt_data
 
-    :param data: data to verify. If encrypted token '$BEEHIVE_VAULT;AES128 | ' is in head of data
-    :param key: fernet key
-    :return: decrypted key
-    """
-    data = ensure_binary(data)
-    if data.find(b('$BEEHIVE_VAULT;AES128 | ')) == 0:
-        if key is None:
-            raise Exception('Fernet key must be provided')        
-        cipher_suite = Fernet(ensure_binary(key))
-        data = data.replace(b('$BEEHIVE_VAULT;AES128 | '), b(''))
-        data = cipher_suite.decrypt(data)
-    data = data.decode('utf-8')
-    return data
+# def check_vault(data, key):
+#     """Check if data is encrypted with fernet token and AES128
+#
+#     :param data: data to verify. If encrypted token '$BEEHIVE_VAULT;AES128 | ' is in head of data
+#     :param key: fernet key
+#     :return: decrypted key
+#     """
+#     data = ensure_binary(data)
+#     if data.find(b('$BEEHIVE_VAULT;AES128 | ')) == 0:
+#         if key is None:
+#             raise Exception('Fernet key must be provided')
+#         cipher_suite = Fernet(ensure_binary(key))
+#         data = data.replace(b('$BEEHIVE_VAULT;AES128 | '), b(''))
+#         data = cipher_suite.decrypt(data)
+#     data = data.decode('utf-8')
+#     return data
+#
+#
+# def is_encrypted(data):
+#     """Check if data is encrypted with fernet token and AES128
+#
+#     :param data: data to verify. If encrypted token '$BEEHIVE_VAULT;AES128 | ' is in head of data
+#     :return: True if data is encrypted, False otherwise
+#     """
+#     if data.find('$BEEHIVE_VAULT;AES128 | ') == 0:
+#         return True
+#     return False
+#
+#
+# def generate_fernet_key():
+#     """Generate fernet key
+#
+#     :return: fernet key
+#     """
+#     return Fernet.generate_key()
+#
+#
+# def encrypt_data(fernet_key, data):
+#     """Encrypt data using a fernet key and a symmetric algorithm
+#
+#     :param fernet_key: fernet key. To generate use: Fernet.generate_key()
+#     :param data: data to encrypt
+#     :return: encrypted data
+#     """
+#     cipher_suite = Fernet(ensure_binary(fernet_key))
+#     cipher_data = ensure_text(cipher_suite.encrypt(ensure_binary(data)))
+#     return '$BEEHIVE_VAULT;AES128 | %s' % cipher_data
+#
+#
+# def decrypt_data(fernet_key, data):
+#     """Decrypt data using a fernet key and a symmetric algorithm
+#
+#     :param fernet_key: fernet key
+#     :param data: data to decrypt
+#     :return: decrypted data
+#     """
+#     data = ensure_text(data)
+#     if data.find('$BEEHIVE_VAULT;AES128 | ') == 0:
+#         data = data.replace('$BEEHIVE_VAULT;AES128 | ', '')
+#         cipher_suite = Fernet(ensure_binary(fernet_key))
+#         cipher_data = cipher_suite.decrypt(ensure_binary(data))
+#     else:
+#         cipher_data = data
+#     return cipher_data
 
 
-def is_encrypted(data):
-    """Check if data is encrypted with fernet token and AES128
-
-    :param data: data to verify. If encrypted token '$BEEHIVE_VAULT;AES128 | ' is in head of data
-    :return: True if data is encrypted, False otherwise
-    """
-    if data.find('$BEEHIVE_VAULT;AES128 | ') == 0:
-        return True
-    return False
-
-
-def generate_fernet_key():
-    """Generate fernet key
-
-    :return: fernet key
-    """
-    return Fernet.generate_key()
-
-
-def encrypt_data(fernet_key, data):
-    """Encrypt data using a fernet key and a symmetric algorithm
-
-    :param fernet_key: fernet key. To generate use: Fernet.generate_key()
-    :param data: data to encrypt
-    :return: encrypted data
-    """
-    cipher_suite = Fernet(ensure_binary(fernet_key))
-    cipher_data = ensure_text(cipher_suite.encrypt(ensure_binary(data)))
-    return '$BEEHIVE_VAULT;AES128 | %s' % cipher_data
-
-
-def decrypt_data(fernet_key, data):
-    """Decrypt data using a fernet key and a symmetric algorithm
-
-    :param fernet_key: fernet key
-    :param data: data to decrypt
-    :return: decrypted data
-    """
-    data = ensure_text(data)
-    if data.find('$BEEHIVE_VAULT;AES128 | ') == 0:
-        data = data.replace('$BEEHIVE_VAULT;AES128 | ', '')
-        cipher_suite = Fernet(ensure_binary(fernet_key))
-        cipher_data = cipher_suite.decrypt(ensure_binary(data))
-    else:
-        cipher_data = data
-    return cipher_data
-
-
-def flatten_dict(d, delimiter=":", loopArray=True):
-    """Flat dictionary conversion
-
-    :param loopArray: If True execute loop unrolling array items in keys. False otherwise
-    :param delimiter: delimiter char
-    :return dictionary unrolled with compound keys
-    """
-
-    def items():
-        for key, value in d.items():
-            if isinstance(value, dict):
-                for subkey, subvalue in flatten_dict(value, delimiter=delimiter, loopArray=loopArray).items():
-                    yield key + delimiter + subkey, subvalue
-            elif isinstance(value, list):
-                if loopArray:
-                    x = 0
-                    for itemArray in value:
-                        if isinstance(itemArray, dict):
-                            for subkey, subvalue in flatten_dict(itemArray, delimiter=delimiter,
-                                                                 loopArray=loopArray).items():
-                                yield key + delimiter + str(x) + delimiter + subkey, subvalue
-                        else:
-                            yield key + delimiter + str(x), itemArray
-                        x += 1
-                else:
-                    res = []
-                    for itemArray in value:
-                        res.append(flatten_dict(itemArray, delimiter=delimiter, loopArray=loopArray))
-                    yield key, res
-            else:
-                yield key, value
-
-    return dict(items())
+# def flatten_dict(d, delimiter=":", loopArray=True):
+#     """Flat dictionary conversion
+#
+#     :param loopArray: If True execute loop unrolling array items in keys. False otherwise
+#     :param delimiter: delimiter char
+#     :return dictionary unrolled with compound keys
+#     """
+#
+#     def items():
+#         for key, value in d.items():
+#             if isinstance(value, dict):
+#                 for subkey, subvalue in flatten_dict(value, delimiter=delimiter, loopArray=loopArray).items():
+#                     yield key + delimiter + subkey, subvalue
+#             elif isinstance(value, list):
+#                 if loopArray:
+#                     x = 0
+#                     for itemArray in value:
+#                         if isinstance(itemArray, dict):
+#                             for subkey, subvalue in flatten_dict(itemArray, delimiter=delimiter,
+#                                                                  loopArray=loopArray).items():
+#                                 yield key + delimiter + str(x) + delimiter + subkey, subvalue
+#                         else:
+#                             yield key + delimiter + str(x), itemArray
+#                         x += 1
+#                 else:
+#                     res = []
+#                     for itemArray in value:
+#                         res.append(flatten_dict(itemArray, delimiter=delimiter, loopArray=loopArray))
+#                     yield key, res
+#             else:
+#                 yield key, value
+#
+#     return dict(items())
 
 
 def getkey(data, key, separator='.'):

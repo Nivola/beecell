@@ -93,3 +93,39 @@ def dict_unset(data, key, separator='.'):
     data = __dict_unset(data)
 
     return data
+
+
+def flatten_dict(data, delimiter=":", loopArray=True):
+    """Flat dictionary conversion
+
+    :param data: input data
+    :param loopArray: If True execute loop unrolling array items in keys. False otherwise
+    :param delimiter: delimiter char
+    :return dictionary unrolled with compound keys
+    """
+
+    def items():
+        for key, value in data.items():
+            if isinstance(value, dict):
+                for subkey, subvalue in flatten_dict(value, delimiter=delimiter, loopArray=loopArray).items():
+                    yield key + delimiter + subkey, subvalue
+            elif isinstance(value, list):
+                if loopArray:
+                    x = 0
+                    for itemArray in value:
+                        if isinstance(itemArray, dict):
+                            for subkey, subvalue in flatten_dict(itemArray, delimiter=delimiter,
+                                                                 loopArray=loopArray).items():
+                                yield key + delimiter + str(x) + delimiter + subkey, subvalue
+                        else:
+                            yield key + delimiter + str(x), itemArray
+                        x += 1
+                else:
+                    res = []
+                    for itemArray in value:
+                        res.append(flatten_dict(itemArray, delimiter=delimiter, loopArray=loopArray))
+                    yield key, res
+            else:
+                yield key, value
+
+    return dict(items())
