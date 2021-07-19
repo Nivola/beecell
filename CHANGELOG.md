@@ -8,7 +8,7 @@
     * improved import in simple module
     * moved read_file in file module to improve load performance
     * moved password methods in password module to improve load performance
-    * moved dict and list methods in types package to improve load performance
+    * moved dict, list, string, date methods in types package to improve load performance
     * moved cryptography methods in crypto module to improve load performance
 * Integrated ...
 * Various bugfixes

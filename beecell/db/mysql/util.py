@@ -3,10 +3,27 @@
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
 # (C) Copyright 2020-2021 CSI-Piemonte
+from subprocess import Popen, PIPE
 
 from beecell.simple import run_command
 from sqlalchemy.sql import compiler
 from MySQLdb.converters import conversions, escape
+
+
+def run_command(command):
+    """Run a shell command as an external process and return response or error.
+
+    :param command: unix command: list like ['ls', '-l', 'ps']
+    :param stdout: pipe to the standard out stream should be opened, default subprocess.PIPE
+    :param stderr: pipe to the standard error stream should be opened, default subprocess.PIPE
+    :returns tuple of 0 and the output of the command if there is no error, code error and error message otherwise
+    """
+    p = Popen(command, stdout=PIPE, stderr=PIPE)
+    out, err = p.communicate()
+    if p.returncode == 0:
+        return 0, out
+    else:
+        return p.returncode, err
 
 
 def compile_query(query):

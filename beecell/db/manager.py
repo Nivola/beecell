@@ -29,6 +29,69 @@ class MysqlManagerError(Exception):
     pass
 
 
+def parse_redis_uri(uri):
+    """Parse redis uri.
+
+    :param uri: redis connection uri. Ex
+            ``redis://localhost:6379/1``
+            ``localhost:6379:1``
+            ``redis-cluster://localhost:6379,localhost:6380``
+
+    :return:
+
+        {'type':'single', 'host':host, 'port':port, 'db':db}
+
+        or
+
+        {'type':'cluster', 'nodes':[
+            {'host': '10.102.184.121', 'port': '6379'},
+            {'host': '10.102.91.23', 'port': '6379'}
+        ]}
+
+    """
+    # redis cluster
+    if uri.find('redis-cluster') >= 0:
+        redis_uri = uri.replace('redis-cluster://', '')
+        host_ports = redis_uri.split(',')
+        cluster_nodes = []
+        for host_port in host_ports:
+            host, port = host_port.split(':')
+            cluster_nodes.append({'host': host, 'port': port})
+        res = {'type': 'cluster', 'nodes': cluster_nodes}
+
+    # redis with sentinel
+    elif uri.find('redis-sentinel') >= 0:
+        pwd = None
+        if uri.find('@') > 0:
+            redis_uri = uri.replace('redis-sentinel://:', '')
+            pwd, redis_uri = redis_uri.split('@')
+        else:
+            redis_uri = uri.replace('redis-sentinel://', '')
+        hosts, group, port = redis_uri.split(':')
+        port, db = port.split('/')
+        res = {'type': 'sentinel', 'hosts': hosts.split(','), 'port': int(port), 'db': int(db), 'pwd': pwd,
+               'group': group}
+
+    # single redis node
+    elif uri.find('redis') >= 0:
+        pwd = None
+        if uri.find('@') > 0:
+            redis_uri = uri.replace('redis://:', '')
+            pwd, redis_uri = redis_uri.split('@')
+        else:
+            redis_uri = uri.replace('redis://', '')
+        host, port = redis_uri.split(':')
+        port, db = port.split('/')
+        res = {'type': 'single', 'host': host, 'port': int(port), 'db': int(db), 'pwd': pwd}
+
+    # single redis node
+    else:
+        host, port, db = uri.split(";")
+        res = {'type': 'single', 'host': host, 'port': int(port), 'db': int(db)}
+
+    return res
+
+
 class ConnectionManager(object):
     """Abstract Connection manager
     """

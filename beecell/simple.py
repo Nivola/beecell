@@ -6,24 +6,21 @@
 
 from inspect import getmembers, isclass
 from struct import pack
-from six import b, ensure_text
 from logging import getLogger
 from socket import inet_ntoa
-from prettytable import PrettyTable
-from string import ascii_letters, digits
-from binascii import hexlify
-from uuid import uuid4
 from math import ceil
-from datetime import datetime
-from re import compile as re_compile
-from os import urandom
-from random import choice
-from subprocess import Popen, PIPE
 
 logger = getLogger(__name__)
 
 
-from.crypto import check_vault, is_encrypted, generate_fernet_key, encrypt_data, decrypt_data
+from.crypto import *
+from .types.type_date import *
+from .types.type_list import *
+from .types.type_dict import *
+from .types.type_string import *
+from .types.type_id import *
+from .file import *
+from .password import *
 
 # def check_vault(data, key):
 #     """Check if data is encrypted with fernet token and AES128
@@ -126,35 +123,35 @@ from.crypto import check_vault, is_encrypted, generate_fernet_key, encrypt_data,
 #     return dict(items())
 
 
-def getkey(data, key, separator='.'):
-    """Get key value from a complex data (dict with child dict and list) using a string key.
-
-    Example:
-
-        a = {'k1':[{'k2':..}]}
-        b = getkey(a, 'k1.0.k2')
-
-    :param data: complex object. Dict with nested list and dict
-    :param key: complex key to search. Ex key1.0.key2
-    :param separator: [default=.] key1 / list index separator
-    :return: value that meet nested key
-    """
-    keys = key.split(separator)
-    res = data
-    for k in keys:
-        if isinstance(res, list):
-            try:
-                res = res[int(k)]
-            except:
-                res = {}
-        else:
-            res = res.get(k, {})
-    if isinstance(res, list):
-        res = jsonDumps(res)
-    if res is None or res == {}:
-        res = '-'
-
-    return res
+# def getkey(data, key, separator='.'):
+#     """Get key value from a complex data (dict with child dict and list) using a string key.
+#
+#     Example:
+#
+#         a = {'k1':[{'k2':..}]}
+#         b = getkey(a, 'k1.0.k2')
+#
+#     :param data: complex object. Dict with nested list and dict
+#     :param key: complex key to search. Ex key1.0.key2
+#     :param separator: [default=.] key1 / list index separator
+#     :return: value that meet nested key
+#     """
+#     keys = key.split(separator)
+#     res = data
+#     for k in keys:
+#         if isinstance(res, list):
+#             try:
+#                 res = res[int(k)]
+#             except:
+#                 res = {}
+#         else:
+#             res = res.get(k, {})
+#     if isinstance(res, list):
+#         res = jsonDumps(res)
+#     if res is None or res == {}:
+#         res = '-'
+#
+#     return res
 
 
 def nround(number, decimal=4):
@@ -186,7 +183,7 @@ def nround(number, decimal=4):
 #         result.update(dictionary)
 #     return result
 
-from .types.type_list import merge_list
+
 # def merge_list(*list_args):
 #     """Given any number of lists, merge into a new list.
 #
@@ -199,33 +196,30 @@ from .types.type_list import merge_list
 #     return result
 
 
-from .password import random_password
+# def run_command(command):
+#     """Run a shell command as an external process and return response or error.
+#
+#     :param command: unix command: list like ['ls', '-l', 'ps']
+#     :param stdout: pipe to the standard out stream should be opened, default subprocess.PIPE
+#     :param stderr: pipe to the standard error stream should be opened, default subprocess.PIPE
+#     :returns tuple of 0 and the output of the command if there is no error, code error and error message otherwise
+#     """
+#     p = Popen(command, stdout=PIPE, stderr=PIPE)
+#     out, err = p.communicate()
+#     if p.returncode == 0:
+#         return 0, out
+#     else:
+#         return p.returncode, err
 
 
-def run_command(command):
-    """Run a shell command as an external process and return response or error.
-
-    :param command: unix command: list like ['ls', '-l', 'ps']
-    :param stdout: pipe to the standard out stream should be opened, default subprocess.PIPE
-    :param stderr: pipe to the standard error stream should be opened, default subprocess.PIPE
-    :returns tuple of 0 and the output of the command if there is no error, code error and error message otherwise
-    """
-    p = Popen(command, stdout=PIPE, stderr=PIPE)
-    out, err = p.communicate()
-    if p.returncode == 0:
-        return 0, out
-    else:
-        return p.returncode, err
-
-
-def str2uni(value):
-    """Convert in unicode (py2) or string (py3)
-
-    :param value: string to convert
-    :return: unicode (py2) or string (py3)
-    """
-    value = ensure_text(value)
-    return value
+# def str2uni(value):
+#     """Convert in unicode (py2) or string (py3)
+#
+#     :param value: string to convert
+#     :return: unicode (py2) or string (py3)
+#     """
+#     value = ensure_text(value)
+#     return value
 
 
 class AttribException(Exception):
@@ -321,42 +315,42 @@ def getmembers(obj, predicate=None):
     return results
 
 
-def print_table(fields, data):
-    """print a list of value and header like a table in string format
-
-    :param fields: list like ["City name", "Area", "Population", "Annual Rainfall"]
-    :param data: list like ["Adelaide",1295, 1158259, 600.5]
-    :return: table string formatted
-    """
-
-    tab = PrettyTable(fields)
-    tab.align = "l"  # Left align city names
-    tab.padding_width = 1  # One space between column edges and contents (default)
-    for item in data:
-        tab.add_row(item)
-    return tab
-
-
-def print_table_from_dict(list, order_field=None):
-    """print a list of dictionary like a table in string format and eventually order a determined column
-
-    :param list: list of dictionary
-    :param order_field: column to order
-    :return: None if list
-    """
-    if len(list) > 0:
-        fields = list[0].keys()
-        data = []
-        for item in list:
-            data.append(item.values())
-        tab = print_table(fields, data)
-
-        if order_field:
-            print(tab.get_string(sortby=order_field))
-        else:
-            print(tab)
-    else:
-        return None
+# def print_table(fields, data):
+#     """print a list of value and header like a table in string format
+#
+#     :param fields: list like ["City name", "Area", "Population", "Annual Rainfall"]
+#     :param data: list like ["Adelaide",1295, 1158259, 600.5]
+#     :return: table string formatted
+#     """
+#
+#     tab = PrettyTable(fields)
+#     tab.align = "l"  # Left align city names
+#     tab.padding_width = 1  # One space between column edges and contents (default)
+#     for item in data:
+#         tab.add_row(item)
+#     return tab
+#
+#
+# def print_table_from_dict(list, order_field=None):
+#     """print a list of dictionary like a table in string format and eventually order a determined column
+#
+#     :param list: list of dictionary
+#     :param order_field: column to order
+#     :return: None if list
+#     """
+#     if len(list) > 0:
+#         fields = list[0].keys()
+#         data = []
+#         for item in list:
+#             data.append(item.values())
+#         tab = print_table(fields, data)
+#
+#         if order_field:
+#             print(tab.get_string(sortby=order_field))
+#         else:
+#             print(tab)
+#     else:
+#         return None
 
 
 def query_python_object(obj):
@@ -423,36 +417,36 @@ def get_class_name(classref):
     return "%s.%s" % (classref.__module__, name)
 
 
-def id_gen(length=10, parent_id=None):
-    """Generate unique uuid according to RFC 4122
-
-    :param length: length of id to generate
-    :param parent_id: root to append in the id
-    :return: oid generated
-    """
-    oid = hexlify(urandom(int(length / 2)))
-    if parent_id is not None:
-        oid = '%s//%s' % (parent_id, ensure_text(oid))
-    return ensure_text(oid)
-
-
-def token_gen(args=None):
-    """Generate a 128 bit token according to RFC 4122
-    :return: token generated
-    """
-    return str(uuid4())
-
-
-def transaction_id_generator(length=20):
-    """Generate random string to use as transaction id
-
-    :param length: length of id to generate
-    return : random string
-    """
-    import random
-    chars = ascii_letters + digits
-    random.seed = (urandom(1024))
-    return ''.join(choice(chars) for i in range(length))
+# def id_gen(length=10, parent_id=None):
+#     """Generate unique uuid according to RFC 4122
+#
+#     :param length: length of id to generate
+#     :param parent_id: root to append in the id
+#     :return: oid generated
+#     """
+#     oid = hexlify(urandom(int(length / 2)))
+#     if parent_id is not None:
+#         oid = '%s//%s' % (parent_id, ensure_text(oid))
+#     return ensure_text(oid)
+#
+#
+# def token_gen(args=None):
+#     """Generate a 128 bit token according to RFC 4122
+#     :return: token generated
+#     """
+#     return str(uuid4())
+#
+#
+# def transaction_id_generator(length=20):
+#     """Generate random string to use as transaction id
+#
+#     :param length: length of id to generate
+#     return : random string
+#     """
+#     import random
+#     chars = ascii_letters + digits
+#     random.seed = (urandom(1024))
+#     return ''.join(choice(chars) for i in range(length))
 
 
 def get_remote_ip(request):
@@ -473,245 +467,201 @@ def get_remote_ip(request):
         return None
 
 
-def truncate(msg, size=600, replace_new_line=True):
-    """Truncate message to fixed size.
-
-    :param str msg: message to truncate
-    :param size: max message length [default=400]
-    :return: truncated Message with ...
-    """
-    msg = str(msg)
-    if replace_new_line is True:
-        msg = msg.replace('\n', ' + ')
-
-    if len(msg) > size:
-        return msg[0:size] + '...'
-    else:
-        return msg
-
-
-def set_dict_item(in_dict, key, value):
-    """Set item in input dictionary if item is not None
-
-    :param in_dict: input dictionary
-    :param value: key value to add
-    :param key: dictionary key to add
-    :return dictionary modified
-    """
-    if value is not None:
-        in_dict[key] = value
-    return in_dict
+# def truncate(msg, size=600, replace_new_line=True):
+#     """Truncate message to fixed size.
+#
+#     :param str msg: message to truncate
+#     :param size: max message length [default=400]
+#     :return: truncated Message with ...
+#     """
+#     msg = str(msg)
+#     if replace_new_line is True:
+#         msg = msg.replace('\n', ' + ')
+#
+#     if len(msg) > size:
+#         return msg[0:size] + '...'
+#     else:
+#         return msg
 
 
-def parse_redis_uri(uri):
-    """Parse redis uri.
-
-    :param uri: redis connection uri. Ex
-            ``redis://localhost:6379/1``
-            ``localhost:6379:1``
-            ``redis-cluster://localhost:6379,localhost:6380``
-
-    :return:
-
-        {'type':'single', 'host':host, 'port':port, 'db':db}
-
-        or
-
-        {'type':'cluster', 'nodes':[
-            {'host': '10.102.184.121', 'port': '6379'},
-            {'host': '10.102.91.23', 'port': '6379'}
-        ]}
-
-    """
-    # redis cluster
-    if uri.find('redis-cluster') >= 0:
-        redis_uri = uri.replace('redis-cluster://', '')
-        host_ports = redis_uri.split(',')
-        cluster_nodes = []
-        for host_port in host_ports:
-            host, port = host_port.split(':')
-            cluster_nodes.append({'host': host, 'port': port})
-        res = {'type': 'cluster', 'nodes': cluster_nodes}
-
-    # redis with sentinel
-    elif uri.find('redis-sentinel') >= 0:
-        pwd = None
-        if uri.find('@') > 0:
-            redis_uri = uri.replace('redis-sentinel://:', '')
-            pwd, redis_uri = redis_uri.split('@')
-        else:
-            redis_uri = uri.replace('redis-sentinel://', '')
-        hosts, group, port = redis_uri.split(':')
-        port, db = port.split('/')
-        res = {'type': 'sentinel', 'hosts': hosts.split(','), 'port': int(port), 'db': int(db), 'pwd': pwd,
-               'group': group}
-
-    # single redis node
-    elif uri.find('redis') >= 0:
-        pwd = None
-        if uri.find('@') > 0:
-            redis_uri = uri.replace('redis://:', '')
-            pwd, redis_uri = redis_uri.split('@')
-        else:
-            redis_uri = uri.replace('redis://', '')
-        host, port = redis_uri.split(':')
-        port, db = port.split('/')
-        res = {'type': 'single', 'host': host, 'port': int(port), 'db': int(db), 'pwd': pwd}
-
-    # single redis node
-    else:
-        host, port, db = uri.split(";")
-        res = {'type': 'single', 'host': host, 'port': int(port), 'db': int(db)}
-
-    return res
+# def set_dict_item(in_dict, key, value):
+#     """Set item in input dictionary if item is not None
+#
+#     :param in_dict: input dictionary
+#     :param value: key value to add
+#     :param key: dictionary key to add
+#     :return dictionary modified
+#     """
+#     if value is not None:
+#         in_dict[key] = value
+#     return in_dict
 
 
-def str2bool(value):
-    """Convert value from string to bool
-
-    :param value: value to convert
-    :return: converted value
-    """
-
-    res = None
-    if value in ['False', 'false', 0, 'no', False]:
-        res = False
-    elif value in ['True', 'true', 1, 'yes', 'si', True]:
-        res = True
-    return res
-
-
-def bool2str(value):
-    """Convert value from bool to string
-
-    :param value: value to convert
-    :return: converted value
-    """
-
-    res = None
-    if value in [False, 0, 'no']:
-        res = 'false'
-    elif value in [True, 1, 'yes', 'si']:
-        res = 'true'
-    return res
-
-
-def parse_date(data_str, format=None):
-    """Parse string to date
-
-    :param data_str: date in string format
-    :param format: format date ex: %Y-%m-%dT%H:%M
-    :return: date
-    """
-    if format is None:
-        time_format = '%Y-%m-%dT%H:%M:%SZ'
-    else:
-        time_format = format
-
-    res = None
-    if data_str is not None:
-        res = datetime.strptime(data_str, time_format)
-    return res
-
-
-def format_date(date, format=None, microsec=False):
-    """Format date as rfc3339.
-
-    Ref. https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html
-
-    :param date: datetime object
-    :param format: format date ex: %Y-%m-%dT%H:%M
-    :return: formatted date
-    """
-
-    if format is None:
-        time_format = '%Y-%m-%dT%H:%M:%SZ'
-        if microsec is True:
-            time_format += '.%f'
-    else:
-        time_format = format
-    res = None
-    if date is not None:
-        res = ensure_text(date.strftime(time_format))
-    return res
+# def parse_redis_uri(uri):
+#     """Parse redis uri.
+#
+#     :param uri: redis connection uri. Ex
+#             ``redis://localhost:6379/1``
+#             ``localhost:6379:1``
+#             ``redis-cluster://localhost:6379,localhost:6380``
+#
+#     :return:
+#
+#         {'type':'single', 'host':host, 'port':port, 'db':db}
+#
+#         or
+#
+#         {'type':'cluster', 'nodes':[
+#             {'host': '10.102.184.121', 'port': '6379'},
+#             {'host': '10.102.91.23', 'port': '6379'}
+#         ]}
+#
+#     """
+#     # redis cluster
+#     if uri.find('redis-cluster') >= 0:
+#         redis_uri = uri.replace('redis-cluster://', '')
+#         host_ports = redis_uri.split(',')
+#         cluster_nodes = []
+#         for host_port in host_ports:
+#             host, port = host_port.split(':')
+#             cluster_nodes.append({'host': host, 'port': port})
+#         res = {'type': 'cluster', 'nodes': cluster_nodes}
+#
+#     # redis with sentinel
+#     elif uri.find('redis-sentinel') >= 0:
+#         pwd = None
+#         if uri.find('@') > 0:
+#             redis_uri = uri.replace('redis-sentinel://:', '')
+#             pwd, redis_uri = redis_uri.split('@')
+#         else:
+#             redis_uri = uri.replace('redis-sentinel://', '')
+#         hosts, group, port = redis_uri.split(':')
+#         port, db = port.split('/')
+#         res = {'type': 'sentinel', 'hosts': hosts.split(','), 'port': int(port), 'db': int(db), 'pwd': pwd,
+#                'group': group}
+#
+#     # single redis node
+#     elif uri.find('redis') >= 0:
+#         pwd = None
+#         if uri.find('@') > 0:
+#             redis_uri = uri.replace('redis://:', '')
+#             pwd, redis_uri = redis_uri.split('@')
+#         else:
+#             redis_uri = uri.replace('redis://', '')
+#         host, port = redis_uri.split(':')
+#         port, db = port.split('/')
+#         res = {'type': 'single', 'host': host, 'port': int(port), 'db': int(db), 'pwd': pwd}
+#
+#     # single redis node
+#     else:
+#         host, port, db = uri.split(";")
+#         res = {'type': 'single', 'host': host, 'port': int(port), 'db': int(db)}
+#
+#     return res
 
 
-def get_date_from_timestamp(date):
-    if date is not None:
-        return datetime.fromtimestamp(date)
-    else:
-        return None
+# def str2bool(value):
+#     """Convert value from string to bool
+#
+#     :param value: value to convert
+#     :return: converted value
+#     """
+#
+#     res = None
+#     if value in ['False', 'false', 0, 'no', False]:
+#         res = False
+#     elif value in ['True', 'true', 1, 'yes', 'si', True]:
+#         res = True
+#     return res
+#
+#
+# def bool2str(value):
+#     """Convert value from bool to string
+#
+#     :param value: value to convert
+#     :return: converted value
+#     """
+#
+#     res = None
+#     if value in [False, 0, 'no']:
+#         res = 'false'
+#     elif value in [True, 1, 'yes', 'si']:
+#         res = 'true'
+#     return res
 
 
-def get_timestamp_from_date(date):
-    if date is not None:
-        return datetime.timestamp(date)
-    else:
-        return None
+# def parse_date(data_str, format=None):
+#     """Parse string to date
+#
+#     :param data_str: date in string format
+#     :param format: format date ex: %Y-%m-%dT%H:%M
+#     :return: date
+#     """
+#     if format is None:
+#         time_format = '%Y-%m-%dT%H:%M:%SZ'
+#     else:
+#         time_format = format
+#
+#     res = None
+#     if data_str is not None:
+#         res = datetime.strptime(data_str, time_format)
+#     return res
+#
+#
+# def format_date(date, format=None, microsec=False):
+#     """Format date as rfc3339.
+#
+#     Ref. https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html
+#
+#     :param date: datetime object
+#     :param format: format date ex: %Y-%m-%dT%H:%M
+#     :return: formatted date
+#     """
+#
+#     if format is None:
+#         time_format = '%Y-%m-%dT%H:%M:%SZ'
+#         if microsec is True:
+#             time_format += '.%f'
+#     else:
+#         time_format = format
+#     res = None
+#     if date is not None:
+#         res = ensure_text(date.strftime(time_format))
+#     return res
+#
+#
+# def get_date_from_timestamp(date):
+#     if date is not None:
+#         return datetime.fromtimestamp(date)
+#     else:
+#         return None
+#
+#
+# def get_timestamp_from_date(date):
+#     if date is not None:
+#         return datetime.timestamp(date)
+#     else:
+#         return None
 
 
-def compat(data):
-    try:
-        if isinstance(data, list):
-            data = '[..]'
-        elif isinstance(data, dict):
-            newdata = {}
-            for k, v in data.items():
-                newdata[k] = compat(v)
-            data = newdata
-        elif isclass(data) is True:
-            data = str(data)
-        else:
-            data = truncate(data, 30)
-    except:
-        logger.warning('compat data %s error' % data, exc_info=True)
-        data = None
-    return data
+# def compat(data):
+#     try:
+#         if isinstance(data, list):
+#             data = '[..]'
+#         elif isinstance(data, dict):
+#             newdata = {}
+#             for k, v in data.items():
+#                 newdata[k] = compat(v)
+#             data = newdata
+#         elif isclass(data) is True:
+#             data = str(data)
+#         else:
+#             data = truncate(data, 30)
+#     except:
+#         logger.warning('compat data %s error' % data, exc_info=True)
+#         data = None
+#     return data
 
-
-def is_blank(myString):
-    """Test if string is blank
-
-    :param myString: string to test
-    :return: True if blank, False otherwhise
-    """
-
-    return not (myString and myString.strip())
-
-
-def is_not_blank(myString):
-    """Test if string is not blank
-
-    :param myString: string to test
-    :return: True if not blank, False otherwhise
-    """
-
-    return bool(myString and myString.strip())
-
-
-from .password import obscure_data
-from .password import obscure_string
-
-
-def is_string(data):
-    res = False
-    if isinstance(data, str) or isinstance(data, bytes):
-        res = True
-    return res
-
-
-def is_int(s):
-    """Check whether string s is a positive or negative integer
-
-    :param s: the string to validate
-    :return: boolean True o False
-    """
-    if s[0] in ('-', '+'):
-        return s[1:].isdigit()
-    return s.isdigit()
-
-
-from .types.type_dict import dict_get, dict_set, dict_unset, merge_dicts
 
 # def dict_get(data, key, separator='.', default=None):
 #     """Get a value from a dict. Key can be composed to get a field in a complex dict that contains other dict, list and
@@ -804,29 +754,6 @@ def prefixlength_to_netmask(prefixlength):
     return netmask
 
 
-def multi_get(data, key, separator='.'):
-    keys = key.split(separator)
-    res = data
-    for k in keys:
-        if isinstance(res, list):
-            try:
-                res = res[int(k)]
-            except:
-                res = {}
-        else:
-            if res is not None:
-                res = res.get(k, {})
-    if isinstance(res, list):
-        res = res
-    if res is None or res == {}:
-        res = '-'
-
-    return res
-
-
-from .file import read_file
-
-
 def set_request_params(kwargs, supported):
     """Set params in request data
 
@@ -863,18 +790,6 @@ def get_pretty_size(data):
     return data
 
 
-def validate_string(data, validation_string=r'[^a-zA-Z0-9\-].'):
-    """Validate a string respect a set of allowed characters
-
-    :param data: data to validate
-    :param validation_string: validation string [deafult=r'[^a-zA-Z0-9\-].']
-    :return: True if validation is OK
-    """
-    char_re = re_compile(validation_string)
-    data = char_re.search(data)
-    return not bool(data)
-
-
 def jsonDumps(data, ensure_ascii=False):
     """Check type of data
     (in lib ujson 4.0.x reject_bytes is on)
@@ -896,14 +811,3 @@ def jsonDumps(data, ensure_ascii=False):
 
     resp = json.dumps(data, **params)
     return resp
-
-
-def split_string_in_chunks(string, pos=100):
-    """split a string in chunks
-
-    :param string: string to split
-    :param pos: position where split
-    :return: list of string chunks
-    """
-    chunks = [string[i:i + pos] for i in range(0, len(string), pos)]
-    return chunks
