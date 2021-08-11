@@ -787,6 +787,8 @@ def get_pretty_size(data):
         data = '%sMB' % round(data / 1048576, 2)
     elif data > 1073741824:
         data = '%sGB' % round(data / 1073741824, 2)
+    elif data > 1073741824:
+        data = '%sTB' % round(data / 1073741824, 2)
     return data
 
 

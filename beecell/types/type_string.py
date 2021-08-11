@@ -114,3 +114,21 @@ def is_not_blank(myString):
     """
 
     return bool(myString and myString.strip())
+
+
+def get_pretty_size(data):
+    """Convert size in pritty string"""
+    KB = 1024
+    MB = KB * 1024
+    GB = MB * 1024
+    TB = GB * 1024
+
+    if KB < data < MB:
+        data = '%sKB' % round(data / KB, 2)
+    elif MB <= data < GB:
+        data = '%sMB' % round(data / MB, 2)
+    elif GB <= data <= TB:
+        data = '%sGB' % round(data / GB, 2)
+    elif data > TB:
+        data = '%sTB' % round(data / TB, 2)
+    return data

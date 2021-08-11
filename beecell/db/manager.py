@@ -440,6 +440,24 @@ class RedisManager(ConnectionManager):
         err = 'Key %s not found' % key
         raise RedisManagerError(err)
 
+    def lrange(self, *args, **kwargs):
+        """Query list.
+
+        :param args: positional args
+        :param kwargs: key value kwargs
+        :return: lists of keys with value
+        """
+        return self.conn.lrange(*args, **kwargs)
+
+    def lrem(self, *args, **kwargs):
+        """Remove list.
+
+        :param args: positional args
+        :param kwargs: key value kwargs
+        :return: lists of keys with value
+        """
+        return self.conn.lrem(*args, **kwargs)
+
 
 class SqlManager(ConnectionManager):
     """
