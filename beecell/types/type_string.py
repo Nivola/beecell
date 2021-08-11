@@ -127,8 +127,8 @@ def get_pretty_size(data):
         data = '%sKB' % round(data / KB, 2)
     elif MB <= data < GB:
         data = '%sMB' % round(data / MB, 2)
-    elif GB <= data <= TB:
+    elif GB <= data < TB:
         data = '%sGB' % round(data / GB, 2)
-    elif data > TB:
+    elif data >= TB:
         data = '%sTB' % round(data / TB, 2)
     return data
