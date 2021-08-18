@@ -415,6 +415,15 @@ class RedisManager(ConnectionManager):
         """
         return self.conn.set(key, value)
 
+    def setex(self, key, time, value):
+        """Set key value with extended params
+
+        :param key: key to insert
+        :param value: value to insert
+        :return:
+        """
+        return self.conn.setex(key, time, value)
+
     def get_with_ttl(self, key, max_retry=3, delay=0.01):
         """Get task from redis
 

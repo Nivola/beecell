@@ -4,6 +4,7 @@
 
 * Added ...
     * add method split_string_in_chunks in simple
+    * add method setex in RedisManager
 * Fixed ...
     * improved import in simple module
     * moved read_file in file module to improve load performance
