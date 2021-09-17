@@ -130,7 +130,7 @@ class RedisManager(ConnectionManager):
         - ``localhost:6379:1``
         - ``redis-cluster://localhost:6379,localhost:6380``
     """
-    def __init__(self, redis_uri, timeout=2, max_connections=200, sentinels=None, sentinel_name=None,
+    def __init__(self, redis_uri, timeout=5, max_connections=200, sentinels=None, sentinel_name=None,
                  sentinel_pwd=None, db=0, pwd=None):
         ConnectionManager.__init__(self)
         
@@ -139,7 +139,7 @@ class RedisManager(ConnectionManager):
         self.is_sentinel = False
         self.sentinel_name = sentinel_name
         self.server = None
-        self.socket_timeout = 0.1
+        self.socket_timeout = timeout
         self.db = db
         self.pwd = pwd
         self.max_connections = max_connections

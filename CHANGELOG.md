@@ -11,6 +11,7 @@
     * moved password methods in password module to improve load performance
     * moved dict, list, string, date methods in types package to improve load performance
     * moved cryptography methods in crypto module to improve load performance
+    * correct RedisManager timeout setting. socket_timeout was notfrom param and default value of 0.1s is too low
 * Integrated ...
 * Various bugfixes
 * Removed
