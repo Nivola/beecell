@@ -96,6 +96,9 @@ class ParamikoShell(object):
         if self.post_logout is not None:
             self.post_logout()
 
+    def close(self):
+        self.client.close()
+
     def run(self):
         """Run interactive shell
         """
@@ -162,7 +165,7 @@ class ParamikoShell(object):
         #         logger.info('OUT: %s' % x)
         #     nb_write(sys.stdout.fileno(), x)
 
-    def cmd(self, cmd, timeout=1.0, **kwargs):
+    def __cmd(self, cmd, timeout=1.0, **kwargs):
         """Execute command in shell
         """
         stdin, stdout, stderr = self.client.exec_command(cmd, timeout=timeout, **kwargs)
@@ -174,6 +177,19 @@ class ParamikoShell(object):
             self.post_action(status=None, cmd=cmd, elapsed=0)
         if self.post_logout is not None:
             self.post_logout()
+        return res
+
+    def cmd(self, cmd, timeout=1.0, **kwargs):
+        """Execute command in shell
+        """
+        if self.tunnel_conf is not None:
+            self.create_tunnel()
+
+        res = self.__cmd(cmd, timeout=timeout, **kwargs)
+
+        if self.tunnel_conf is not None:
+            self.close_tunnel()
+
         return res
 
     def mkdir(self, dirname):

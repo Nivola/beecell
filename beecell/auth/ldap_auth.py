@@ -196,15 +196,15 @@ class LdapAuth(AbstractAuth):
             self.close()
             self.conn = None
 
-            # check retry
-            if cur_retry < max_retry:
-                # {'desc': "Can't contact LDAP server", 'errno': 104, 'info': 'Connection reset by peer'}
-                if str(ex).find('104') > 0:
-                    cur_retry += 1
-                    self.authenticate(username, password, max_retry=max_retry, cur_retry=cur_retry)
-            else:
-                raise AuthError('', 'Ldap authentication error: %s' % ex, code=7)
-
+            # # check retry
+            # if cur_retry < max_retry:
+            #     # {'desc': "Can't contact LDAP server", 'errno': 104, 'info': 'Connection reset by peer'}
+            #     if str(ex).find('104') > 0:
+            #         cur_retry += 1
+            #         self.authenticate(username, password, max_retry=max_retry, cur_retry=cur_retry)
+            # else:
+            #     raise AuthError('', 'Ldap authentication error: %s' % ex, code=7)
+            raise AuthError('', 'Ldap authentication error: %s' % ex, code=7)
         return True
 
     def search_user(self, username, search_filter):

@@ -5,13 +5,15 @@
 * Added ...
     * add method split_string_in_chunks in simple
     * add method setex in RedisManager
+    * add package crypto_util and class RasCrypto that manage asymmetric cryptography with rsa
 * Fixed ...
     * improved import in simple module
     * moved read_file in file module to improve load performance
     * moved password methods in password module to improve load performance
     * moved dict, list, string, date methods in types package to improve load performance
     * moved cryptography methods in crypto module to improve load performance
-    * correct RedisManager timeout setting. socket_timeout was notfrom param and default value of 0.1s is too low
+    * correct RedisManager timeout setting. socket_timeout was not from param and default value of 0.1s is too low
+    * removed in ldap.authenticate code for reconnection. code is bad and bypass wrong password
 * Integrated ...
 * Various bugfixes
 * Removed
