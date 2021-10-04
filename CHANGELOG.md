@@ -6,6 +6,7 @@
     * add method split_string_in_chunks in simple
     * add method setex in RedisManager
     * add package crypto_util and class RasCrypto that manage asymmetric cryptography with rsa
+    * add manage_connection in SqlManager
 * Fixed ...
     * improved import in simple module
     * moved read_file in file module to improve load performance

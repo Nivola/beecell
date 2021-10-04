@@ -8,11 +8,11 @@ import sys
 import logging
 from socket import SOCK_STREAM, SOCK_DGRAM
 
-try:
-    from celery.utils.log import ColorFormatter as CeleryColorFormatter
-    from celery.utils.term import colored
-except:
-    pass
+# try:
+#     from celery.utils.log import ColorFormatter as CeleryColorFormatter
+#     from celery.utils.term import colored
+# except:
+#     pass
 
 from beecell.logger.elasticsearch import ElasticsearchHandler, ElasticsearchFormatter
 
@@ -64,8 +64,15 @@ try:
             'DEBUG3': COLORS['cyan']
         }
 except:
-    class ColorFormatter(logging.Formatter):
-        pass
+    try:
+        from colorlog import ColoredFormatter
+
+        class ColorFormatter(ColoredFormatter):
+            """Logging formatter that adds colors based on severity."""
+            pass
+    except:
+        class ColorFormatter(logging.Formatter):
+            pass
 
 
 class LoggerHelper(object):
