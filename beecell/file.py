@@ -7,6 +7,8 @@
 from yaml import full_load
 from ujson import loads
 from six import b
+import xml.etree.ElementTree as et
+# from xmltodict import parse as xmltodict
 
 
 def read_file(file_name, parse=True):
@@ -26,5 +28,7 @@ def read_file(file_name, parse=True):
             data = full_load(data)
         elif extension == b('.yml') or extension == '.yml':
             data = full_load(data)
+        elif extension == b('.xml') or extension == '.xml':
+            data = et.fromstring(data)
     f.close()
     return data
