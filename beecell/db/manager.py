@@ -1232,6 +1232,58 @@ class MysqlManager(SqlManager):
             'is_unique': c.unique} for c in table_obj.columns]
 
     @manage_connection
+    def query(self, query, rows=20, offset=0, count_field='id'):
+        """Make a custom query
+
+        :param query: query statement
+        :param rows: number of rows to fetch [default=100]
+        :param offset: row fetch offset [default=0]
+        :param count_field: field to use in count [default=id]
+        :return: queried rows
+        :raise SqlManagerError:
+        """
+        res = []
+
+        # query = query.lower()
+        # a = query.find('select') + 6
+        # print(a)
+        # b = query.find('from')
+        # fields = query[a:b]
+        # print(fields)
+        #
+        # if fields is not None:
+        #     fields = ",".join(fields)
+
+        # query_count = "SELECT count(%s) as count FROM %s" % (count_field, query[b:])
+        # query = "%s LIMIT %s OFFSET %s" % (query, rows, offset)
+
+        # get columns name
+        #col_names = [c['name'] for c in self.get_table_description(table_name)]
+
+        # query tables
+        # total = self.active_connection.execute(query_count).fetchone()[0]
+        result = self.active_connection.execute(query)
+
+        for row in result:
+            res.append(row)
+        total = len(res)
+        # for row in result:
+        #     cols = {}
+        #     i = 0
+        #     for col in row:
+        #         if type(col) is datetime:
+        #             #col = str(col)
+        #             col = col
+        #         if type(col) is str and col.find('{"') > -1:
+        #             # col = str(json.loads(col))
+        #             col = json.loads(col)
+        #         cols[col_names[i]] = col
+        #         i += 1
+        #     res.append(cols)
+        self.logger.debug("Execute query %s: %s" % (query, truncate(res)))
+        return res, total
+
+    @manage_connection
     def query_table(self, table_name, where=None, fields="*", rows=20, offset=0, order=None):
         """Query a table
 
@@ -1241,7 +1293,7 @@ class MysqlManager(SqlManager):
         :param rows: number of rows to fetch [default=100]
         :param offset: row fetch offset [default=0]
         :param order: field used to order records [default=None]
-        :return: query rows
+        :return: queried rows
         :raise SqlManagerError:
         """
         res = []
@@ -1273,9 +1325,11 @@ class MysqlManager(SqlManager):
             i = 0
             for col in row:
                 if type(col) is datetime:
-                    col = str(col)
-                if type(col) is str and col.find('"') > -1:
-                    col = str(json.loads(col))
+                    #col = str(col)
+                    col = col
+                if type(col) is str and col.find('{"') > -1:
+                    # col = str(json.loads(col))
+                    col = json.loads(col)
                 cols[col_names[i]] = col
                 i += 1
             res.append(cols)
