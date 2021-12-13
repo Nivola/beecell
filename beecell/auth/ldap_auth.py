@@ -55,7 +55,7 @@ class LdapAuth(AbstractAuth):
 
     def _connect(self):
         """Open connection to Ldap."""
-        if self.port == None:
+        if self.port is None:
             self.port = 389
             
         conn_uri = 'ldap://%s:%s' % (self.host, self.port)
@@ -64,7 +64,7 @@ class LdapAuth(AbstractAuth):
 
     def _connect_ssl(self):
         """Open connection to ldaps portal2."""
-        if self.port == None:
+        if self.port is None:
             self.port = 636
             
         conn_uri = 'ldaps://%s:%s' % (self.host, self.port)
