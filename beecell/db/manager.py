@@ -5,7 +5,6 @@
 # (C) Copyright 2020-2021 CSI-Piemonte
 
 import logging
-
 from sqlalchemy.exc import OperationalError
 from sshtunnel import SSHTunnelForwarder
 from time import sleep
@@ -16,6 +15,8 @@ from sqlalchemy.orm import sessionmaker
 from datetime import datetime, timedelta
 from beecell.simple import truncate
 from beecell.types.type_date import format_date
+
+logger = logging.getLogger(__name__)
 
 try:
     import redis
@@ -93,6 +94,26 @@ def parse_redis_uri(uri):
         res = {'type': 'single', 'host': host, 'port': int(port), 'db': int(db)}
 
     return res
+
+
+def compile_query(query):
+    # from sqlalchemy.sql import compiler
+    res = query.statement.compile(query.session.bind)
+    logger.debug(res)
+
+    # dialect = query.session.bind.dialect
+    # statement = query.statement
+    # comp = compiler.SQLCompiler(dialect, statement)
+    # comp.compile()
+    # enc = dialect.encoding
+    # params = []
+    # for k in comp.positiontup:
+    #     v = comp.params[k]
+    #     params.append(v)
+    # #     if isinstance(v, unicode):
+    # #         v = v.encode(enc)
+    # #     params.append(escape(v, conversions))
+    # return (comp.string.encode(enc) % tuple(params)).decode(enc)
 
 
 class ConnectionManager(object):
