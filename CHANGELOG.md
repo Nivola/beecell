@@ -7,6 +7,7 @@
     * add method setex in RedisManager
     * add package crypto_util and class RasCrypto that manage asymmetric cryptography with rsa
     * add manage_connection in SqlManager
+    * add method compile_query
 * Fixed ...
     * improved import in simple module
     * moved read_file in file module to improve load performance
