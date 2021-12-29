@@ -19,8 +19,10 @@ from .types.type_list import *
 from .types.type_dict import *
 from .types.type_string import *
 from .types.type_id import *
+from .types.type_class import *
 from .file import *
 from .password import *
+
 
 # def check_vault(data, key):
 #     """Check if data is encrypted with fernet token and AES128
@@ -294,25 +296,25 @@ def get_attrib2(inst, key, default_value=None):
     return value
 
 
-def getmembers(obj, predicate=None):
-    """Return all members of an object as (name, value) pairs sorted by name.
-    Optionally, only return members that satisfy a given predicate.
-
-    :param obj:
-    :param predicate: predicate to satisfy
-    :return: list of members
-    """
-    results = []
-    for key in dir(obj):
-
-        try:
-            value = getattr(obj, key)
-        except AttributeError:
-            continue
-        if not predicate or predicate(value):
-            results.append((key, value))
-    results.sort()
-    return results
+# def getmembers(obj, predicate=None):
+#     """Return all members of an object as (name, value) pairs sorted by name.
+#     Optionally, only return members that satisfy a given predicate.
+#
+#     :param obj:
+#     :param predicate: predicate to satisfy
+#     :return: list of members
+#     """
+#     results = []
+#     for key in dir(obj):
+#
+#         try:
+#             value = getattr(obj, key)
+#         except AttributeError:
+#             continue
+#         if not predicate or predicate(value):
+#             results.append((key, value))
+#     results.sort()
+#     return results
 
 
 # def print_table(fields, data):
@@ -353,68 +355,68 @@ def getmembers(obj, predicate=None):
 #         return None
 
 
-def query_python_object(obj):
-    import pprint
-    pp = pprint.PrettyPrinter(indent=2)
-    pp.pprint(getmembers(obj))
-
-
-def dynamic_import(name):
-    """Import dinamically a python library
-
-    :param name: name of the library
-    :return:
-    """
-    mod = __import__(name)
-    components = name.split('.')
-    for comp in components[1:]:
-        mod = getattr(mod, comp)
-    return mod
-
-
-def import_func(name):
-    """Import dinamically a function
-
-    :param name: name of the function
-    :return:
-    """
-    components = name.split('.')
-    mod = __import__('.'.join(components[:-1]), globals(), locals(), [components[-1]], -1)
-    func = getattr(mod, components[-1], None)
-    return func
-
-
-def import_class(cl):
-    """Import dinamically a class
-
-    :param cl: name of the class
-    :return:
-    """
-
-    cl = str(cl)
-    d = cl.rfind(".")
-    classname = cl[d + 1:len(cl)]
-    m = __import__(cl[0:d], globals(), locals(), [classname])
-    return getattr(m, classname, None)
-
-
-def get_class_props(cls):
-    return [i for i in cls.__dict__.keys() if i[:1] != '_']
-
-
-def get_member_class(args):
-    """"""
-    try:
-        classname = args[0].__class__.__name__
-    except:
-        classname = ''
-    return classname
-
-
-def get_class_name(classref):
-    """"""
-    name = str(classref).split('.')[-1].rstrip("'>").lower()
-    return "%s.%s" % (classref.__module__, name)
+# def query_python_object(obj):
+#     import pprint
+#     pp = pprint.PrettyPrinter(indent=2)
+#     pp.pprint(getmembers(obj))
+#
+#
+# def dynamic_import(name):
+#     """Import dinamically a python library
+#
+#     :param name: name of the library
+#     :return:
+#     """
+#     mod = __import__(name)
+#     components = name.split('.')
+#     for comp in components[1:]:
+#         mod = getattr(mod, comp)
+#     return mod
+#
+#
+# def import_func(name):
+#     """Import dinamically a function
+#
+#     :param name: name of the function
+#     :return:
+#     """
+#     components = name.split('.')
+#     mod = __import__('.'.join(components[:-1]), globals(), locals(), [components[-1]], -1)
+#     func = getattr(mod, components[-1], None)
+#     return func
+#
+#
+# def import_class(cl):
+#     """Import dinamically a class
+#
+#     :param cl: name of the class
+#     :return:
+#     """
+#
+#     cl = str(cl)
+#     d = cl.rfind(".")
+#     classname = cl[d + 1:len(cl)]
+#     m = __import__(cl[0:d], globals(), locals(), [classname])
+#     return getattr(m, classname, None)
+#
+#
+# def get_class_props(cls):
+#     return [i for i in cls.__dict__.keys() if i[:1] != '_']
+#
+#
+# def get_member_class(args):
+#     """"""
+#     try:
+#         classname = args[0].__class__.__name__
+#     except:
+#         classname = ''
+#     return classname
+#
+#
+# def get_class_name(classref):
+#     """"""
+#     name = str(classref).split('.')[-1].rstrip("'>").lower()
+#     return "%s.%s" % (classref.__module__, name)
 
 
 # def id_gen(length=10, parent_id=None):
