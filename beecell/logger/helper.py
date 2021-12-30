@@ -109,11 +109,12 @@ class LoggerHelper(object):
             logger.propagate = False
     
     @staticmethod
-    def simple_handler(loggers, logging_level, frmt=None, formatter=ColorFormatter, propagate=False):
+    def simple_handler(loggers, logging_level, frmt=None, formatter=ColorFormatter, propagate=False,
+                       handler=logging.StreamHandler):
         if frmt is None:
             frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] %(name)s:%(funcName)s:%(lineno)d - %(message)s"
 
-        handler = logging.StreamHandler(sys.stdout)
+        handler = handler(sys.stdout)
         handler.setLevel(logging_level)
         if formatter is None:
             handler.setFormatter(logging.Formatter(frmt))

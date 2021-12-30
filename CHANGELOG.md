@@ -8,6 +8,7 @@
     * add package crypto_util and class RasCrypto that manage asymmetric cryptography with rsa
     * add manage_connection in SqlManager
     * add method compile_query
+    * add K8shHandler to manage new line when logging an exception and read from filebeat
 * Fixed ...
     * improved import in simple module
     * moved read_file in file module to improve load performance
