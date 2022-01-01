@@ -36,7 +36,7 @@ def query_python_object(obj):
 
 
 def dynamic_import(name):
-    """Import dinamically a python library
+    """Import dynamically a python library
 
     :param name: name of the library
     :return:
