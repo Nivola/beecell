@@ -1,5 +1,26 @@
 # Changelog
 
+## Version 1.9.0 (, 2021)
+
+* Added ...
+    * add method split_string_in_chunks in simple
+    * add method setex in RedisManager
+    * add package crypto_util and class RasCrypto that manage asymmetric cryptography with rsa
+    * add manage_connection in SqlManager
+    * add method compile_query
+    * add K8shHandler to manage new line when logging an exception and read from filebeat
+* Fixed ...
+    * improved import in simple module
+    * moved read_file in file module to improve load performance
+    * moved password methods in password module to improve load performance
+    * moved dict, list, string, date methods in types package to improve load performance
+    * moved cryptography methods in crypto module to improve load performance
+    * correct RedisManager timeout setting. socket_timeout was not from param and default value of 0.1s is too low
+    * removed in ldap.authenticate code for reconnection. code is bad and bypass wrong password
+* Integrated ...
+* Various bugfixes
+* Removed
+
 ## Version 1.8.0 (jun 11, 2021)
 
 * Added ...
@@ -10,7 +31,7 @@
     * add method exec_statements in sql manager
 * Fixed ...
     * fixed parse_redis_uri to parse redis sentinel uri
-    * replaced caracther | with + in simple.truncate
+    * replaced character | with + in simple.truncate
     * renamed schema in db in SqlManager
 * Integrated ...
 * Various bugfixes

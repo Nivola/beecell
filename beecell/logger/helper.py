@@ -8,8 +8,11 @@ import sys
 import logging
 from socket import SOCK_STREAM, SOCK_DGRAM
 
-from celery.utils.log import ColorFormatter as CeleryColorFormatter
-from celery.utils.term import colored
+# try:
+#     from celery.utils.log import ColorFormatter as CeleryColorFormatter
+#     from celery.utils.term import colored
+# except:
+#     pass
 
 from beecell.logger.elasticsearch import ElasticsearchHandler, ElasticsearchFormatter
 
@@ -42,20 +45,34 @@ class CustomFormatter(logging.Formatter):
         return self._default_formatter.format(record)
 
 
-class ColorFormatter(CeleryColorFormatter):
-    """Logging formatter that adds colors based on severity."""
+try:
+    from celery.utils.log import ColorFormatter as CeleryColorFormatter
+    from celery.utils.term import colored
 
-    #: Loglevel -> Color mapping.
-    COLORS = colored().names
-    colors = {
-        'DEBUG': COLORS['blue'], 
-        'WARNING': COLORS['yellow'],
-        'WARN': COLORS['yellow'],
-        'ERROR': COLORS['red'], 
-        'CRITICAL': COLORS['magenta'],
-        'DEBUG2': COLORS['green'],
-        'DEBUG3': COLORS['cyan']
-    }  
+    class ColorFormatter(CeleryColorFormatter):
+        """Logging formatter that adds colors based on severity."""
+
+        #: Loglevel -> Color mapping.
+        COLORS = colored().names
+        colors = {
+            'DEBUG': COLORS['blue'],
+            'WARNING': COLORS['yellow'],
+            'WARN': COLORS['yellow'],
+            'ERROR': COLORS['red'],
+            'CRITICAL': COLORS['magenta'],
+            'DEBUG2': COLORS['green'],
+            'DEBUG3': COLORS['cyan']
+        }
+except:
+    try:
+        from colorlog import ColoredFormatter
+
+        class ColorFormatter(ColoredFormatter):
+            """Logging formatter that adds colors based on severity."""
+            pass
+    except:
+        class ColorFormatter(logging.Formatter):
+            pass
 
 
 class LoggerHelper(object):
@@ -92,11 +109,12 @@ class LoggerHelper(object):
             logger.propagate = False
     
     @staticmethod
-    def simple_handler(loggers, logging_level, frmt=None, formatter=ColorFormatter, propagate=False):
+    def simple_handler(loggers, logging_level, frmt=None, formatter=ColorFormatter, propagate=False,
+                       handler=logging.StreamHandler):
         if frmt is None:
             frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] %(name)s:%(funcName)s:%(lineno)d - %(message)s"
 
-        handler = logging.StreamHandler(sys.stdout)
+        handler = handler(sys.stdout)
         handler.setLevel(logging_level)
         if formatter is None:
             handler.setFormatter(logging.Formatter(frmt))

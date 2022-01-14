@@ -6,10 +6,8 @@
 
 import ldap
 from six import ensure_str
-
 from beecell.simple import truncate
 from .base import AuthError, AbstractAuth
-from beecell.perf import watch
 
 
 class LdapAuth(AbstractAuth):
@@ -57,7 +55,7 @@ class LdapAuth(AbstractAuth):
 
     def _connect(self):
         """Open connection to Ldap."""
-        if self.port == None:
+        if self.port is None:
             self.port = 389
             
         conn_uri = 'ldap://%s:%s' % (self.host, self.port)
@@ -66,7 +64,7 @@ class LdapAuth(AbstractAuth):
 
     def _connect_ssl(self):
         """Open connection to ldaps portal2."""
-        if self.port == None:
+        if self.port is None:
             self.port = 636
             
         conn_uri = 'ldaps://%s:%s' % (self.host, self.port)
@@ -198,15 +196,17 @@ class LdapAuth(AbstractAuth):
             self.close()
             self.conn = None
 
-            # check retry
-            if cur_retry < max_retry:
-                # {'desc': "Can't contact LDAP server", 'errno': 104, 'info': 'Connection reset by peer'}
-                if str(ex).find('104') > 0:
+            # {'desc': "Can't contact LDAP server", 'errno': 104, 'info': 'Connection reset by peer'}
+            if str(ex).find('104') > 0:
+                # check retry
+                if cur_retry < max_retry:
                     cur_retry += 1
-                    self.authenticate(username, password, max_retry=max_retry, cur_retry=cur_retry)
+                    res = self.authenticate(username, password, max_retry=max_retry, cur_retry=cur_retry)
+                    return res
+                else:
+                    raise AuthError('', 'Ldap authentication error: %s' % ex, code=7)
             else:
                 raise AuthError('', 'Ldap authentication error: %s' % ex, code=7)
-
         return True
 
     def search_user(self, username, search_filter):

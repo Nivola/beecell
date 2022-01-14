@@ -7,8 +7,9 @@
 import json
 import sqlalchemy
 from sqlalchemy.types import TypeDecorator
-from beecell.simple import is_not_blank
+from beecell.types.type_string import is_not_blank
 from beecell.simple import jsonDumps
+
 
 class TextDictType(TypeDecorator):
     impl = sqlalchemy.Text()
