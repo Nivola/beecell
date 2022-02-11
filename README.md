@@ -76,7 +76,7 @@ We use Semantic Versioning for versioning. (https://semver.org)
 See the list of contributors who participated in this project in the file AUTHORS.md contained in each specific project.
 
 ## Copyright
-CSI Piemonte - 2018-2021
+CSI Piemonte - 2018-2022
 
 ## License
 See the LICENSE.txt file for details

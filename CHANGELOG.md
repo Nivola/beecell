@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.9.0 (, 2021)
+## Version 1.9.0 (feb 11, 2022)
 
 * Added ...
     * add method split_string_in_chunks in simple
