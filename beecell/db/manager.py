@@ -1560,7 +1560,7 @@ class MysqlManager(SqlManager):
         res = True
 
         if date is None:
-            date = datetime.today() - timedelta(days=2)
+            date = datetime.today() - timedelta(days=1)
             date = '%s-%s-%s' % (date.year, date.month, date.day)
 
         self.active_connection.execute("PURGE BINARY LOGS BEFORE '%s';" % date)
