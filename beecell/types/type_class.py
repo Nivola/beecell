@@ -105,11 +105,20 @@ def get_class_methods_by_decorator(cls, decorator_name):
     import inspect
     res = []
     sourcelines = inspect.getsourcelines(cls)[0]
+    find = False
     for i, line in enumerate(sourcelines):
         line = line.strip()
-        if line.split('(')[0].strip() == '@'+decorator_name: # leaving a bit out
-            nextLine = sourcelines[i+1]
-            name = nextLine.split('def')[1].split('(')[0].strip()
-            # full_name = '%s.%s.%s' % (cls.__module__, cls.__name__, name)
+        # find main decorator
+        if line.split('(')[0].strip() == '@'+decorator_name:
+            find = True
+            continue
+
+        # find secondary decorator
+        elif line.split('(')[0].strip().find('@') == 0:
+            continue
+
+        elif find is True:
+            name = line.split('def')[1].split('(')[0].strip()
             res.append(name)
+            find = False
     return res
