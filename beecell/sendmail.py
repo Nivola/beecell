@@ -50,7 +50,8 @@ class Mailer(object):
                             'attachment; filename={}'.format(Path(path).name))
             msg.attach(part)
         
-        self.logger.debug('Prepare email message: %s' % msg)
+        # log raw email contents
+        # self.logger.debug('Prepare email message: %s' % msg)
         
         # Send the message via local SMTP server.
         if self.mailport is None:
