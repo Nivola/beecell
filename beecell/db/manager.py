@@ -175,9 +175,11 @@ class RedisManager(ConnectionManager):
             self.is_sentinel = True
             if sentinel_name is None:
                 raise RedisManagerError('sentinel group name must be specified')
-            if sentinel_pwd is None:
-                raise RedisManagerError('sentinel password must be specified')
-            sentinel_kwargs = {'password': sentinel_pwd}
+            #if sentinel_pwd is None:
+            #    raise RedisManagerError('sentinel password must be specified')
+            sentinel_kwargs = {}
+            if sentinel_pwd is not None:
+                sentinel_kwargs = {'password': sentinel_pwd}
             self.sentinel = Sentinel(sentinels, socket_timeout=self.socket_timeout, sentinel_kwargs=sentinel_kwargs)
             self.sentinel_name = sentinel_name
 
