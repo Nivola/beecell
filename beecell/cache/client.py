@@ -67,8 +67,6 @@ class CacheClient(object):
                 pickled = envelop.get('pickled', None)
                 if pickled is not None:
                     value = pickle.loads(codecs.decode(pickled.encode(), "base64"))
-            else:
-                value = json.loads(value).get('data')
         self.logger.debug('Get cache item %s:%s' % (key, truncate(value)))
         return value
 
