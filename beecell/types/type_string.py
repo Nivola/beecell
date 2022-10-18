@@ -8,7 +8,7 @@ from inspect import isclass
 from re import compile as re_compile
 
 
-def str2bool(value):
+def str2bool(value: str):
     """Convert value from string to bool
 
     :param value: value to convert
@@ -38,7 +38,7 @@ def bool2str(value):
     return res
 
 
-def truncate(msg, size=600, replace_new_line=True):
+def truncate(msg:str, size:int=600, replace_new_line:bool=True)->str:
     """Truncate message to fixed size.
 
     :param str msg: message to truncate
