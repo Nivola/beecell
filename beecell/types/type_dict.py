@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# (C) Copyright 2018-2019 CSI-Piemonte
-# (C) Copyright 2019-2020 CSI-Piemonte
-# (C) Copyright 2020-2021 CSI-Piemonte
+# (C) Copyright 2018-2022 CSI-Piemonte
 
 def merge_dicts(*dict_args):
     """Given any number of dicts, shallow copy and merge into a new dict, precedence goes to key value pairs in latter
