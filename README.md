@@ -36,11 +36,6 @@ Public packages:
 $ pip install -U git+https://github.com/Nivola/beecell.git
 ```
 
-CSI Internal packages:
-
-```
-$ pip3 install -U git+https://gitlab.csi.it/nivola/cmp3/beecell.git@devel
-```
 
 ## Running the tests
 Activate virtual env

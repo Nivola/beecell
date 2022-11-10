@@ -51,6 +51,7 @@ if __name__ == '__main__':
             'beecell.amqp',
             'beecell.auth',
             'beecell.cache',
+            'beecell.crypto_util',
             'beecell.db',
             'beecell.db.mysql',
             'beecell.flask',
@@ -69,17 +70,21 @@ if __name__ == '__main__':
             'beecell.test',
             'beecell.tests',
             'beecell.tests.auth',
-            'beecell.tests.db'
+            'beecell.tests.db',
+            'beecell.types',
         ],
         namespace_packages=[],
         py_modules=[
+            'beecell.crypto',
+            'beecell.file',
             'beecell.formatter',
             'beecell.__init__',
             'beecell.network',
+            'beecell.password',
             'beecell.perf',
             'beecell.remote',
             'beecell.sendmail',
-            'beecell.simple'
+            'beecell.simple',
         ],
         classifiers=[
             'Development Status :: %s' % version,
