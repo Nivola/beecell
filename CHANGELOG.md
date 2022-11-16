@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 1.11.0 (oct 11, 2022)
+* Various bugfixes
+
 ## Version 1.9.0 (feb 11, 2022)
 
 * Added ...
