@@ -3,7 +3,7 @@
 # (C) Copyright 2018-2022 CSI-Piemonte
 
 import sys
-import logging
+import logging.handlers
 from socket import SOCK_STREAM, SOCK_DGRAM
 
 # try:
