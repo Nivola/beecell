@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # (C) Copyright 2018-2022 CSI-Piemonte
-
+import os
 from os import popen
 from tempfile import NamedTemporaryFile
 from paramiko.client import SSHClient, MissingHostKeyPolicy
@@ -58,10 +58,12 @@ class ParamikoShell(object):
         else:
             self.pkey = None
 
+        logger.warning('____ParamikoShell.__init__ user={}'.format(os.environ.get('USER')))
         if self.tunnel_conf is None:
             self.__create_client(**kwargs)
 
     def __create_client(self, **kwargs):
+        logger.warning('____ParamikoShell.__create_client')
         if self.pre_login is not None:
             self.pre_login()
         try:
@@ -71,6 +73,7 @@ class ParamikoShell(object):
                                 pkey=self.pkey, look_for_keys=False, compress=True, timeout=self.timeout,
                                 auth_timeout=self.timeout, banner_timeout=self.timeout, **kwargs)
         except Exception as ex:
+            logger.warning('____ParamikoShell.__create_client.Exception')
             if self.post_logout is not None:
                 self.post_logout(status=str(ex))
             raise
@@ -100,6 +103,7 @@ class ParamikoShell(object):
     def run(self):
         """Run interactive shell
         """
+        logger.warning('____ParamikoShell.run')
         if self.tunnel_conf is not None:
             self.create_tunnel()
 
@@ -109,6 +113,7 @@ class ParamikoShell(object):
             self.close_tunnel()
 
     def create_tunnel(self):
+        logger.warning('____ParamikoShell.create_tunnel')
         self.tunnel = SSHTunnelForwarder(
             logger=logger,
             ssh_address_or_host=(self.tunnel_conf.get('host'), self.tunnel_conf.get('port')),
@@ -120,6 +125,7 @@ class ParamikoShell(object):
         self.__create_client(port=self.tunnel.local_bind_port, host='127.0.0.1')
 
     def close_tunnel(self):
+        logger.warning('____ParamikoShell.close_tunnel')
         self.tunnel.stop()
 
     def cmd1(self, cmd):

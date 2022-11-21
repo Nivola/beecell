@@ -4,7 +4,7 @@
 
 import sys
 import logging.handlers
-from socket import SOCK_STREAM, SOCK_DGRAM
+from socket import SOCK_DGRAM
 
 # try:
 #     from celery.utils.log import ColorFormatter as CeleryColorFormatter
