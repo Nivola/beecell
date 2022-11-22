@@ -45,7 +45,7 @@ class ParamikoShell(object):
         self.host_user = user # user used to connect in the host
         self.keepalive = 30
 
-        self.loc_user = os.environ.get('USER')
+        self.loc_user = os.environ.get('BEEHIVE_USER', os.environ.get('USER'))
         self.host = host
         self.user = user
         self.port = port
