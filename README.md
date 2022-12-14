@@ -73,5 +73,7 @@ See the list of contributors who participated in this project in the file AUTHOR
 ## Copyright
 CSI Piemonte - 2018-2022
 
+Regione Piemonte - 2020-2022
+
 ## License
 See the LICENSE.txt file for details
