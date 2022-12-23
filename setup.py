@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: EUPL-1.2
 #
 # (C) Copyright 2018-2022 CSI-Piemonte
 
@@ -43,7 +43,7 @@ if __name__ == '__main__':
         long_description='Utility',
         author='CSI Piemonte',
         author_email='nivola.engineering@csi.it',
-        license='GPL v3',
+        license='EUPL-1.2',
         url='',
         scripts=[],
         packages=[
