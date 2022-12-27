@@ -1,13 +1,12 @@
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2019 CSI-Piemonte
-# (C) Copyright 2019-2020 CSI-Piemonte
-# (C) Copyright 2020-2021 CSI-Piemonte
+# (C) Copyright 2018-2022 CSI-Piemonte
 
 import json
 import sqlalchemy
 from sqlalchemy.types import TypeDecorator
-from beecell.simple import is_not_blank
+from beecell.types.type_string import is_not_blank
+from beecell.simple import jsonDumps
 
 
 class TextDictType(TypeDecorator):
@@ -15,7 +14,7 @@ class TextDictType(TypeDecorator):
 
     def process_bind_param(self, value, dialect):
         if value is not None:
-            value = json.dumps(value)
+            value = jsonDumps(value)
         else:
             value = '{}'
         return value

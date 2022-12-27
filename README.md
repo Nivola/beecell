@@ -18,7 +18,7 @@ Utility package:
 - __logger__: logging helper
 
 ## Prerequisites
-Fundamental requirements is python 3.5>.
+Fundamental requirements is python 3.7>.
 
 First of all you have to install some package and create a python virtual env:
 
@@ -36,11 +36,6 @@ Public packages:
 $ pip install -U git+https://github.com/Nivola/beecell.git
 ```
 
-CSI Internal packages:
-
-```
-$ pip3 install -U git+https://gitlab.csi.it/nivola/cmp3/beecell.git@devel
-```
 
 ## Running the tests
 Activate virtual env
@@ -65,6 +60,10 @@ $ python auth/ldap_auth.py
 $ python auth/database_auth.py 
 ```
 
+Test log can be seen in the home directory. 
+Files: 
+- __test.log__
+
 ## Versioning
 We use Semantic Versioning for versioning. (https://semver.org)
 
@@ -72,12 +71,9 @@ We use Semantic Versioning for versioning. (https://semver.org)
 See the list of contributors who participated in this project in the file AUTHORS.md contained in each specific project.
 
 ## Copyright
-CSI Piemonte - 2018-2019
+CSI Piemonte - 2018-2022
 
-CSI Piemonte - 2019-2020
-
-CSI Piemonte - 2020-2021
+Regione Piemonte - 2020-2022
 
 ## License
 See the LICENSE.txt file for details
-

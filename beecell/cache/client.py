@@ -1,17 +1,20 @@
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2019 CSI-Piemonte
-# (C) Copyright 2019-2020 CSI-Piemonte
-# (C) Copyright 2020-2021 CSI-Piemonte
+# (C) Copyright 2018-2022 CSI-Piemonte
+
+from beecell.simple import jsonDumps
 
 import logging
 import ujson as json
 from beecell.simple import truncate
-
+import redis
+import pickle
+import codecs
+from typing import Any
 
 class CacheClient(object):
     """ """
-    def __init__(self, redis, prefix='cache.'):
+    def __init__(self, redis: redis.StrictRedis, prefix='cache.'):
         """Initialize cache client
 
         :param redis: redis manager reference (redis.StrictRedis or StrictRedisCluster instance)
@@ -22,20 +25,31 @@ class CacheClient(object):
         self.redis = redis
         self.prefix = prefix
 
-    def set(self, key, value, ttl=600):
+    def set(self, key:str, value, ttl=600, pickling=False):
         """Set a cache item
 
         :param key: cache item key
         :param value: cache item value
         :param ttl: item time to live [default=600s]
+        :param picling: if true marshal value using pickle otherways use json [default=False]
         :return: True
         """
-        value = json.dumps({'data': value})
-        self.redis.setex(self.prefix + key, ttl, value)
-        self.logger.debug('Set cache item %s:%s [%ss]' % (key, truncate(value), ttl))
+        if pickling:
+            pickled = codecs.encode(pickle.dumps(value), "base64").decode()
+            cachevalue =  jsonDumps({'pickled': pickled})
+        else:
+            cachevalue = jsonDumps({'data': value})
+        self.redis.setex(self.prefix + key, ttl, cachevalue)
+        self.logger.debug('Set cache item %s:%s [%ss]' % (key, truncate(cachevalue), ttl))
         return True
 
-    def get(self, key):
+
+        ##unpickled = pickle.loads(codecs.decode(pickled.encode(), "base64"))
+        self.redis.setex(self.prefix + key, ttl, cachevalue)
+        self.logger.debug('Set cache item %s:%s [%ss]' % (key, truncate(cachevalue), ttl))
+        return True
+
+    def get(self, key:str) -> Any:
         """Get a cache item
 
         :param key: cache item key
@@ -43,9 +57,17 @@ class CacheClient(object):
         """
         value = self.redis.get(self.prefix + key)
         if value is not None:
-            value = json.loads(value).get('data')
+            # if found the cached data foe key
+            # get envelop we axpect data for json-marshaled or pickeled for pickled
+            envelop:dict =json.loads(value)
+            value = envelop.get('data', None)
+            if value is None:
+                pickled = envelop.get('pickled', None)
+                if pickled is not None:
+                    value = pickle.loads(codecs.decode(pickled.encode(), "base64"))
         self.logger.debug('Get cache item %s:%s' % (key, truncate(value)))
         return value
+
 
     def expire(self, key, ttl=600):
         """Set key expire time

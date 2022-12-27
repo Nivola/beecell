@@ -1,11 +1,8 @@
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2019 CSI-Piemonte
-# (C) Copyright 2019-2020 CSI-Piemonte
-# (C) Copyright 2020-2021 CSI-Piemonte
+# (C) Copyright 2018-2022 CSI-Piemonte
 
 import logging
-import gevent
 from datetime import datetime
 from logging import Handler, Formatter
 import json
@@ -117,6 +114,7 @@ class ElasticsearchHandler(Handler):
         has an 'encoding' attribute, it is used to determine how to do the
         output to the stream.
         """
+        import gevent
         try:
             gevent.spawn(self._emit, record)
             # self._emit(record)

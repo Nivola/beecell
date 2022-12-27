@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2019 CSI-Piemonte
-# (C) Copyright 2019-2020 CSI-Piemonte
-# (C) Copyright 2020-2021 CSI-Piemonte
+# (C) Copyright 2018-2022 CSI-Piemonte
 
 from setuptools import setup
 from setuptools.command.install import install as _install
@@ -45,7 +43,7 @@ if __name__ == '__main__':
         long_description='Utility',
         author='CSI Piemonte',
         author_email='nivola.engineering@csi.it',
-        license='GPL v3',
+        license='EUPL-1.2',
         url='',
         scripts=[],
         packages=[
@@ -53,6 +51,7 @@ if __name__ == '__main__':
             'beecell.amqp',
             'beecell.auth',
             'beecell.cache',
+            'beecell.crypto_util',
             'beecell.db',
             'beecell.db.mysql',
             'beecell.flask',
@@ -65,22 +64,27 @@ if __name__ == '__main__':
             'beecell.server',
             'beecell.server.uwsgi_server',
             'beecell.sphinx',
+            'beecell.sphinx.ext',
             'beecell.sqlalchemy',
             'beecell.swagger',
             'beecell.test',
             'beecell.tests',
-            'beecell.tests.db',
             'beecell.tests.auth',
+            'beecell.tests.db',
+            'beecell.types',
         ],
         namespace_packages=[],
         py_modules=[
-            'beecell.simple',
-            'beecell.perf',
-            'beecell.sendmail',
-            'beecell.remote',
+            'beecell.crypto',
+            'beecell.file',
             'beecell.formatter',
+            'beecell.__init__',
             'beecell.network',
-            'beecell.__init__'
+            'beecell.password',
+            'beecell.perf',
+            'beecell.remote',
+            'beecell.sendmail',
+            'beecell.simple',
         ],
         classifiers=[
             'Development Status :: %s' % version,

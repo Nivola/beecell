@@ -1,15 +1,11 @@
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2019 CSI-Piemonte
-# (C) Copyright 2019-2020 CSI-Piemonte
-# (C) Copyright 2020-2021 CSI-Piemonte
+# (C) Copyright 2018-2022 CSI-Piemonte
 
 import ldap
 from six import ensure_str
-
 from beecell.simple import truncate
 from .base import AuthError, AbstractAuth
-from beecell.perf import watch
 
 
 class LdapAuth(AbstractAuth):
@@ -57,7 +53,7 @@ class LdapAuth(AbstractAuth):
 
     def _connect(self):
         """Open connection to Ldap."""
-        if self.port == None:
+        if self.port is None:
             self.port = 389
             
         conn_uri = 'ldap://%s:%s' % (self.host, self.port)
@@ -66,7 +62,7 @@ class LdapAuth(AbstractAuth):
 
     def _connect_ssl(self):
         """Open connection to ldaps portal2."""
-        if self.port == None:
+        if self.port is None:
             self.port = 636
             
         conn_uri = 'ldaps://%s:%s' % (self.host, self.port)
@@ -168,7 +164,7 @@ class LdapAuth(AbstractAuth):
 
         return user
 
-    def authenticate(self, username, password):
+    def authenticate(self, username, password, max_retry=3, cur_retry=0):
         """Authenticate a user
 
         :param username: user name
@@ -197,8 +193,18 @@ class LdapAuth(AbstractAuth):
             self.logger.error('Ldap authentication error: %s' % ex)
             self.close()
             self.conn = None
-            raise AuthError('', 'Ldap authentication error: %s' % ex, code=7)
 
+            # {'desc': "Can't contact LDAP server", 'errno': 104, 'info': 'Connection reset by peer'}
+            if str(ex).find('104') > 0:
+                # check retry
+                if cur_retry < max_retry:
+                    cur_retry += 1
+                    res = self.authenticate(username, password, max_retry=max_retry, cur_retry=cur_retry)
+                    return res
+                else:
+                    raise AuthError('', 'Ldap authentication error: %s' % ex, code=7)
+            else:
+                raise AuthError('', 'Ldap authentication error: %s' % ex, code=7)
         return True
 
     def search_user(self, username, search_filter):

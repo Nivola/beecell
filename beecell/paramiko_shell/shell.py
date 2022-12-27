@@ -1,18 +1,27 @@
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: EUPL-1.2
 #
 # (C) Copyright 2018-2019 CSI-Piemonte
 # (C) Copyright 2019-2020 CSI-Piemonte
 # (C) Copyright 2020-2021 CSI-Piemonte
 
+import os
+from os import popen
+from tempfile import NamedTemporaryFile
 from paramiko.client import SSHClient, MissingHostKeyPolicy
 from paramiko import RSAKey
 from logging import getLogger
-from six import StringIO, ensure_text
+from six import StringIO, ensure_text, ensure_binary
 import fcntl
 import termios
 import struct
 import sys
 from gevent.os import make_nonblocking, nb_read, nb_write
+from sshtunnel import SSHTunnelForwarder
+
+try:
+    from scp import SCPClient
+except:
+    pass
 
 try:
     import interactive
@@ -24,7 +33,8 @@ logger = getLogger(__name__)
 
 class ParamikoShell(object):
     def __init__(self, host, user, port=22, pwd=None, keyfile=None, keystring=None, pre_login=None, post_logout=None,
-                 post_action=None, **kwargs):
+                 post_action=None, tunnel=None, **kwargs):
+        self.pre_login = pre_login
         self.post_logout = post_logout
         self.post_action = post_action
 
@@ -35,21 +45,38 @@ class ParamikoShell(object):
         self.host_user = user # user used to connect in the host
         self.keepalive = 30
 
+        self.loc_user = os.environ.get('BEEHIVE_USER', os.environ.get('USER'))
+        self.host = host
+        self.user = user
+        self.port = port
+        self.pwd = pwd
+        self.keyfile = keyfile
+        self.tunnel_conf = tunnel
+        self.tunnel = None
+
         if keystring is not None:
             key = ensure_text(keystring)
             keystring_io = StringIO(key)
-            pkey = RSAKey.from_private_key(keystring_io)
+            self.pkey = RSAKey.from_private_key(keystring_io)
             keystring_io.close()
         else:
-            pkey = None
+            self.pkey = None
 
-        if pre_login is not None:
-            pre_login()
+        if self.tunnel_conf is None:
+            self.__create_client(**kwargs)
+
+    def __create_client(self, **kwargs):
+        if self.pre_login is not None:
+            self.pre_login()
         try:
-            self.client.connect(host, port, username=user, password=pwd, key_filename=keyfile, pkey=pkey,
-                                look_for_keys=False, compress=True, timeout=self.timeout, auth_timeout=self.timeout,
-                                banner_timeout=self.timeout, **kwargs)
+            host = kwargs.pop('host', self.host)
+            port = kwargs.pop('port', self.port)
+            self.client.connect(host, port, username=self.user, password=self.pwd, key_filename=self.keyfile,
+                                pkey=self.pkey, look_for_keys=False, compress=True, timeout=self.timeout,
+                                auth_timeout=self.timeout, banner_timeout=self.timeout, **kwargs)
+            logger.info('Local user {}: established connection with server={} port={} user={}'.format(self.loc_user, host, port, self.user))
         except Exception as ex:
+            logger.error('Local user {}: unable to connect to server={} port={} user={} '.format(self.loc_user, host, port, self.user))
             if self.post_logout is not None:
                 self.post_logout(status=str(ex))
             raise
@@ -58,7 +85,7 @@ class ParamikoShell(object):
         th, tw, hp, wp = struct.unpack('HHHH', fcntl.ioctl(0, termios.TIOCGWINSZ, struct.pack('HHHH', 0, 0, 0, 0)))
         return tw, th
 
-    def run(self):
+    def __run(self):
         """Run interactive shell
         """
         tw, th = self.terminal_size()
@@ -70,8 +97,37 @@ class ParamikoShell(object):
         interactive.interactive_shell(channel, log=False, trace=True, trace_func=self.post_action)
         channel.close()
         self.client.close()
+        logger.info('Local user {}: closed connection with server={}'.format(self.loc_user, self.host))
         if self.post_logout is not None:
             self.post_logout()
+
+    def close(self):
+        self.client.close()
+
+    def run(self):
+        """Run interactive shell
+        """
+        if self.tunnel_conf is not None:
+            self.create_tunnel()
+
+        self.__run()
+
+        if self.tunnel_conf is not None:
+            self.close_tunnel()
+
+    def create_tunnel(self):
+        self.tunnel = SSHTunnelForwarder(
+            logger=logger,
+            ssh_address_or_host=(self.tunnel_conf.get('host'), self.tunnel_conf.get('port')),
+            ssh_username=self.tunnel_conf.get('user'),
+            ssh_password=self.tunnel_conf.get('pwd'),
+            remote_bind_address=(self.host, 22),
+        )
+        self.tunnel.start()
+        self.__create_client(port=self.tunnel.local_bind_port, host='127.0.0.1')
+
+    def close_tunnel(self):
+        self.tunnel.stop()
 
     def cmd1(self, cmd):
         from six import b, u, ensure_text
@@ -114,7 +170,7 @@ class ParamikoShell(object):
         #         logger.info('OUT: %s' % x)
         #     nb_write(sys.stdout.fileno(), x)
 
-    def cmd(self, cmd, timeout=1.0, **kwargs):
+    def __cmd(self, cmd, timeout=1.0, **kwargs):
         """Execute command in shell
         """
         stdin, stdout, stderr = self.client.exec_command(cmd, timeout=timeout, **kwargs)
@@ -126,6 +182,19 @@ class ParamikoShell(object):
             self.post_action(status=None, cmd=cmd, elapsed=0)
         if self.post_logout is not None:
             self.post_logout()
+        return res
+
+    def cmd(self, cmd, timeout=1.0, **kwargs):
+        """Execute command in shell
+        """
+        if self.tunnel_conf is not None:
+            self.create_tunnel()
+
+        res = self.__cmd(cmd, timeout=timeout, **kwargs)
+
+        if self.tunnel_conf is not None:
+            self.close_tunnel()
+
         return res
 
     def mkdir(self, dirname):
@@ -229,3 +298,78 @@ class ParamikoShell(object):
 
         channel.close()
         self.client.close()
+
+    def __scp_progress(self, filename, size, sent):
+        """Define progress callback that prints the current percentage completed for the file"""
+        status = float(sent) / float(size)
+        newline = '\n'
+        if status < 1:
+            newline = '\r'
+        sys.stdout.write('%s progress: %.2f%% %s' % (ensure_text(filename), status * 100, newline))
+
+    def scp(self, local_package_path, remote_package_path):
+        ssh = self.client
+        with SCPClient(ssh.get_transport(), progress=self.__scp_progress) as scp:
+            scp.put(local_package_path, recursive=True, remote_path=remote_package_path)
+
+
+class Rsync(object):
+    def __init__(self, user='root', pwd=None, keyfile=None, keystring=None, **kwargs):
+        self.user = user
+        self.pwd = pwd
+        self.keystring = keystring
+        self.cmd = None
+        self.excludes = []
+        self.fp = None
+
+    def __create_temp_file(self, data):
+        fp = NamedTemporaryFile()
+        fp.write(ensure_binary(data))
+        fp.seek(0)
+        self.fp = fp
+
+    def __close_temp_file(self):
+        if self.fp is not None:
+            self.fp.close()
+
+    def __set_base_command(self):
+        self.cmd = ['rsync -r --delete']
+        if self.pwd is not None:
+            rsh_cmd = '/usr/bin/sshpass -p {sshpass} ssh -o StrictHostKeyChecking=no -l {sshuser}'\
+                .format(sshpass=self.pwd, sshuser=self.user)
+            self.cmd.append("--rsh='{cmd}'".format(cmd=rsh_cmd))
+        elif self.keystring is not None:
+            self.__create_temp_file(self.keystring)
+            rsh_cmd = 'ssh -o StrictHostKeyChecking=no -l {sshuser} -i {sshkey}'\
+                .format(sshkey=self.fp.name, sshuser=self.user)
+            self.cmd.append("--rsh='{cmd}'".format(cmd=rsh_cmd))
+
+    def __get_plain_command(self, from_path, to_path):
+        self.cmd.extend(self.excludes)
+        self.cmd.append(from_path)
+        self.cmd.append(to_path)
+        cmd = ' '.join(self.cmd)
+        return cmd
+
+    def add_exclude(self, pattern):
+        """add exclude file pattern
+
+        :param pattern: file pattern. Ex. *.pyc or *.pyo
+        :return:
+        """
+        self.excludes.append('--exclude={exclude}'.format(exclude=pattern))
+
+    def run(self, from_path, to_path):
+        """Sync local folder with remote folder using rsync protocol
+
+        :param from_path: origin path. Ex. /tmp
+        :param to_path: destination path. Ex. root@localhost:/tmp
+        :return:
+        """
+        self.__set_base_command()
+        cmd = self.__get_plain_command(from_path, to_path)
+        stream = popen(cmd)
+        output = stream.read()
+        self.__close_temp_file()
+        logger.debug('run rsync from {fp} to {tp}: {out}'.format(fp=from_path, tp=to_path, out=output))
+        return output

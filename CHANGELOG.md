@@ -1,5 +1,66 @@
 # Changelog
 
+## Version 1.11.0 (oct 11, 2022)
+* Various bugfixes
+
+## Version 1.9.0 (feb 11, 2022)
+
+* Added ...
+    * add method split_string_in_chunks in simple
+    * add method setex in RedisManager
+    * add package crypto_util and class RasCrypto that manage asymmetric cryptography with rsa
+    * add manage_connection in SqlManager
+    * add method compile_query
+    * add K8shHandler to manage new line when logging an exception and read from filebeat
+* Fixed ...
+    * improved import in simple module
+    * moved read_file in file module to improve load performance
+    * moved password methods in password module to improve load performance
+    * moved dict, list, string, date methods in types package to improve load performance
+    * moved cryptography methods in crypto module to improve load performance
+    * correct RedisManager timeout setting. socket_timeout was not from param and default value of 0.1s is too low
+    * removed in ldap.authenticate code for reconnection. code is bad and bypass wrong password
+* Integrated ...
+* Various bugfixes
+* Removed
+
+## Version 1.8.0 (jun 11, 2021)
+
+* Added ...
+    * add support connection using ssh tunnel to paramiko_shell
+    * add rsync client authentication with ssh key
+    * add management of redis cluster with sentinel
+    * add tunnel configuration for sql manager
+    * add method exec_statements in sql manager
+* Fixed ...
+    * fixed parse_redis_uri to parse redis sentinel uri
+    * replaced character | with + in simple.truncate
+    * renamed schema in db in SqlManager
+* Integrated ...
+* Various bugfixes
+* Removed
+
+## Version 1.7.1 (Feb 05, 2021)
+
+* Added ...
+    * added command ParamikoShell scp to exec secure copy
+    * added class Rsync to run rsync between folder
+    * add MysqlManager methods show_binary_log and purge_binary_log to manage binary logs
+    * add method validate_string
+* Fixed ...
+    * correct some bugs in ParamikoShell: exit sometimes was not captured, command trace run twice.
+    * correct connection release in MysqlManager
+    * correct User._check_password
+    * change method LdapAuth.authenticate to authenticate(self, username, password, max_retry=3, cur_retry=0). Add param
+      max_retry to manage some connections retry to ldap
+* Integrated ...
+    * update Copyright to 2020-2021
+* Various bugfixes
+* Removed
+    * removed cement_cmd package. Compatible only with python 2
+    * removed module server.gevent_ssl
+    * removed test for redis cluster
+
 ## Version 1.7.0 (Dec 31, 2020)
 
 * Added ...

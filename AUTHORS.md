@@ -6,3 +6,6 @@ beecell is written and maintained by:
 * Gianni Doria
 * Daniela Ferrarini
 * Davide Sacchetto
+* Filippo Vallero
+* Franco Frattini
+* Alessandro More'

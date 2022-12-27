@@ -1,8 +1,8 @@
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2019 CSI-Piemonte
-# (C) Copyright 2019-2020 CSI-Piemonte
-# (C) Copyright 2020-2021 CSI-Piemonte
+# (C) Copyright 2018-2022 CSI-Piemonte
+
+from beecell.simple import jsonDumps
 
 import json
 from bson import BSON
@@ -14,7 +14,7 @@ def get_error(exception, code, data, mime='json'):
              'code': str(code), 'data': str(data)}
     
     if mime == 'json':
-        return json.dumps(error)
+        return jsonDumps(error)
     elif mime == 'bson':
         return BSON.encode(error)
 
@@ -22,7 +22,7 @@ def get_error(exception, code, data, mime='json'):
 def get_response(data, mime='json'):
     res = {'status': 'ok', 'data': data}
     if mime == 'json':
-        return json.dumps(res)
+        return jsonDumps(res)
     elif mime == 'bson':
         return BSON.encode(res)
 
