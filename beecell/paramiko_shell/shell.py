@@ -68,15 +68,18 @@ class ParamikoShell(object):
     def __create_client(self, **kwargs):
         if self.pre_login is not None:
             self.pre_login()
+
+        host = kwargs.pop('host', self.host)
+        port = kwargs.pop('port', self.port)
         try:
-            host = kwargs.pop('host', self.host)
-            port = kwargs.pop('port', self.port)
             self.client.connect(host, port, username=self.user, password=self.pwd, key_filename=self.keyfile,
                                 pkey=self.pkey, look_for_keys=False, compress=True, timeout=self.timeout,
                                 auth_timeout=self.timeout, banner_timeout=self.timeout, **kwargs)
-            logger.info('Local user {}: established connection with server={} port={} user={}'.format(self.loc_user, host, port, self.user))
+            logger.info('Local user {}: established connection with server={} port={} user={}'
+                        .format(self.loc_user, host, port, self.user))
         except Exception as ex:
-            logger.error('Local user {}: unable to connect to server={} port={} user={} '.format(self.loc_user, host, port, self.user))
+            logger.error('Local user {}: unable to connect to server={} port={} user={}'
+                         .format(self.loc_user, host, port, self.user))
             if self.post_logout is not None:
                 self.post_logout(status=str(ex))
             raise
