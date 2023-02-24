@@ -32,8 +32,20 @@ logger = getLogger(__name__)
 
 
 class ParamikoShell(object):
-    def __init__(self, host, user, port=22, pwd=None, keyfile=None, keystring=None, pre_login=None, post_logout=None,
-                 post_action=None, tunnel=None, **kwargs):
+    def __init__(
+        self,
+        host,
+        user,
+        port=22,
+        pwd=None,
+        keyfile=None,
+        keystring=None,
+        pre_login=None,
+        post_logout=None,
+        post_action=None,
+        tunnel=None,
+        **kwargs,
+    ):
         self.pre_login = pre_login
         self.post_logout = post_logout
         self.post_action = post_action
@@ -42,10 +54,10 @@ class ParamikoShell(object):
         self.client.set_missing_host_key_policy(MissingHostKeyPolicy())
 
         self.timeout = 10.0
-        self.host_user = user # user used to connect in the host
+        self.host_user = user  # user used to connect in the host
         self.keepalive = 30
 
-        self.loc_user = os.environ.get('BEEHIVE_USER', os.environ.get('USER'))
+        self.loc_user = os.environ.get("BEEHIVE_USER", os.environ.get("USER"))
         self.host = host
         self.user = user
         self.port = port
@@ -69,38 +81,64 @@ class ParamikoShell(object):
         if self.pre_login is not None:
             self.pre_login()
 
-        host = kwargs.pop('host', self.host)
-        port = kwargs.pop('port', self.port)
+        host = kwargs.pop("host", self.host)
+        port = kwargs.pop("port", self.port)
         try:
-            self.client.connect(host, port, username=self.user, password=self.pwd, key_filename=self.keyfile,
-                                pkey=self.pkey, look_for_keys=False, compress=True, timeout=self.timeout,
-                                auth_timeout=self.timeout, banner_timeout=self.timeout, **kwargs)
-            logger.info('Local user {}: established connection with server={} port={} user={}'
-                        .format(self.loc_user, host, port, self.user))
+            self.client.connect(
+                host,
+                port,
+                username=self.user,
+                password=self.pwd,
+                key_filename=self.keyfile,
+                pkey=self.pkey,
+                look_for_keys=False,
+                compress=True,
+                timeout=self.timeout,
+                auth_timeout=self.timeout,
+                banner_timeout=self.timeout,
+                **kwargs,
+            )
+            logger.info(
+                "Local user {}: established connection with server={} port={} user={}".format(
+                    self.loc_user, host, port, self.user
+                )
+            )
         except Exception as ex:
-            logger.error('Local user {}: unable to connect to server={} port={} user={}'
-                         .format(self.loc_user, host, port, self.user))
+            logger.error(
+                "Local user {}: unable to connect to server={} port={} user={}".format(
+                    self.loc_user, host, port, self.user
+                )
+            )
             if self.post_logout is not None:
                 self.post_logout(status=str(ex))
             raise
 
     def terminal_size(self):
-        th, tw, hp, wp = struct.unpack('HHHH', fcntl.ioctl(0, termios.TIOCGWINSZ, struct.pack('HHHH', 0, 0, 0, 0)))
+        th, tw, hp, wp = struct.unpack(
+            "HHHH", fcntl.ioctl(0, termios.TIOCGWINSZ, struct.pack("HHHH", 0, 0, 0, 0))
+        )
         return tw, th
 
     def __run(self):
-        """Run interactive shell
-        """
+        """Run interactive shell"""
         tw, th = self.terminal_size()
         self.client.get_transport().set_keepalive(self.keepalive)
         channel = self.client.get_transport().open_session()
-        channel.get_pty(term='xterm', width=tw, height=th, width_pixels=0, height_pixels=0)
+        channel.get_pty(
+            term="xterm", width=tw, height=th, width_pixels=0, height_pixels=0
+        )
         # channel.get_pty(term='xterm')
         channel.invoke_shell()
-        interactive.interactive_shell(channel, log=False, trace=True, trace_func=self.post_action)
+        interactive.interactive_shell(
+            channel, log=False, trace=True, trace_func=self.post_action
+        )
         channel.close()
         self.client.close()
-        logger.info('Local user {}: closed connection with server={}'.format(self.loc_user, self.host))
+        logger.info(
+            "Local user {}: closed connection with server={}".format(
+                self.loc_user, self.host
+            )
+        )
         if self.post_logout is not None:
             self.post_logout()
 
@@ -108,8 +146,7 @@ class ParamikoShell(object):
         self.client.close()
 
     def run(self):
-        """Run interactive shell
-        """
+        """Run interactive shell"""
         if self.tunnel_conf is not None:
             self.create_tunnel()
 
@@ -121,22 +158,27 @@ class ParamikoShell(object):
     def create_tunnel(self):
         self.tunnel = SSHTunnelForwarder(
             logger=logger,
-            ssh_address_or_host=(self.tunnel_conf.get('host'), self.tunnel_conf.get('port')),
-            ssh_username=self.tunnel_conf.get('user'),
-            ssh_password=self.tunnel_conf.get('pwd'),
+            ssh_address_or_host=(
+                self.tunnel_conf.get("host"),
+                self.tunnel_conf.get("port"),
+            ),
+            ssh_username=self.tunnel_conf.get("user"),
+            ssh_password=self.tunnel_conf.get("pwd"),
             remote_bind_address=(self.host, 22),
         )
         self.tunnel.start()
-        self.__create_client(port=self.tunnel.local_bind_port, host='127.0.0.1')
+        self.__create_client(port=self.tunnel.local_bind_port, host="127.0.0.1")
 
     def close_tunnel(self):
         self.tunnel.stop()
 
     def cmd1(self, cmd):
         from six import b, u, ensure_text
+
         try:
             import termios
             import tty
+
             has_termios = True
         except ImportError:
             has_termios = False
@@ -174,12 +216,11 @@ class ParamikoShell(object):
         #     nb_write(sys.stdout.fileno(), x)
 
     def __cmd(self, cmd, timeout=1.0, **kwargs):
-        """Execute command in shell
-        """
+        """Execute command in shell"""
         stdin, stdout, stderr = self.client.exec_command(cmd, timeout=timeout, **kwargs)
-        res = {'stdout': [], 'stderr': ensure_text(stderr.read())}
+        res = {"stdout": [], "stderr": ensure_text(stderr.read())}
         for line in stdout:
-            res['stdout'].append(line.strip('\n'))
+            res["stdout"].append(line.strip("\n"))
         # self.client.close()
         if self.post_action is not None:
             self.post_action(status=None, cmd=cmd, elapsed=0)
@@ -188,8 +229,7 @@ class ParamikoShell(object):
         return res
 
     def cmd(self, cmd, timeout=1.0, **kwargs):
-        """Execute command in shell
-        """
+        """Execute command in shell"""
         if self.tunnel_conf is not None:
             self.create_tunnel()
 
@@ -206,12 +246,12 @@ class ParamikoShell(object):
         :param dirname: nameof the directory
         :return: True if all is ok
         """
-        res = self.cmd('mkdir -p %s' % dirname, timeout=5.0)
-        if res.get('stderr') != '':
+        res = self.cmd("mkdir -p %s" % dirname, timeout=5.0)
+        if res.get("stderr") != "":
             return False
         return True
 
-    def chown(self, dirname, user='root', group='root'):
+    def chown(self, dirname, user="root", group="root"):
         """Change owner of a directory in remote server
 
         :param dirname: nameof the directory
@@ -219,21 +259,23 @@ class ParamikoShell(object):
         :param group: directory group owner
         :return: True if all is ok
         """
-        res = self.cmd('chown -R $(id -u %s):%s %s' % (user, group, dirname), timeout=5.0)
+        res = self.cmd(
+            "chown -R $(id -u %s):%s %s" % (user, group, dirname), timeout=5.0
+        )
         # res = self.cmd('chown -R $(id -u %s) %s' % (user, dirname), timeout=5.0)
-        if res.get('stderr') != '':
+        if res.get("stderr") != "":
             return False
         return True
 
-    def chmod(self, dirname, acl='700'):
+    def chmod(self, dirname, acl="700"):
         """Change acl of a directory in remote server
 
         :param dirname: nameof the directory
         :param acl: directory acl
         :return: True if all is ok
         """
-        res = self.cmd('chmod -R %s %s' % (acl, dirname), timeout=5.0)
-        if res.get('stderr') != '':
+        res = self.cmd("chmod -R %s %s" % (acl, dirname), timeout=5.0)
+        if res.get("stderr") != "":
             return False
         return True
 
@@ -271,7 +313,7 @@ class ParamikoShell(object):
         res = ftp_client.listdir_attr(path)
         ftp_client.close()
         if self.post_action is not None:
-            self.post_action(status=None, cmd='ls -al %s' % path, elapsed=0)
+            self.post_action(status=None, cmd="ls -al %s" % path, elapsed=0)
         if self.post_logout is not None:
             self.post_logout()
         return res
@@ -289,7 +331,7 @@ class ParamikoShell(object):
         channel = transport.open_session()
         channel.settimeout(self.timeout)
 
-        cmd = 'tail -f %s' % filename
+        cmd = "tail -f %s" % filename
         channel.exec_command(cmd)
 
         make_nonblocking(sys.stdin.fileno())
@@ -305,10 +347,12 @@ class ParamikoShell(object):
     def __scp_progress(self, filename, size, sent):
         """Define progress callback that prints the current percentage completed for the file"""
         status = float(sent) / float(size)
-        newline = '\n'
+        newline = "\n"
         if status < 1:
-            newline = '\r'
-        sys.stdout.write('%s progress: %.2f%% %s' % (ensure_text(filename), status * 100, newline))
+            newline = "\r"
+        sys.stdout.write(
+            "%s progress: %.2f%% %s" % (ensure_text(filename), status * 100, newline)
+        )
 
     def scp(self, local_package_path, remote_package_path):
         ssh = self.client
@@ -317,7 +361,7 @@ class ParamikoShell(object):
 
 
 class Rsync(object):
-    def __init__(self, user='root', pwd=None, keyfile=None, keystring=None, **kwargs):
+    def __init__(self, user="root", pwd=None, keyfile=None, keystring=None, **kwargs):
         self.user = user
         self.pwd = pwd
         self.keystring = keystring
@@ -336,22 +380,24 @@ class Rsync(object):
             self.fp.close()
 
     def __set_base_command(self):
-        self.cmd = ['rsync -r --delete']
+        self.cmd = ["rsync -r --delete"]
         if self.pwd is not None:
-            rsh_cmd = '/usr/bin/sshpass -p {sshpass} ssh -o StrictHostKeyChecking=no -l {sshuser}'\
-                .format(sshpass=self.pwd, sshuser=self.user)
+            rsh_cmd = "/usr/bin/sshpass -p {sshpass} ssh -o StrictHostKeyChecking=no -l {sshuser}".format(
+                sshpass=self.pwd, sshuser=self.user
+            )
             self.cmd.append("--rsh='{cmd}'".format(cmd=rsh_cmd))
         elif self.keystring is not None:
             self.__create_temp_file(self.keystring)
-            rsh_cmd = 'ssh -o StrictHostKeyChecking=no -l {sshuser} -i {sshkey}'\
-                .format(sshkey=self.fp.name, sshuser=self.user)
+            rsh_cmd = "ssh -o StrictHostKeyChecking=no -l {sshuser} -i {sshkey}".format(
+                sshkey=self.fp.name, sshuser=self.user
+            )
             self.cmd.append("--rsh='{cmd}'".format(cmd=rsh_cmd))
 
     def __get_plain_command(self, from_path, to_path):
         self.cmd.extend(self.excludes)
         self.cmd.append(from_path)
         self.cmd.append(to_path)
-        cmd = ' '.join(self.cmd)
+        cmd = " ".join(self.cmd)
         return cmd
 
     def add_exclude(self, pattern):
@@ -360,7 +406,7 @@ class Rsync(object):
         :param pattern: file pattern. Ex. *.pyc or *.pyo
         :return:
         """
-        self.excludes.append('--exclude={exclude}'.format(exclude=pattern))
+        self.excludes.append("--exclude={exclude}".format(exclude=pattern))
 
     def run(self, from_path, to_path):
         """Sync local folder with remote folder using rsync protocol
@@ -374,5 +420,9 @@ class Rsync(object):
         stream = popen(cmd)
         output = stream.read()
         self.__close_temp_file()
-        logger.debug('run rsync from {fp} to {tp}: {out}'.format(fp=from_path, tp=to_path, out=output))
+        logger.debug(
+            "run rsync from {fp} to {tp}: {out}".format(
+                fp=from_path, tp=to_path, out=output
+            )
+        )
         return output

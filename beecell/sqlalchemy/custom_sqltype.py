@@ -16,7 +16,7 @@ class TextDictType(TypeDecorator):
         if value is not None:
             value = jsonDumps(value)
         else:
-            value = '{}'
+            value = "{}"
         return value
 
     def process_result_value(self, value, dialect):

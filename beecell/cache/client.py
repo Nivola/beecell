@@ -12,20 +12,24 @@ import pickle
 import codecs
 from typing import Any
 
+
 class CacheClient(object):
     """ """
-    def __init__(self, redis: redis.StrictRedis, prefix='cache.'):
+
+    def __init__(self, redis: redis.StrictRedis, prefix="cache."):
         """Initialize cache client
 
         :param redis: redis manager reference (redis.StrictRedis or StrictRedisCluster instance)
         :param prefix: chache key prefix
         """
-        self.logger = logging.getLogger(self.__class__.__module__ + '.' + self.__class__.__name__)
+        self.logger = logging.getLogger(
+            self.__class__.__module__ + "." + self.__class__.__name__
+        )
 
         self.redis = redis
         self.prefix = prefix
 
-    def set(self, key:str, value, ttl=600, pickling=False):
+    def set(self, key: str, value, ttl=600, pickling=False):
         """Set a cache item
 
         :param key: cache item key
@@ -36,20 +40,23 @@ class CacheClient(object):
         """
         if pickling:
             pickled = codecs.encode(pickle.dumps(value), "base64").decode()
-            cachevalue =  jsonDumps({'pickled': pickled})
+            cachevalue = jsonDumps({"pickled": pickled})
         else:
-            cachevalue = jsonDumps({'data': value})
+            cachevalue = jsonDumps({"data": value})
         self.redis.setex(self.prefix + key, ttl, cachevalue)
-        self.logger.debug('Set cache item %s:%s [%ss]' % (key, truncate(cachevalue), ttl))
+        self.logger.debug(
+            "Set cache item %s:%s [%ss]" % (key, truncate(cachevalue), ttl)
+        )
         return True
-
 
         ##unpickled = pickle.loads(codecs.decode(pickled.encode(), "base64"))
         self.redis.setex(self.prefix + key, ttl, cachevalue)
-        self.logger.debug('Set cache item %s:%s [%ss]' % (key, truncate(cachevalue), ttl))
+        self.logger.debug(
+            "Set cache item %s:%s [%ss]" % (key, truncate(cachevalue), ttl)
+        )
         return True
 
-    def get(self, key:str) -> Any:
+    def get(self, key: str) -> Any:
         """Get a cache item
 
         :param key: cache item key
@@ -59,15 +66,14 @@ class CacheClient(object):
         if value is not None:
             # if found the cached data foe key
             # get envelop we axpect data for json-marshaled or pickeled for pickled
-            envelop:dict =json.loads(value)
-            value = envelop.get('data', None)
+            envelop: dict = json.loads(value)
+            value = envelop.get("data", None)
             if value is None:
-                pickled = envelop.get('pickled', None)
+                pickled = envelop.get("pickled", None)
                 if pickled is not None:
                     value = pickle.loads(codecs.decode(pickled.encode(), "base64"))
-        self.logger.debug('Get cache item %s:%s' % (key, truncate(value)))
+        self.logger.debug("Get cache item %s:%s" % (key, truncate(value)))
         return value
-
 
     def expire(self, key, ttl=600):
         """Set key expire time
@@ -77,7 +83,7 @@ class CacheClient(object):
         :return: True
         """
         value = self.redis.expire(self.prefix + key, ttl)
-        self.logger.debug('Set cache item %s expire to %s' % (key, ttl))
+        self.logger.debug("Set cache item %s expire to %s" % (key, ttl))
         return True
 
     def delete(self, key):
@@ -87,7 +93,7 @@ class CacheClient(object):
         :return: True
         """
         value = self.redis.delete(self.prefix + key)
-        self.logger.debug('Delete cache item %s' % key)
+        self.logger.debug("Delete cache item %s" % key)
         return True
 
     def get_by_pattern(self, pattern):
@@ -99,7 +105,7 @@ class CacheClient(object):
         keys = self.redis.keys(self.prefix + pattern)
         res = []
         for key in keys:
-            res.append({'key': key, 'value': self.redis.get(key)})
+            res.append({"key": key, "value": self.redis.get(key)})
         return res
 
     def delete_by_pattern(self, pattern):
@@ -121,5 +127,5 @@ class CacheClient(object):
         :return: True
         """
         value = self.redis.expire(self.prefix + key, ttl)
-        self.logger.debug('Extend cache item %s ttl to %s' % (key, ttl))
+        self.logger.debug("Extend cache item %s ttl to %s" % (key, ttl))
         return True

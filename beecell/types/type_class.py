@@ -16,7 +16,6 @@ def getmembers(obj, predicate=None):
     """
     results = []
     for key in dir(obj):
-
         try:
             value = getattr(obj, key)
         except AttributeError:
@@ -29,6 +28,7 @@ def getmembers(obj, predicate=None):
 
 def query_python_object(obj):
     import pprint
+
     pp = pprint.PrettyPrinter(indent=2)
     pp.pprint(getmembers(obj))
 
@@ -40,7 +40,7 @@ def dynamic_import(name):
     :return:
     """
     mod = __import__(name)
-    components = name.split('.')
+    components = name.split(".")
     for comp in components[1:]:
         mod = getattr(mod, comp)
     return mod
@@ -52,8 +52,10 @@ def import_func(name):
     :param name: name of the function
     :return:
     """
-    components = name.split('.')
-    mod = __import__('.'.join(components[:-1]), globals(), locals(), [components[-1]], -1)
+    components = name.split(".")
+    mod = __import__(
+        ".".join(components[:-1]), globals(), locals(), [components[-1]], -1
+    )
     func = getattr(mod, components[-1], None)
     return func
 
@@ -67,13 +69,13 @@ def import_class(cl):
 
     cl = str(cl)
     d = cl.rfind(".")
-    classname = cl[d + 1:len(cl)]
+    classname = cl[d + 1 : len(cl)]
     m = __import__(cl[0:d], globals(), locals(), [classname])
     return getattr(m, classname, None)
 
 
 def get_class_props(cls):
-    return [i for i in cls.__dict__.keys() if i[:1] != '_']
+    return [i for i in cls.__dict__.keys() if i[:1] != "_"]
 
 
 def get_member_class(args):
@@ -81,13 +83,13 @@ def get_member_class(args):
     try:
         classname = args[0].__class__.__name__
     except:
-        classname = ''
+        classname = ""
     return classname
 
 
 def get_class_name(classref):
     """"""
-    name = str(classref).split('.')[-1].rstrip("'>").lower()
+    name = str(classref).split(".")[-1].rstrip("'>").lower()
     return "%s.%s" % (classref.__module__, name)
 
 
@@ -101,22 +103,23 @@ def get_class_methods_by_decorator(cls, decorator_name):
     :return:
     """
     import inspect
+
     res = []
     sourcelines = inspect.getsourcelines(cls)[0]
     find = False
     for i, line in enumerate(sourcelines):
         line = line.strip()
         # find main decorator
-        if line.split('(')[0].strip() == '@'+decorator_name:
+        if line.split("(")[0].strip() == "@" + decorator_name:
             find = True
             continue
 
         # find secondary decorator
-        elif line.split('(')[0].strip().find('@') == 0:
+        elif line.split("(")[0].strip().find("@") == 0:
             continue
 
         elif find is True:
-            name = line.split('def')[1].split('(')[0].strip()
+            name = line.split("def")[1].split("(")[0].strip()
             res.append(name)
             find = False
     return res

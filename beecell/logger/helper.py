@@ -31,14 +31,14 @@ class ExtendedLogger(logging.Logger):
 
 
 logging.setLoggerClass(ExtendedLogger)
-logging.addLevelName(DEBUG2, 'DEBUG2')
-logging.addLevelName(DEBUG3, 'DEBUG3')
+logging.addLevelName(DEBUG2, "DEBUG2")
+logging.addLevelName(DEBUG3, "DEBUG3")
 
 
 class CustomFormatter(logging.Formatter):
     def __init__(self, default):
         self._default_formatter = default
-        
+
     def format(self, record):
         return self._default_formatter.format(record)
 
@@ -53,22 +53,26 @@ try:
         #: Loglevel -> Color mapping.
         COLORS = colored().names
         colors = {
-            'DEBUG': COLORS['blue'],
-            'WARNING': COLORS['yellow'],
-            'WARN': COLORS['yellow'],
-            'ERROR': COLORS['red'],
-            'CRITICAL': COLORS['magenta'],
-            'DEBUG2': COLORS['green'],
-            'DEBUG3': COLORS['cyan']
+            "DEBUG": COLORS["blue"],
+            "WARNING": COLORS["yellow"],
+            "WARN": COLORS["yellow"],
+            "ERROR": COLORS["red"],
+            "CRITICAL": COLORS["magenta"],
+            "DEBUG2": COLORS["green"],
+            "DEBUG3": COLORS["cyan"],
         }
+
 except:
     try:
         from colorlog import ColoredFormatter
 
         class ColorFormatter(ColoredFormatter):
             """Logging formatter that adds colors based on severity."""
+
             pass
+
     except:
+
         class ColorFormatter(logging.Formatter):
             pass
 
@@ -86,11 +90,13 @@ class LoggerHelper(object):
     DEBUG3 = DEBUG3
 
     #
-    # new methods. Correct the problem with loggers that use the same file. Use 
+    # new methods. Correct the problem with loggers that use the same file. Use
     # rotatingfile_handler passing all the logger.
     #
     @staticmethod
-    def memory_handler(loggers, logging_level, target, frmt=None, formatter=ColorFormatter):
+    def memory_handler(
+        loggers, logging_level, target, frmt=None, formatter=ColorFormatter
+    ):
         if frmt is None:
             frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] %(name)s:%(funcName)s:%(lineno)d - %(message)s"
 
@@ -100,15 +106,21 @@ class LoggerHelper(object):
             handler.setFormatter(logging.Formatter(frmt))
         else:
             handler.setFormatter(formatter(frmt))
-            
+
         for logger in loggers:
             logger.addHandler(handler)
             logger.setLevel(logging_level)
             logger.propagate = False
-    
+
     @staticmethod
-    def simple_handler(loggers, logging_level, frmt=None, formatter=ColorFormatter, propagate=False,
-                       handler=logging.StreamHandler):
+    def simple_handler(
+        loggers,
+        logging_level,
+        frmt=None,
+        formatter=ColorFormatter,
+        propagate=False,
+        handler=logging.StreamHandler,
+    ):
         if frmt is None:
             frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] %(name)s:%(funcName)s:%(lineno)d - %(message)s"
 
@@ -123,46 +135,72 @@ class LoggerHelper(object):
             logger.addHandler(handler)
             logger.setLevel(logging_level)
             logger.propagate = propagate
-    
+
     @staticmethod
-    def rotatingfile_handler(loggers, logging_level, file_name, maxBytes=104857600, backupCount=10, frmt=None,
-                             formatter=ColorFormatter, propagate=False):
+    def rotatingfile_handler(
+        loggers,
+        logging_level,
+        file_name,
+        maxBytes=104857600,
+        backupCount=10,
+        frmt=None,
+        formatter=ColorFormatter,
+        propagate=False,
+    ):
         if frmt is None:
             frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] %(name)s:%(funcName)s:%(lineno)d - %(message)s"
-        handler = logging.handlers.RotatingFileHandler(file_name, mode='a', maxBytes=maxBytes, backupCount=backupCount)
+        handler = logging.handlers.RotatingFileHandler(
+            file_name, mode="a", maxBytes=maxBytes, backupCount=backupCount
+        )
         handler.setLevel(logging_level)
         if formatter is None:
             handler.setFormatter(logging.Formatter(frmt))
         else:
             handler.setFormatter(formatter(frmt))
-        
-        for logger in loggers:
-            logger.addHandler(handler)
-            logger.setLevel(logging_level)
-            logger.propagate = propagate
-            
-    @staticmethod
-    def file_handler(loggers, logging_level, file_name, frmt=None, formatter=ColorFormatter, propagate=False):
-        if frmt is None:
-            frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] %(name)s:%(funcName)s:%(lineno)d - %(message)s"
-        handler = logging.FileHandler(file_name, mode='a')
-        handler.setLevel(logging_level)
-        if formatter is None:
-            handler.setFormatter(logging.Formatter(frmt))
-        else:
-            handler.setFormatter(formatter(frmt))        
-        
+
         for logger in loggers:
             logger.addHandler(handler)
             logger.setLevel(logging_level)
             logger.propagate = propagate
 
     @staticmethod
-    def syslog_handler(loggers, logging_level, syslog_server, facility, frmt=None, propagate=False, syslog_port=514):
+    def file_handler(
+        loggers,
+        logging_level,
+        file_name,
+        frmt=None,
+        formatter=ColorFormatter,
+        propagate=False,
+    ):
         if frmt is None:
             frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] %(name)s:%(funcName)s:%(lineno)d - %(message)s"
-        handler = logging.handlers.SysLogHandler(address=(syslog_server, syslog_port), facility=facility,
-                                                 socktype=SOCK_DGRAM)
+        handler = logging.FileHandler(file_name, mode="a")
+        handler.setLevel(logging_level)
+        if formatter is None:
+            handler.setFormatter(logging.Formatter(frmt))
+        else:
+            handler.setFormatter(formatter(frmt))
+
+        for logger in loggers:
+            logger.addHandler(handler)
+            logger.setLevel(logging_level)
+            logger.propagate = propagate
+
+    @staticmethod
+    def syslog_handler(
+        loggers,
+        logging_level,
+        syslog_server,
+        facility,
+        frmt=None,
+        propagate=False,
+        syslog_port=514,
+    ):
+        if frmt is None:
+            frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] %(name)s:%(funcName)s:%(lineno)d - %(message)s"
+        handler = logging.handlers.SysLogHandler(
+            address=(syslog_server, syslog_port), facility=facility, socktype=SOCK_DGRAM
+        )
         handler.setLevel(logging_level)
         handler.setFormatter(logging.Formatter(frmt))
 
@@ -172,8 +210,16 @@ class LoggerHelper(object):
             logger.propagate = propagate
 
     @staticmethod
-    def elastic_handler(loggers, logging_level, client, frmt=None, propagate=False, index='log', tags=[],
-                        **custom_fields):
+    def elastic_handler(
+        loggers,
+        logging_level,
+        client,
+        frmt=None,
+        propagate=False,
+        index="log",
+        tags=[],
+        **custom_fields,
+    ):
         """Configure a logging handler that use elasticsearch as backend.
 
         :param loggers: list of loggers
@@ -185,9 +231,11 @@ class LoggerHelper(object):
         :param custom_fields: custom fields as key=value
         """
         if frmt is None:
-            frmt = '{"timestamp":"%(asctime)s","levelname":"%(levelname)s","process":"%(process)s",' \
-                   '"thread":"%(thread)s","module":"%(name)s","func":"%(funcName)s","lineno":"%(lineno)d",' \
-                   '"message":"%(message)s"}'
+            frmt = (
+                '{"timestamp":"%(asctime)s","levelname":"%(levelname)s","process":"%(process)s",'
+                '"thread":"%(thread)s","module":"%(name)s","func":"%(funcName)s","lineno":"%(lineno)d",'
+                '"message":"%(message)s"}'
+            )
         handler = ElasticsearchHandler(client, index=index, tags=tags, **custom_fields)
         handler.setLevel(logging_level)
         handler.setFormatter(ElasticsearchFormatter(frmt))
