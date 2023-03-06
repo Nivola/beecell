@@ -11,7 +11,7 @@ from math import ceil
 logger = getLogger(__name__)
 
 
-from.crypto import *
+from .crypto import *
 from .types.type_date import *
 from .types.type_list import *
 from .types.type_dict import *
@@ -167,7 +167,7 @@ def nround(number, decimal=4):
     :return: rounded number in UNICODE format
     """
     factor = 10 * decimal
-    convert = '%.' + b(decimal) + 'f'
+    convert = "%." + b(decimal) + "f"
     return convert % (ceil(number * factor) / factor)
 
 
@@ -265,7 +265,7 @@ def get_value(value_dict, key, default_value, exception=False, vtype=None):
         try:
             value = value_dict[key]
         except:
-            raise AttribException('Attribute %s is missing' % key)
+            raise AttribException("Attribute %s is missing" % key)
     else:
         value = default_value
         if key in value_dict:
@@ -274,7 +274,7 @@ def get_value(value_dict, key, default_value, exception=False, vtype=None):
     # check type
     if vtype is not None:
         if not isinstance(value, vtype):
-            raise AttribException('Attribute type is wrong')
+            raise AttribException("Attribute type is wrong")
 
     return value
 
@@ -458,9 +458,9 @@ def get_remote_ip(request):
     try:
         try:
             # get remote ip when use nginx as balancer
-            ipaddr = request.environ['HTTP_X_REAL_IP']
+            ipaddr = request.environ["HTTP_X_REAL_IP"]
         except:
-            ipaddr = request.environ['REMOTE_ADDR']
+            ipaddr = request.environ["REMOTE_ADDR"]
 
         return ipaddr
     except RuntimeError:
@@ -750,7 +750,7 @@ def prefixlength_to_netmask(prefixlength):
     :return:
     """
     host_bits = 32 - int(prefixlength)
-    netmask = inet_ntoa(pack('!I', (1 << 32) - (1 << host_bits)))
+    netmask = inet_ntoa(pack("!I", (1 << 32) - (1 << host_bits)))
     return netmask
 
 
@@ -769,7 +769,7 @@ def set_request_params(kwargs, supported):
     return data
 
 
-def get_line(size, char='-'):
+def get_line(size, char="-"):
     """Create a string of size char
 
     :param size: line lenght
@@ -782,13 +782,13 @@ def get_line(size, char='-'):
 def get_pretty_size(data):
     """Convert size in pritty string"""
     if 1024 < data <= 1048576:
-        data = '%sKB' % round(data / 1024, 2)
+        data = "%sKB" % round(data / 1024, 2)
     elif 1048576 < data <= 1073741824:
-        data = '%sMB' % round(data / 1048576, 2)
+        data = "%sMB" % round(data / 1048576, 2)
     elif data > 1073741824:
-        data = '%sGB' % round(data / 1073741824, 2)
+        data = "%sGB" % round(data / 1073741824, 2)
     elif data > 1073741824:
-        data = '%sTB' % round(data / 1073741824, 2)
+        data = "%sTB" % round(data / 1073741824, 2)
     return data
 
 
@@ -802,14 +802,15 @@ def jsonDumps(data, ensure_ascii=False):
     :return: a json
     """
     import ujson as json
+
     params = {}
     if ensure_ascii:
-        params['ensure_ascii'] = ensure_ascii
+        params["ensure_ascii"] = ensure_ascii
 
     vers_json = json.__version__
     major = vers_json.split(".")[0]
     if int(major) >= 3:
-        params['reject_bytes'] = False
+        params["reject_bytes"] = False
 
     resp = json.dumps(data, **params)
     return resp

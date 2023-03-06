@@ -37,6 +37,7 @@ def login_required(func):
     :param func: The view function to decorate.
     :type func: function
     """
+
     @wraps(func)
     def decorated_view(*args, **kwargs):
         if current_app.login_manager._login_disabled:
@@ -44,6 +45,7 @@ def login_required(func):
         elif current_user is None or not current_user.is_authenticated:
             return current_app.login_manager.unauthorized()
         return func(*args, **kwargs)
+
     return decorated_view
 
 
@@ -61,6 +63,7 @@ def perms_required(perm):
 
     :param perm: The required permission. A tupla like (action, object_type)
     """
+
     def wrapper(fn):
         @wraps(fn)
         def decorated_view(*args, **kwargs):
@@ -75,19 +78,24 @@ def perms_required(perm):
             logger.debug("User object permissions for current operation: %s" % can)
             if len(can) > 0:
                 return fn(objs=can, *args, **kwargs)
-            
+
             # user doesn't have roles required
-            msg = "User %s doesn't have the permissions to access this page." % current_user.email
-            logger.error(request.headers['Referer'])
-            return render_template('error.html', msg=msg)
+            msg = (
+                "User %s doesn't have the permissions to access this page."
+                % current_user.email
+            )
+            logger.error(request.headers["Referer"])
+            return render_template("error.html", msg=msg)
+
         return decorated_view
+
     return wrapper
 
 
 def can(perm):
     """Decorator used to verify if user can execute an action over a defined
     resource type.
-    
+
     Example::
 
         @app.route('/dashboard')
@@ -97,6 +105,7 @@ def can(perm):
 
     :param perm: The required permission. A tupla like (action, resource_type)
     """
+
     def wrapper(fn):
         @wraps(fn)
         def decorated_view(*args, **kwargs):
@@ -104,15 +113,20 @@ def can(perm):
                 return fn(*args, **kwargs)
             elif not current_user.is_authenticated():
                 abort(401)
-            
+
             # check if user has the required permission
             can = current_user.can(perm[0], perm[1], perm[2])
             if can:
                 return fn(*args, **kwargs)
-            
+
             # user doesn't have roles required
-            msg = "User %s doesn't have sufficient permissions to access this view." % current_user.email
+            msg = (
+                "User %s doesn't have sufficient permissions to access this view."
+                % current_user.email
+            )
             logger.error(msg)
-            return render_template('error.html', title="Authorization error", msg=msg)
+            return render_template("error.html", title="Authorization error", msg=msg)
+
         return decorated_view
+
     return wrapper

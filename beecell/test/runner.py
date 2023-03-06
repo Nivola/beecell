@@ -16,8 +16,9 @@ class TestResult(DefaultTestResult):
 
     Used by TextTestRunner.
     """
-    separator1 = '=' * 70
-    separator2 = '-' * 70
+
+    separator1 = "=" * 70
+    separator2 = "-" * 70
 
     def __init__(self, stream, descriptions, verbosity, index=0):
         super(TestResult, self).__init__(stream, descriptions, verbosity)
@@ -82,14 +83,14 @@ class TestResult(DefaultTestResult):
     def printErrors(self):
         # if self.dots or self.showAll:
         #     self.stream.writeln()
-        self.printErrorList('ERROR', self.errors)
-        self.printErrorList('FAIL', self.failures)
+        self.printErrorList("ERROR", self.errors)
+        self.printErrorList("FAIL", self.failures)
 
     def printErrorList(self, flavour, errors):
         for test, err in errors:
-            self.stream.write("\n"+self.separator1)
+            self.stream.write("\n" + self.separator1)
             self.stream.write("\n%s: %s" % (flavour, self.getDescription(test)))
-            self.stream.write("\n"+self.separator2)
+            self.stream.write("\n" + self.separator2)
             self.stream.write("\n%s" % err)
 
 
@@ -99,12 +100,21 @@ class TestRunner(object):
     It prints out the names of tests as they are run, errors as they
     occur, and a summary of the results at the end of the test run.
     """
-    resultclass = TestResult
-    separator1 = '=' * 70
-    separator2 = '-' * 70
 
-    def __init__(self, stream=sys.stderr, descriptions=True, verbosity=1,
-                 failfast=False, buffer=False, resultclass=None, index=0):
+    resultclass = TestResult
+    separator1 = "=" * 70
+    separator2 = "-" * 70
+
+    def __init__(
+        self,
+        stream=sys.stderr,
+        descriptions=True,
+        verbosity=1,
+        failfast=False,
+        buffer=False,
+        resultclass=None,
+        index=0,
+    ):
         # self.stream = _WritelnDecorator(stream)
         self.stream = stream
         self.descriptions = descriptions
@@ -119,7 +129,9 @@ class TestRunner(object):
         self.stream.write("[runner-%s] " % self.index)
 
     def _makeResult(self):
-        return self.resultclass(self.stream, self.descriptions, self.verbosity, index=self.index)
+        return self.resultclass(
+            self.stream, self.descriptions, self.verbosity, index=self.index
+        )
 
     def run(self, test):
         "Run the given test case or test suite."
@@ -128,13 +140,13 @@ class TestRunner(object):
         result.failfast = self.failfast
         result.buffer = self.buffer
         startTime = time.time()
-        startTestRun = getattr(result, 'startTestRun', None)
+        startTestRun = getattr(result, "startTestRun", None)
         if startTestRun is not None:
             startTestRun()
         try:
             test(result)
         finally:
-            stopTestRun = getattr(result, 'stopTestRun', None)
+            stopTestRun = getattr(result, "stopTestRun", None)
             if stopTestRun is not None:
                 stopTestRun()
         stopTime = time.time()
@@ -153,7 +165,10 @@ class TestRunner(object):
 
         expectedFails = unexpectedSuccesses = skipped = 0
         try:
-            results = map(len, (result.expectedFailures, result.unexpectedSuccesses, result.skipped))
+            results = map(
+                len,
+                (result.expectedFailures, result.unexpectedSuccesses, result.skipped),
+            )
         except AttributeError:
             pass
         else:
@@ -180,5 +195,5 @@ class TestRunner(object):
         else:
             self.stream.write("\n")
 
-        self.print_error_list('ERROR', result.errors)
-        self.print_error_list('FAIL', result.failures)
+        self.print_error_list("ERROR", result.errors)
+        self.print_error_list("FAIL", result.failures)

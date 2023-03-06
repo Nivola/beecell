@@ -14,7 +14,7 @@ def parse_date(data_str, format=None):
     :return: date
     """
     if format is None:
-        time_format = '%Y-%m-%dT%H:%M:%SZ'
+        time_format = "%Y-%m-%dT%H:%M:%SZ"
     else:
         time_format = format
 
@@ -35,9 +35,9 @@ def format_date(date, format=None, microsec=False):
     """
 
     if format is None:
-        time_format = '%Y-%m-%dT%H:%M:%SZ'
+        time_format = "%Y-%m-%dT%H:%M:%SZ"
         if microsec is True:
-            time_format += '.%f'
+            time_format += ".%f"
     else:
         time_format = format
     res = None

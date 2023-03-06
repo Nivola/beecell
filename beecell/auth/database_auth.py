@@ -17,13 +17,16 @@ class DatabaseAuth(AbstractAuth):
         :param user_class: flask_login user class
         """
         super(DatabaseAuth, self).__init__(user_class)
-        
+
         self.auth_manager_class = auth_manager
         self.conn_manager = conn_manager
-        
+
     def __str__(self):
         return "<DatabaseAuth provider:'%s', manager:'%s', user_class='%s'>" % (
-            self.auth_manager_class, self.conn_manager.engine, self.user_class)
+            self.auth_manager_class,
+            self.conn_manager.engine,
+            self.user_class,
+        )
 
     def login(self, username, password, *args, **kvargs):
         """Login a user
@@ -32,13 +35,13 @@ class DatabaseAuth(AbstractAuth):
         :param password: user password
         :return: instance of user_class
         """
-        self.logger.debug('Login user: %s' % username)
-        
+        self.logger.debug("Login user: %s" % username)
+
         # open database session
         session = self.conn_manager.get_session()
         auth_manager = self.auth_manager_class(session=session)
-        self.logger.debug('Authentication manager: %s' % auth_manager.__module__)
-        
+        self.logger.debug("Authentication manager: %s" % auth_manager.__module__)
+
         # verify that user exists in the db
         try:
             db_user = auth_manager.get_user(username)
@@ -46,41 +49,41 @@ class DatabaseAuth(AbstractAuth):
             self.logger.error(ex)
             # release database session
             self.conn_manager.release_session(session)
-            raise AuthError("", "User %s was not found" % username, code=5) 
-            
+            raise AuthError("", "User %s was not found" % username, code=5)
+
         if db_user == None:
             self.logger.error("Invalid credentials")
             # release database session
             self.conn_manager.release_session(session)
             raise AuthError("", "Invalid credentials", code=1)
-        
+
         if db_user.active is not True:
             self.logger.error("User is disabled")
             # release database session
             self.conn_manager.release_session(session)
-            raise AuthError("", "User is disabled", code=2)            
+            raise AuthError("", "User is disabled", code=2)
 
         # authenticate user
-        try:     
+        try:
             res = auth_manager.verify_user_password(db_user, password)
         except Exception as ex:
             self.logger.error(ex)
             # release database session
             self.conn_manager.release_session(session)
-            raise AuthError("", "Invalid credentials", code=1)    
-            
+            raise AuthError("", "Invalid credentials", code=1)
+
         if not res:
             self.logger.error("Wrong password")
             # release database session
             self.conn_manager.release_session(session)
             raise AuthError("", "Wrong password", code=4)
-            
+
         # create final user object
         user = self.user_class(db_user.uuid, username, password, True)
 
         # release database session
         self.conn_manager.release_session(session)
-        
-        self.logger.debug('Login succesfully: %s' % user)        
+
+        self.logger.debug("Login succesfully: %s" % user)
 
         return user

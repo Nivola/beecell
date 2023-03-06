@@ -8,11 +8,7 @@ from beecell.tests.test_util import runtest
 from beecell.tests.test_util import BeecellTestCase
 
 
-tests = [
-    'test_get_name_from_number',
-    'test_get_number_from_name',
-    'test_get_names'
-]
+tests = ["test_get_name_from_number", "test_get_number_from_name", "test_get_names"]
 
 
 class NetworkTestCase(BeecellTestCase):
@@ -26,15 +22,15 @@ class NetworkTestCase(BeecellTestCase):
 
     def test_get_name_from_number(self):
         res = self.client.get_name_from_number(6)
-        self.assertEqual(res, 'tcp')
+        self.assertEqual(res, "tcp")
 
     def test_get_number_from_name(self):
-        res = self.client.get_number_from_name('tcp')
+        res = self.client.get_number_from_name("tcp")
         self.assertEqual(res, 6)
 
     def test_get_names(self):
         res = self.client.get_names()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runtest(NetworkTestCase, tests)
