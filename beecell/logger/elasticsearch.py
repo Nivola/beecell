@@ -78,7 +78,8 @@ class ElasticsearchHandler(Handler):
                 "elasticsearch.Elasticsearch class instance must be specified"
             )
 
-        self.client = client
+        from elasticsearch import Elasticsearch
+        self.client: Elasticsearch = client
         self.index = index
         self.tags = tags
         self.custom_fields = custom_fields
@@ -103,7 +104,8 @@ class ElasticsearchHandler(Handler):
         msg.update(self.custom_fields)
         # ex. logstash-2024.03.23
         index = "%s-%s" % (self.index, date.strftime("%Y.%m.%d"))
-        self.client.index(index=index, body=msg, request_timeout=5, doc_type="doc")
+        # self.client.index(index=index, body=msg, request_timeout=5, doc_type="doc")
+        self.client.index(index=index, body=msg, timeout=5)
 
     def emit(self, record):
         """
