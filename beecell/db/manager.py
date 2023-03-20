@@ -1456,11 +1456,7 @@ class MysqlManager(SqlManager):
             cols = {}
             i = 0
             for col in row:
-                if type(col) is datetime:
-                    # col = str(col)
-                    col = col
                 if type(col) is str and col.find('{"') > -1:
-                    # col = str(json.loads(col))
                     col = json.loads(col)
                 cols[col_names[i]] = col
                 i += 1
@@ -1602,7 +1598,7 @@ class MysqlManager(SqlManager):
     @manage_connection
     def get_replica_master_status(self):
         """Get replica master status"""
-        connection = None
+        # connection = None
         res = {}
         result = self.active_connection.execute("SHOW MASTER STATUS;")
         for row in result:

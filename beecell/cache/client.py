@@ -49,13 +49,6 @@ class CacheClient(object):
         )
         return True
 
-        ##unpickled = pickle.loads(codecs.decode(pickled.encode(), "base64"))
-        self.redis.setex(self.prefix + key, ttl, cachevalue)
-        self.logger.debug(
-            "Set cache item %s:%s [%ss]" % (key, truncate(cachevalue), ttl)
-        )
-        return True
-
     def get(self, key: str) -> Any:
         """Get a cache item
 
@@ -75,14 +68,14 @@ class CacheClient(object):
         self.logger.debug("Get cache item %s:%s" % (key, truncate(value)))
         return value
 
-    def expire(self, key, ttl=600):
+    def expire(self, key, ttl=600) -> bool:
         """Set key expire time
 
         :param key: cache item key
         :param ttl: item time to live [default=600s]
         :return: True
         """
-        value = self.redis.expire(self.prefix + key, ttl)
+        self.redis.expire(self.prefix + key, ttl)
         self.logger.debug("Set cache item %s expire to %s" % (key, ttl))
         return True
 
@@ -92,7 +85,7 @@ class CacheClient(object):
         :param key: cache item key
         :return: True
         """
-        value = self.redis.delete(self.prefix + key)
+        self.redis.delete(self.prefix + key)
         self.logger.debug("Delete cache item %s" % key)
         return True
 
@@ -120,12 +113,12 @@ class CacheClient(object):
             return res
         return True
 
-    def extend_ttl(self, key, ttl=600):
+    def extend_ttl(self, key, ttl=600) -> bool:
         """Extend a cache item ttl
 
         :param key: cache item key
         :return: True
         """
-        value = self.redis.expire(self.prefix + key, ttl)
+        self.redis.expire(self.prefix + key, ttl)
         self.logger.debug("Extend cache item %s ttl to %s" % (key, ttl))
         return True

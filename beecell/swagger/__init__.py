@@ -58,8 +58,6 @@ class SwaggerHelper(object):
                     }
 
                     field_type = value.__class__.__name__.lower()
-                    # logger.warning(value)
-                    # logger.warning(field_type)
                     if field_type == "date":
                         kvargs["type"] = "string"
                         kvargs["format"] = "date"
@@ -72,10 +70,8 @@ class SwaggerHelper(object):
                             kvargs["collectionFormat"] = value.metadata.get(
                                 "collection_format", ""
                             )
-                            # subfield_type = value.container.__class__.__name__.lower()
                             subfield_type = value.inner.__class__.__name__.lower()
                             kvargs["items"] = {"type": subfield_type}
-                            # kvargs['name'] = kvargs['name'].replace('_N', '.N')
                         except:
                             logger.warning("", exc_info=True)
                     else:
@@ -115,7 +111,7 @@ class ApiValidator(object):
                     if parent is not None:
                         key = "%s.%s" % (parent, key)
                     else:
-                        key = key
+                        key = str(key)
 
                     self.keys.append(key)
                     if isinstance(value, dict):
@@ -137,7 +133,9 @@ class ApiValidator(object):
             return self.keys
         return []
 
-    def get_schema_keys(self, data, parent=None, required=[]):
+    def get_schema_keys(self, data, parent=None, required=None):
+        if required in None:
+            required = []
         if "$ref" in data:
             # #/responses/NotFound
             data = data["$ref"]
