@@ -105,7 +105,8 @@ class ElasticsearchHandler(Handler):
         # ex. logstash-2024.03.23
         index = "%s-%s" % (self.index, date.strftime("%Y.%m.%d"))
         # self.client.index(index=index, body=msg, request_timeout=5, doc_type="doc")
-        self.client.index(index=index, body=msg, timeout=5)
+        self.client._request_timeout = 5
+        self.client.index(index=index, body=msg)
 
     def emit(self, record):
         """
