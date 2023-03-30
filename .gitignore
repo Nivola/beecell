@@ -4,6 +4,7 @@ _build/
 .vscode
 .project
 .pydevproject
+.scannerwork
 .idea/
 .manage.*
 beecell.egg-info
