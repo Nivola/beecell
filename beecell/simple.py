@@ -66,7 +66,7 @@ def get_attrib(value_dict, key, default_value, exception=False):
     return value
 
 
-def get_value(value_dict, key, default_value, exception=False, vtype=None):
+def get_value(value_dict: dict, key: str, default_value , exception:bool=False, vtype=None):
     """Get a value of dictionary given a key if it exist, otherwise it throw an exception or give a default value.
         Moreover it perform a type checking of returned value.
 
@@ -81,12 +81,10 @@ def get_value(value_dict, key, default_value, exception=False, vtype=None):
     if exception is True:
         try:
             value = value_dict[key]
-        except:
+        except KeyError as ex:
             raise AttribException("Attribute %s is missing" % key)
     else:
-        value = default_value
-        if key in value_dict:
-            value = value_dict[key]
+        value = value_dict.get(key, default_value)
 
     # check type
     if vtype is not None:
