@@ -79,6 +79,7 @@ class ElasticsearchHandler(Handler):
             )
 
         from elasticsearch import Elasticsearch
+
         self.client: Elasticsearch = client
         self.index = index
         self.tags = tags

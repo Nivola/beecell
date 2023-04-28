@@ -3,6 +3,8 @@
 # (C) Copyright 2018-2022 CSI-Piemonte
 
 from typing import List, Union, Any
+
+
 def merge_dicts(*dict_args):
     """Given any number of dicts, shallow copy and merge into a new dict, precedence goes to key value pairs in latter
     dicts.
@@ -16,7 +18,7 @@ def merge_dicts(*dict_args):
     return result
 
 
-def dict_get(data:Union[list, dict], key:str, separator:str=".", default=None):
+def dict_get(data: Union[list, dict], key: str, separator: str = ".", default=None):
     """Get a value from a dict. Key can be composed to get a field in a complex dict that contains other dict, list and
     string.
 
