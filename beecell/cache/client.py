@@ -29,6 +29,9 @@ class CacheClient(object):
         self.redis = redis
         self.prefix = prefix
 
+    def ping(self):
+        self.redis.ping()
+
     def set(self, key: str, value, ttl=600, pickling=False):
         """Set a cache item
 
