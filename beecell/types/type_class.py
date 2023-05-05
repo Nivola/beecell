@@ -53,9 +53,7 @@ def import_func(name):
     :return:
     """
     components = name.split(".")
-    mod = __import__(
-        ".".join(components[:-1]), globals(), locals(), [components[-1]], -1
-    )
+    mod = __import__(".".join(components[:-1]), globals(), locals(), [components[-1]], -1)
     func = getattr(mod, components[-1], None)
     return func
 

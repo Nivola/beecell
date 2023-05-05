@@ -36,9 +36,7 @@ class AsyncConsumer(object):
             example.stop()
     """
 
-    def __init__(
-        self, name, amqp_params, callback=None, auto_reconnect=False, reconnect_after=60
-    ):
+    def __init__(self, name, amqp_params, callback=None, auto_reconnect=False, reconnect_after=60):
         """Create a new instance of the consumer class, passing in the AMQP
         URL used to connect to RabbitMQ.
 
@@ -53,9 +51,7 @@ class AsyncConsumer(object):
         :param reconnect_after: when connection goes down it tries to reconnect
                                 after this time indefinitely [default = 60s]
         """
-        self.logger = logging.getLogger(
-            self.__class__.__module__ + "." + self.__class__.__name__
-        )
+        self.logger = logging.getLogger(self.__class__.__module__ + "." + self.__class__.__name__)
 
         self._name = name
         self._connection = None
@@ -88,9 +84,7 @@ class AsyncConsumer(object):
             self._amqp_params["host"],
             self._amqp_params["port"],
         )
-        credentials = pika.PlainCredentials(
-            self._amqp_params["user"], self._amqp_params["pwd"]
-        )
+        credentials = pika.PlainCredentials(self._amqp_params["user"], self._amqp_params["pwd"])
         parameters = pika.ConnectionParameters(
             self._amqp_params["host"],
             self._amqp_params["port"],
@@ -234,9 +228,7 @@ class AsyncConsumer(object):
         self.logger.info("%s - Adding consumer cancellation callback", self._name)
         self._channel.add_on_cancel_callback(self.on_consumer_cancelled)
         self.logger.info('%s - Bind queue "%s" to channel', self._name, self.queue_name)
-        self._consumer_tag = self._channel.basic_consume(
-            self.on_message, self.queue_name
-        )
+        self._consumer_tag = self._channel.basic_consume(self.on_message, self.queue_name)
 
     def on_consumer_cancelled(self, method_frame):
         """Invoked by pika when RabbitMQ sends a Basic.Cancel for a consumer
@@ -244,9 +236,7 @@ class AsyncConsumer(object):
 
         :param pika.frame.Method method_frame: The Basic.Cancel frame
         """
-        self.logger.info(
-            "%s - Consumer was cancelled remotely, shutting down: %r", method_frame
-        )
+        self.logger.info("%s - Consumer was cancelled remotely, shutting down: %r", method_frame)
         if self._channel:
             self._channel.close()
 
@@ -275,9 +265,7 @@ class AsyncConsumer(object):
         if self.callback:
             self.callback(unused_channel, basic_deliver, properties, body)
 
-        self.logger.debug(
-            "%s - Acknowledging message %s", self._name, basic_deliver.delivery_tag
-        )
+        self.logger.debug("%s - Acknowledging message %s", self._name, basic_deliver.delivery_tag)
         self._channel.basic_ack(basic_deliver.delivery_tag)
 
     def on_cancelok(self, unused_frame):
@@ -288,9 +276,7 @@ class AsyncConsumer(object):
 
         :param pika.frame.Method unused_frame: The Basic.CancelOk frame
         """
-        self.logger.info(
-            "%s - RabbitMQ acknowledged the cancellation of the consumer", self._name
-        )
+        self.logger.info("%s - RabbitMQ acknowledged the cancellation of the consumer", self._name)
         self.logger.info("%s - Closing the channel", self._name)
         self._channel.close()
 
@@ -337,9 +323,7 @@ class AsyncConsumer(object):
             self._closing = True
 
             if self._channel:
-                self.logger.info(
-                    "%s - Sending a Basic.Cancel command to RabbitMQ", self._name
-                )
+                self.logger.info("%s - Sending a Basic.Cancel command to RabbitMQ", self._name)
                 self._channel.basic_cancel(self.on_cancelok, self._consumer_tag)
         except (AMQPError, Exception) as ex:
             self.logger.error(ex)
@@ -368,9 +352,7 @@ class AsyncSubscriber(object):
             example.stop()
     """
 
-    def __init__(
-        self, name, amqp_params, callback=None, auto_reconnect=False, reconnect_after=60
-    ):
+    def __init__(self, name, amqp_params, callback=None, auto_reconnect=False, reconnect_after=60):
         """Create a new instance of the consumer class, passing in the AMQP
         URL used to connect to RabbitMQ.
 
@@ -386,9 +368,7 @@ class AsyncSubscriber(object):
         :param reconnect_after: when connection goes down it tries to reconnect
                                 after this time indefinitely [default = 60s]
         """
-        self.logger = logging.getLogger(
-            self.__class__.__module__ + "." + self.__class__.__name__
-        )
+        self.logger = logging.getLogger(self.__class__.__module__ + "." + self.__class__.__name__)
 
         self._name = name
         self._connection = None
@@ -424,9 +404,7 @@ class AsyncSubscriber(object):
             self._amqp_params["host"],
             self._amqp_params["port"],
         )
-        credentials = pika.PlainCredentials(
-            self._amqp_params["user"], self._amqp_params["pwd"]
-        )
+        credentials = pika.PlainCredentials(self._amqp_params["user"], self._amqp_params["pwd"])
         parameters = pika.ConnectionParameters(
             self._amqp_params["host"],
             self._amqp_params["port"],
@@ -552,9 +530,7 @@ class AsyncSubscriber(object):
         self.logger.info("%s - Adding channel close callback", self._name)
         self._channel.add_on_close_callback(self.on_channel_closed)
         self.logger.info("%s - Declaring exchange %s", self._name, self.exchange_name)
-        self._channel.exchange_declare(
-            self.on_exchange_declareok, self.exchange_name, self.exchange_type
-        )
+        self._channel.exchange_declare(self.on_exchange_declareok, self.exchange_name, self.exchange_type)
 
     def on_exchange_declareok(self, unused_frame):
         """Invoked by pika when RabbitMQ has finished the Exchange.Declare command.
@@ -659,9 +635,7 @@ class AsyncSubscriber(object):
         self.logger.info("%s - Adding consumer cancellation callback", self._name)
         self._channel.add_on_cancel_callback(self.on_consumer_cancelled)
         self.logger.info("%s - Issuing consumer related commands", self._name)
-        self._consumer_tag = self._channel.basic_consume(
-            self.on_message, self._queue_name
-        )
+        self._consumer_tag = self._channel.basic_consume(self.on_message, self._queue_name)
 
     def run(self):
         """Run the example consumer by connecting to RabbitMQ and then
@@ -707,9 +681,7 @@ class AsyncSubscriber(object):
             self.logger.info("%s - Stopping", self._name)
             self._closing = True
             if self._channel:
-                self.logger.info(
-                    "%s - Sending a Basic.Cancel command to RabbitMQ", self._name
-                )
+                self.logger.info("%s - Sending a Basic.Cancel command to RabbitMQ", self._name)
                 self._channel.basic_cancel(self.on_cancelok, self._consumer_tag)
         except (AMQPError, Exception) as ex:
             self.logger.error(ex)

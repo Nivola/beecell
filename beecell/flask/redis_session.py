@@ -28,9 +28,7 @@ class RedisSessionInterface(SessionInterface):
     session_duration = 1800
 
     def __init__(self, redis=None, prefix="session:"):
-        self.logger = logging.getLogger(
-            self.__class__.__module__ + "." + self.__class__.__name__
-        )
+        self.logger = logging.getLogger(self.__class__.__module__ + "." + self.__class__.__name__)
 
         if redis is None:
             redis = Redis()
@@ -82,9 +80,7 @@ class RedisSessionInterface(SessionInterface):
         path = self.get_cookie_path(app)
         if not session:
             if session.modified:
-                response.delete_cookie(
-                    app.session_cookie_name, domain=domain, path=path
-                )
+                response.delete_cookie(app.session_cookie_name, domain=domain, path=path)
             return
         httponly = self.get_cookie_httponly(app)
         secure = self.get_cookie_secure(app)

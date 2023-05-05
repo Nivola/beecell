@@ -44,9 +44,7 @@ class RasCrypto(object):
         :param key_size:
         :return: private_key object
         """
-        private_key = rsa.generate_private_key(
-            public_exponent=public_exponent, key_size=key_size
-        )
+        private_key = rsa.generate_private_key(public_exponent=public_exponent, key_size=key_size)
         return private_key
 
     def import_private_key(self, private_key_base64, password=None):
@@ -58,9 +56,7 @@ class RasCrypto(object):
         """
         private_key_base64 = ensure_binary(private_key_base64)
         private_key_string = b64decode(private_key_base64)
-        private_key = serialization.load_pem_private_key(
-            private_key_string, password=password
-        )
+        private_key = serialization.load_pem_private_key(private_key_string, password=password)
         return private_key
 
     def import_public_key(self, public_key_base64):
@@ -92,9 +88,7 @@ class RasCrypto(object):
             pem = private_key.private_bytes(
                 encoding=serialization.Encoding.PEM,
                 format=serialization.PrivateFormat.PKCS8,
-                encryption_algorithm=serialization.BestAvailableEncryption(
-                    ensure_binary(password)
-                ),
+                encryption_algorithm=serialization.BestAvailableEncryption(ensure_binary(password)),
             )
 
         if base64_encode is True:

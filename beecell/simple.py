@@ -66,9 +66,7 @@ def get_attrib(value_dict, key, default_value, exception=False):
     return value
 
 
-def get_value(
-    value_dict: dict, key: str, default_value, exception: bool = False, vtype=None
-):
+def get_value(value_dict: dict, key: str, default_value, exception: bool = False, vtype=None):
     """Get a value of dictionary given a key if it exist, otherwise it throw an exception or give a default value.
         Moreover it perform a type checking of returned value.
 

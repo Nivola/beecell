@@ -13,9 +13,7 @@ logger = logging.getLogger(__name__)
 def open_amqp_channel(queue_conn, queue):
     """ """
     credentials = pika.PlainCredentials(queue_conn["user"], queue_conn["pwd"])
-    parameters = pika.ConnectionParameters(
-        queue_conn["host"], queue_conn["port"], queue_conn["vhost"], credentials
-    )
+    parameters = pika.ConnectionParameters(queue_conn["host"], queue_conn["port"], queue_conn["vhost"], credentials)
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
     channel.queue_declare(queue=queue)
@@ -26,9 +24,7 @@ def open_amqp_channel(queue_conn, queue):
 def open_amqp_exchange(queue_conn, exchange):
     """ """
     credentials = pika.PlainCredentials(queue_conn["user"], queue_conn["pwd"])
-    parameters = pika.ConnectionParameters(
-        queue_conn["host"], queue_conn["port"], queue_conn["vhost"], credentials
-    )
+    parameters = pika.ConnectionParameters(queue_conn["host"], queue_conn["port"], queue_conn["vhost"], credentials)
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
     channel.exchange_declare(exchange=exchange, type="fanout")
@@ -42,9 +38,7 @@ def open_amqp_exchange(queue_conn, exchange):
 def subscriber(queue_conn, exchange, callback):
     """Base amqp sumbscriber."""
     credentials = pika.PlainCredentials(queue_conn["user"], queue_conn["pwd"])
-    parameters = pika.ConnectionParameters(
-        queue_conn["host"], queue_conn["port"], queue_conn["vhost"], credentials
-    )
+    parameters = pika.ConnectionParameters(queue_conn["host"], queue_conn["port"], queue_conn["vhost"], credentials)
     connection = pika.BlockingConnection(parameters)
     logger.debug(
         "Open amqp connection - host: %s, port: %s, vhost: %s, user: %s"
@@ -68,9 +62,7 @@ def subscriber(queue_conn, exchange, callback):
 def consumer(queue_conn, queue, callback):
     """Base amqp consumer."""
     credentials = pika.PlainCredentials(queue_conn["user"], queue_conn["pwd"])
-    parameters = pika.ConnectionParameters(
-        queue_conn["host"], queue_conn["port"], queue_conn["vhost"], credentials
-    )
+    parameters = pika.ConnectionParameters(queue_conn["host"], queue_conn["port"], queue_conn["vhost"], credentials)
     connection = pika.BlockingConnection(parameters)
     logger.debug(
         "Open amqp connection - host: %s, port: %s, vhost: %s, user: %s"

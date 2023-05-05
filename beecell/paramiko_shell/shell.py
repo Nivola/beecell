@@ -114,9 +114,7 @@ class ParamikoShell(object):
             raise
 
     def terminal_size(self):
-        th, tw, hp, wp = struct.unpack(
-            "HHHH", fcntl.ioctl(0, termios.TIOCGWINSZ, struct.pack("HHHH", 0, 0, 0, 0))
-        )
+        th, tw, hp, wp = struct.unpack("HHHH", fcntl.ioctl(0, termios.TIOCGWINSZ, struct.pack("HHHH", 0, 0, 0, 0)))
         return tw, th
 
     def __run(self):
@@ -124,21 +122,13 @@ class ParamikoShell(object):
         tw, th = self.terminal_size()
         self.client.get_transport().set_keepalive(self.keepalive)
         channel = self.client.get_transport().open_session()
-        channel.get_pty(
-            term="xterm", width=tw, height=th, width_pixels=0, height_pixels=0
-        )
+        channel.get_pty(term="xterm", width=tw, height=th, width_pixels=0, height_pixels=0)
         # channel.get_pty(term='xterm')
         channel.invoke_shell()
-        interactive.interactive_shell(
-            channel, log=False, trace=True, trace_func=self.post_action
-        )
+        interactive.interactive_shell(channel, log=False, trace=True, trace_func=self.post_action)
         channel.close()
         self.client.close()
-        logger.info(
-            "Local user {}: closed connection with server={}".format(
-                self.loc_user, self.host
-            )
-        )
+        logger.info("Local user {}: closed connection with server={}".format(self.loc_user, self.host))
         if self.post_logout is not None:
             self.post_logout()
 
@@ -259,9 +249,7 @@ class ParamikoShell(object):
         :param group: directory group owner
         :return: True if all is ok
         """
-        res = self.cmd(
-            "chown -R $(id -u %s):%s %s" % (user, group, dirname), timeout=5.0
-        )
+        res = self.cmd("chown -R $(id -u %s):%s %s" % (user, group, dirname), timeout=5.0)
         # res = self.cmd('chown -R $(id -u %s) %s' % (user, dirname), timeout=5.0)
         if res.get("stderr") != "":
             return False
@@ -350,9 +338,7 @@ class ParamikoShell(object):
         newline = "\n"
         if status < 1:
             newline = "\r"
-        sys.stdout.write(
-            "%s progress: %.2f%% %s" % (ensure_text(filename), status * 100, newline)
-        )
+        sys.stdout.write("%s progress: %.2f%% %s" % (ensure_text(filename), status * 100, newline))
 
     def scp(self, local_package_path, remote_package_path):
         ssh = self.client
@@ -420,9 +406,5 @@ class Rsync(object):
         stream = popen(cmd)
         output = stream.read()
         self.__close_temp_file()
-        logger.debug(
-            "run rsync from {fp} to {tp}: {out}".format(
-                fp=from_path, tp=to_path, out=output
-            )
-        )
+        logger.debug("run rsync from {fp} to {tp}: {out}".format(fp=from_path, tp=to_path, out=output))
         return output

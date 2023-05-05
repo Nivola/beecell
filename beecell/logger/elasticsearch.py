@@ -74,9 +74,7 @@ class ElasticsearchHandler(Handler):
         Handler.__init__(self)
 
         if client is None:
-            raise Exception(
-                "elasticsearch.Elasticsearch class instance must be specified"
-            )
+            raise Exception("elasticsearch.Elasticsearch class instance must be specified")
 
         from elasticsearch import Elasticsearch
 

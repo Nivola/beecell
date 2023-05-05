@@ -12,10 +12,7 @@ class InternetProtocol(object):
     p_icmp_echo = 0
 
     def get_name_from_number(self, number):
-        proto = {
-            str(getattr(self, x)): x
-            for x in filter(lambda x: x.find("p_") == 0, dir(InternetProtocol))
-        }
+        proto = {str(getattr(self, x)): x for x in filter(lambda x: x.find("p_") == 0, dir(InternetProtocol))}
         name = proto.get(str(number), None)
         if name is not None:
             name = name[2:]

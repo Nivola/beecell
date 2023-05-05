@@ -129,9 +129,7 @@ class TestRunner(object):
         self.stream.write("[runner-%s] " % self.index)
 
     def _makeResult(self):
-        return self.resultclass(
-            self.stream, self.descriptions, self.verbosity, index=self.index
-        )
+        return self.resultclass(self.stream, self.descriptions, self.verbosity, index=self.index)
 
     def run(self, test):
         "Run the given test case or test suite."

@@ -80,10 +80,7 @@ def perms_required(perm):
                 return fn(objs=can, *args, **kwargs)
 
             # user doesn't have roles required
-            msg = (
-                "User %s doesn't have the permissions to access this page."
-                % current_user.email
-            )
+            msg = "User %s doesn't have the permissions to access this page." % current_user.email
             logger.error(request.headers["Referer"])
             return render_template("error.html", msg=msg)
 
@@ -120,10 +117,7 @@ def can(perm):
                 return fn(*args, **kwargs)
 
             # user doesn't have roles required
-            msg = (
-                "User %s doesn't have sufficient permissions to access this view."
-                % current_user.email
-            )
+            msg = "User %s doesn't have sufficient permissions to access this view." % current_user.email
             logger.error(msg)
             return render_template("error.html", title="Authorization error", msg=msg)
 

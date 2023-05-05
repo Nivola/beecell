@@ -22,9 +22,7 @@ class CacheClient(object):
         :param redis: redis manager reference (redis.StrictRedis or StrictRedisCluster instance)
         :param prefix: chache key prefix
         """
-        self.logger = logging.getLogger(
-            self.__class__.__module__ + "." + self.__class__.__name__
-        )
+        self.logger = logging.getLogger(self.__class__.__module__ + "." + self.__class__.__name__)
 
         self.redis = redis
         self.prefix = prefix
@@ -47,9 +45,7 @@ class CacheClient(object):
         else:
             cachevalue = jsonDumps({"data": value})
         self.redis.setex(self.prefix + key, ttl, cachevalue)
-        self.logger.debug(
-            "Set cache item %s:%s [%ss]" % (key, truncate(cachevalue), ttl)
-        )
+        self.logger.debug("Set cache item %s:%s [%ss]" % (key, truncate(cachevalue), ttl))
         return True
 
     def get(self, key: str) -> Any:

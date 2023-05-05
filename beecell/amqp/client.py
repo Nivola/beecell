@@ -24,9 +24,7 @@ class AmqpClient(object):
     def sendMessage(self, message, tid):
         """"""
         connection = pika.BlockingConnection(
-            pika.ConnectionParameters(
-                host=self.connection_pars.host, port=self.connection_pars.port
-            )
+            pika.ConnectionParameters(host=self.connection_pars.host, port=self.connection_pars.port)
         )
         channel = connection.channel()
         channel.queue_declare(queue=self.queue, durable=True)

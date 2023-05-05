@@ -19,9 +19,7 @@ class UwsgiManager(object):
     """ """
 
     def __init__(self):
-        self.logger = getLogger(
-            self.__class__.__module__ + "." + self.__class__.__name__
-        )
+        self.logger = getLogger(self.__class__.__module__ + "." + self.__class__.__name__)
 
     def _get_proc_infos(self, p, extended=False):
         """Internal function to get process infos
@@ -43,9 +41,7 @@ class UwsgiManager(object):
                 "exe": p.exe(),
                 "cmdline": p.cmdline(),
                 "environ": p.environ(),
-                "create_time": datetime.fromtimestamp(p.create_time()).strftime(
-                    "%Y-%m-%d %H:%M:%S"
-                ),
+                "create_time": datetime.fromtimestamp(p.create_time()).strftime("%Y-%m-%d %H:%M:%S"),
                 "status": p.status(),
                 "state": p.is_running(),
                 "cwd": p.cwd(),

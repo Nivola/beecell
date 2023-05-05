@@ -5,14 +5,10 @@
 
 import pika
 
-connection = pika.BlockingConnection(
-    pika.ConnectionParameters(host="spedata6", port=5672)
-)
+connection = pika.BlockingConnection(pika.ConnectionParameters(host="spedata6", port=5672))
 channel = connection.channel()
 
-channel.exchange_declare(
-    exchange="dashboard.logs", type="topic", durable=True, auto_delete=False
-)
+channel.exchange_declare(exchange="dashboard.logs", type="topic", durable=True, auto_delete=False)
 
 result = channel.queue_declare(exclusive=True)
 queue_name = result.method.queue

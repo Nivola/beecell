@@ -139,12 +139,7 @@ def main(run_path, argv):
                 for c in p.children(recursive=True):
                     pc = psutil.Process(c.pid)
                     pcts = ",".join([str(td.id) for td in pc.threads()])
-                    print(
-                        t.blue(
-                            "    |- %-6s %-8s %-20s [%s]"
-                            % (c.pid, pc.name, pc.exe, pcts)
-                        )
-                    )
+                    print(t.blue("    |- %-6s %-8s %-20s [%s]" % (c.pid, pc.name, pc.exe, pcts)))
 
                 print(t.blue("\nProcess info:"))
                 print(t.blue(" path : %s" % p.cwd()))
@@ -181,9 +176,7 @@ def main(run_path, argv):
             from sh import tail
 
             # runs forever
-            for line in tail(
-                "-f", "%s/log/%s-uwsgi.log" % (run_path, service), _iter=True
-            ):
+            for line in tail("-f", "%s/log/%s-uwsgi.log" % (run_path, service), _iter=True):
                 sys.stdout.write(line)
         except:
             traceback.print_exc(file=sys.stdout)

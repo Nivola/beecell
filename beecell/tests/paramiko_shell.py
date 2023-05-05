@@ -30,17 +30,13 @@ class ShellTestCase(BeecellTestCase):
 
         # self.port = 22
         # self.user = 'root'
-        LoggerHelper.simple_handler(
-            [logger, logging.getLogger("paramiko")], logging.DEBUG
-        )
+        LoggerHelper.simple_handler([logger, logging.getLogger("paramiko")], logging.DEBUG)
 
     def tearDown(self):
         BeecellTestCase.tearDown(self)
 
     def test_run_tunnel_with_password(self):
-        self.client = ParamikoShell(
-            self.host, self.user, pwd=self.pwd, tunnel=self.tunnel
-        )
+        self.client = ParamikoShell(self.host, self.user, pwd=self.pwd, tunnel=self.tunnel)
         self.client.create_tunnel()
         res = self.client.cmd("ls", timeout=5.0)
         self.logger.info(res)

@@ -39,8 +39,7 @@ class BeecellTestCase(unittest.TestCase):
     def setUpClass(cls):
         logger.log(
             60,
-            "#################### Testplan %s - START ####################"
-            % cls.__name__,
+            "#################### Testplan %s - START ####################" % cls.__name__,
         )
         self = cls
 
@@ -63,8 +62,7 @@ class BeecellTestCase(unittest.TestCase):
     def tearDownClass(cls):
         logger.log(
             60,
-            "#################### Testplan %s - STOP ####################"
-            % cls.__name__,
+            "#################### Testplan %s - STOP ####################" % cls.__name__,
         )
 
     def setUp(self):
@@ -124,9 +122,7 @@ class BeecellTestCase(unittest.TestCase):
         self.logger.debug("Send http request to %s" % base_url)
         return response
 
-    def http_client2(
-        self, proto, host, path, method, data="", headers={}, port=80, timeout=30
-    ):
+    def http_client2(self, proto, host, path, method, data="", headers={}, port=80, timeout=30):
         """Http client.
 
         Usage:
@@ -144,9 +140,7 @@ class BeecellTestCase(unittest.TestCase):
             '@number': 12524, '@type': 'issue', '@action': 'show'}
         :param timeout: Request timeout. [default=30s]
         """
-        self.logger.debug(
-            "Send http %s request to %s://%s:%s%s" % (method, proto, host, port, path)
-        )
+        self.logger.debug("Send http %s request to %s://%s:%s%s" % (method, proto, host, port, path))
         if proto == "http":
             conn = http_client.HTTPConnection(host, port, timeout=timeout)
         else:

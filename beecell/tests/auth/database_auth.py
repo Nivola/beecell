@@ -35,9 +35,7 @@ class User(Base):
         if is_encrypted(self.password):
             res = decrypt_data(self.password) == password.encode("utf-8")
         else:
-            res = bcrypt.checkpw(
-                password.encode("utf-8"), self.password.encode("utf-8")
-            )
+            res = bcrypt.checkpw(password.encode("utf-8"), self.password.encode("utf-8"))
         return res
 
 
@@ -57,9 +55,7 @@ class DbAuthTestCase(BeecellTestCase):
     def setUp(self):
         BeecellTestCase.setUp(self)
 
-        self.manager = SqlManager(
-            1, self.conf("authdb.conn"), connect_timeout=self.conf("authdb.timeout")
-        )
+        self.manager = SqlManager(1, self.conf("authdb.conn"), connect_timeout=self.conf("authdb.timeout"))
         self.manager.create_simple_engine()
         self.auth_provider = DatabaseAuth(AuthDbManager, self.manager, SystemUser)
         self.user = self.conf("authdb.user")
