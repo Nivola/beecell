@@ -44,7 +44,9 @@ class RasCrypto(object):
         :param key_size:
         :return: private_key object
         """
-        private_key = rsa.generate_private_key(public_exponent=public_exponent, key_size=key_size)
+        private_key = rsa.generate_private_key(
+            public_exponent=public_exponent, key_size=key_size
+        )
         return private_key
 
     def import_private_key(self, private_key_base64, password=None):
@@ -56,7 +58,9 @@ class RasCrypto(object):
         """
         private_key_base64 = ensure_binary(private_key_base64)
         private_key_string = b64decode(private_key_base64)
-        private_key = serialization.load_pem_private_key(private_key_string, password=password)
+        private_key = serialization.load_pem_private_key(
+            private_key_string, password=password
+        )
         return private_key
 
     def import_public_key(self, public_key_base64):
@@ -82,13 +86,15 @@ class RasCrypto(object):
             pem = private_key.private_bytes(
                 encoding=serialization.Encoding.PEM,
                 format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.NoEncryption()
+                encryption_algorithm=serialization.NoEncryption(),
             )
         else:
             pem = private_key.private_bytes(
-               encoding=serialization.Encoding.PEM,
-               format=serialization.PrivateFormat.PKCS8,
-               encryption_algorithm=serialization.BestAvailableEncryption(ensure_binary(password))
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.PKCS8,
+                encryption_algorithm=serialization.BestAvailableEncryption(
+                    ensure_binary(password)
+                ),
             )
 
         if base64_encode is True:
@@ -105,7 +111,7 @@ class RasCrypto(object):
         public_key = private_key.public_key()
         pem = public_key.public_bytes(
             encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
         )
         if base64_encode is True:
             pem = b64encode(pem)
@@ -121,7 +127,11 @@ class RasCrypto(object):
         """
         ciphertext = public_key.encrypt(
             ensure_binary(message),
-            padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None)
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None,
+            ),
         )
         if base64_encode is True:
             ciphertext = b64encode(ciphertext)
@@ -139,7 +149,11 @@ class RasCrypto(object):
             ciphertext = b64decode(ciphertext)
         plaintext = private_key.decrypt(
             ciphertext,
-            padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None)
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None,
+            ),
         )
         plaintext = ensure_text(plaintext)
         return plaintext

@@ -7,9 +7,7 @@ from beecell.networkx.layout import GridLayout
 from beecell.tests.test_util import runtest
 from beecell.tests.test_util import BeecellTestCase
 
-tests = [
-    'test_grid_layout'
-]
+tests = ["test_grid_layout"]
 
 
 class LayoutTestCase(BeecellTestCase):
@@ -26,9 +24,9 @@ class LayoutTestCase(BeecellTestCase):
         layout.generate_grid(1000, 500, 160, 70)
         layout.place_nodes()
         res = layout.print_grid()
-        with open('graph.svg', 'w') as text_file:
+        with open("graph.svg", "w") as text_file:
             text_file.write(res)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runtest(LayoutTestCase, tests)

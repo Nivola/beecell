@@ -17,13 +17,13 @@ def check_vault(data, key):
     :return: decrypted key
     """
     data = ensure_binary(data)
-    if data.find(b('$BEEHIVE_VAULT;AES128 | ')) == 0:
+    if data.find(b("$BEEHIVE_VAULT;AES128 | ")) == 0:
         if key is None:
-            raise Exception('Fernet key must be provided')
+            raise Exception("Fernet key must be provided")
         cipher_suite = Fernet(ensure_binary(key))
-        data = data.replace(b('$BEEHIVE_VAULT;AES128 | '), b(''))
+        data = data.replace(b("$BEEHIVE_VAULT;AES128 | "), b(""))
         data = cipher_suite.decrypt(data)
-    data = data.decode('utf-8')
+    data = data.decode("utf-8")
     return data
 
 
@@ -33,7 +33,7 @@ def is_encrypted(data):
     :param data: data to verify. If encrypted token '$BEEHIVE_VAULT;AES128 | ' is in head of data
     :return: True if data is encrypted, False otherwise
     """
-    if data.find('$BEEHIVE_VAULT;AES128 | ') == 0:
+    if data.find("$BEEHIVE_VAULT;AES128 | ") == 0:
         return True
     return False
 
@@ -55,7 +55,7 @@ def encrypt_data(fernet_key, data):
     """
     cipher_suite = Fernet(ensure_binary(fernet_key))
     cipher_data = ensure_text(cipher_suite.encrypt(ensure_binary(data)))
-    return '$BEEHIVE_VAULT;AES128 | %s' % cipher_data
+    return "$BEEHIVE_VAULT;AES128 | %s" % cipher_data
 
 
 def decrypt_data(fernet_key, data):
@@ -66,8 +66,8 @@ def decrypt_data(fernet_key, data):
     :return: decrypted data
     """
     data = ensure_text(data)
-    if data.find('$BEEHIVE_VAULT;AES128 | ') == 0:
-        data = data.replace('$BEEHIVE_VAULT;AES128 | ', '')
+    if data.find("$BEEHIVE_VAULT;AES128 | ") == 0:
+        data = data.replace("$BEEHIVE_VAULT;AES128 | ", "")
         cipher_suite = Fernet(ensure_binary(fernet_key))
         cipher_data = cipher_suite.decrypt(ensure_binary(data))
     else:

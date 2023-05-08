@@ -2,4 +2,4 @@
 #
 # (C) Copyright 2018-2022 CSI-Piemonte
 
-__all__ = ['simple']
+__all__ = ["simple"]

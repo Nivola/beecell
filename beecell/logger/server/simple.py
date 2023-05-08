@@ -14,6 +14,7 @@ class LogRecordStreamHandler(SocketServer.StreamRequestHandler):
 
     This basically logs the record using whatever logging policy is configured locally.
     """
+
     def handle(self):
         """Handle multiple requests - each expected to be a 4-byte length,
         followed by the LogRecord in pickle format. Logs the record
@@ -23,7 +24,7 @@ class LogRecordStreamHandler(SocketServer.StreamRequestHandler):
             chunk = self.connection.recv(4)
             if len(chunk) < 4:
                 break
-            slen = struct.unpack('>L', chunk)[0]
+            slen = struct.unpack(">L", chunk)[0]
             chunk = self.connection.recv(slen)
             while len(chunk) < slen:
                 chunk = chunk + self.connection.recv(slen - len(chunk))
@@ -50,12 +51,16 @@ class LogRecordStreamHandler(SocketServer.StreamRequestHandler):
 
 
 class LogRecordSocketReceiver(SocketServer.ThreadingTCPServer):
-    """Simple TCP socket-based logging receiver suitable for testing.
-    """
+    """Simple TCP socket-based logging receiver suitable for testing."""
+
     allow_reuse_address = 1
 
-    def __init__(self, host='localhost', port=logging.handlers.DEFAULT_TCP_LOGGING_PORT,
-                 handler=LogRecordStreamHandler):
+    def __init__(
+        self,
+        host="localhost",
+        port=logging.handlers.DEFAULT_TCP_LOGGING_PORT,
+        handler=LogRecordStreamHandler,
+    ):
         SocketServer.ThreadingTCPServer.__init__(self, (host, port), handler)
         self.abort = 0
         self.timeout = 1
@@ -63,6 +68,7 @@ class LogRecordSocketReceiver(SocketServer.ThreadingTCPServer):
 
     def serve_until_stopped(self):
         import select
+
         abort = 0
         while not abort:
             rd, wr, ex = select.select([self.socket.fileno()], [], [], self.timeout)
@@ -72,17 +78,18 @@ class LogRecordSocketReceiver(SocketServer.ThreadingTCPServer):
 
 
 def main():
-    host = 'localhost'
+    host = "localhost"
     port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
 
     logging.basicConfig(
         level=logging.DEBUG,
-        format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-        datefmt='%m-%d %H:%M',)
+        format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
+        datefmt="%m-%d %H:%M",
+    )
     tcpserver = LogRecordSocketReceiver(host, port)
-    print('About to start TCP portal2...')
+    print("About to start TCP portal2...")
     tcpserver.serve_until_stopped()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

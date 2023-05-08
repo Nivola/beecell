@@ -21,7 +21,7 @@ class K8shHandler(logging.StreamHandler):
         output to the stream.
         """
         try:
-            msg = self.format(record).replace('\n', ' ||| ')
+            msg = self.format(record).replace("\n", " ||| ")
             stream = self.stream
             # issue 35046: merged two stream.writes into one.
             stream.write(msg + self.terminator)

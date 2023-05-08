@@ -2,6 +2,9 @@
 #
 # (C) Copyright 2018-2022 CSI-Piemonte
 
+from typing import List, Union, Any
+
+
 def merge_dicts(*dict_args):
     """Given any number of dicts, shallow copy and merge into a new dict, precedence goes to key value pairs in latter
     dicts.
@@ -15,7 +18,7 @@ def merge_dicts(*dict_args):
     return result
 
 
-def dict_get(data, key, separator='.', default=None):
+def dict_get(data: Union[list, dict], key: str, separator: str = ".", default=None):
     """Get a value from a dict. Key can be composed to get a field in a complex dict that contains other dict, list and
     string.
 
@@ -42,7 +45,7 @@ def dict_get(data, key, separator='.', default=None):
     return res
 
 
-def dict_set(data, key, value, separator='.'):
+def dict_set(data, key, value, separator="."):
     """Set a key in a dict. Key can be a composition of different keys separated by a separator.
 
     :param data: dictionary to query
@@ -51,6 +54,7 @@ def dict_set(data, key, value, separator='.'):
     :param separator: key depth separator
     :return:
     """
+
     def __dict_set(data):
         k = keys.pop()
         if len(keys) == 0:
@@ -68,7 +72,7 @@ def dict_set(data, key, value, separator='.'):
     return data
 
 
-def dict_unset(data, key, separator='.'):
+def dict_unset(data, key, separator="."):
     """Unset a key in a dict. Key can be a composition of different keys separated by a separator.
 
     :param data: dictionary to query
@@ -76,6 +80,7 @@ def dict_unset(data, key, separator='.'):
     :param separator: key depth separator
     :return:
     """
+
     def __dict_unset(data):
         k = keys.pop()
         if len(keys) == 0:
@@ -105,23 +110,32 @@ def flatten_dict(data, delimiter=":", loopArray=True):
     def items():
         for key, value in data.items():
             if isinstance(value, dict):
-                for subkey, subvalue in flatten_dict(value, delimiter=delimiter, loopArray=loopArray).items():
+                for subkey, subvalue in flatten_dict(
+                    value, delimiter=delimiter, loopArray=loopArray
+                ).items():
                     yield key + delimiter + subkey, subvalue
             elif isinstance(value, list):
                 if loopArray:
                     x = 0
                     for itemArray in value:
                         if isinstance(itemArray, dict):
-                            for subkey, subvalue in flatten_dict(itemArray, delimiter=delimiter,
-                                                                 loopArray=loopArray).items():
-                                yield key + delimiter + str(x) + delimiter + subkey, subvalue
+                            for subkey, subvalue in flatten_dict(
+                                itemArray, delimiter=delimiter, loopArray=loopArray
+                            ).items():
+                                yield key + delimiter + str(
+                                    x
+                                ) + delimiter + subkey, subvalue
                         else:
                             yield key + delimiter + str(x), itemArray
                         x += 1
                 else:
                     res = []
                     for itemArray in value:
-                        res.append(flatten_dict(itemArray, delimiter=delimiter, loopArray=loopArray))
+                        res.append(
+                            flatten_dict(
+                                itemArray, delimiter=delimiter, loopArray=loopArray
+                            )
+                        )
                     yield key, res
             else:
                 yield key, value

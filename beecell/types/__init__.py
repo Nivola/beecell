@@ -16,6 +16,6 @@ def is_int(s):
     :param s: the string to validate
     :return: boolean True o False
     """
-    if s[0] in ('-', '+'):
+    if s[0] in ("-", "+"):
         return s[1:].isdigit()
     return s.isdigit()

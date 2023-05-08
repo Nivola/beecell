@@ -19,7 +19,7 @@ def id_gen(length=10, parent_id=None):
     """
     oid = hexlify(urandom(int(length / 2)))
     if parent_id is not None:
-        oid = '%s//%s' % (parent_id, ensure_text(oid))
+        oid = "%s//%s" % (parent_id, ensure_text(oid))
     return ensure_text(oid)
 
 
@@ -37,6 +37,7 @@ def transaction_id_generator(length=20):
     return : random string
     """
     import random
+
     chars = ascii_letters + digits
-    random.seed = (urandom(1024))
-    return ''.join(choice(chars) for i in range(length))
+    random.seed = urandom(1024)
+    return "".join(choice(chars) for i in range(length))
