@@ -31,12 +31,14 @@ def dict_get(data: Union[list, dict], key: str, separator: str = ".", default=No
     keys = key.split(separator)
     res = data
     for k in keys:
-        if isinstance(res, list):
+        if type(res) != list:
+            if res is not None:
+                res = res.get(k, {})
+        else:
             try:
                 res = res[int(k)]
             except:
                 res = {}
-        else:
             if res is not None:
                 res = res.get(k, {})
     if res is None or res == {}:
