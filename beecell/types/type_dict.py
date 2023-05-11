@@ -31,7 +31,7 @@ def dict_get(data: Union[list, dict], key: str, separator: str = ".", default=No
     keys = key.split(separator)
     res = data
     for k in keys:
-        if type(res) != list:
+        if type(res) == dict:
             if res is not None:
                 res = res.get(k, {})
         else:
@@ -39,8 +39,6 @@ def dict_get(data: Union[list, dict], key: str, separator: str = ".", default=No
                 res = res[int(k)]
             except:
                 res = {}
-            if res is not None:
-                res = res.get(k, {})
     if res is None or res == {}:
         res = default
 
