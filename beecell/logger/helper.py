@@ -94,9 +94,7 @@ class LoggerHelper(object):
     # rotatingfile_handler passing all the logger.
     #
     @staticmethod
-    def memory_handler(
-        loggers, logging_level, target, frmt=None, formatter=ColorFormatter
-    ):
+    def memory_handler(loggers, logging_level, target, frmt=None, formatter=ColorFormatter):
         if frmt is None:
             frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] %(name)s:%(funcName)s:%(lineno)d - %(message)s"
 
@@ -149,9 +147,7 @@ class LoggerHelper(object):
     ):
         if frmt is None:
             frmt = "[%(asctime)s: %(levelname)s/%(process)s:%(thread)s] %(name)s:%(funcName)s:%(lineno)d - %(message)s"
-        handler = logging.handlers.RotatingFileHandler(
-            file_name, mode="a", maxBytes=maxBytes, backupCount=backupCount
-        )
+        handler = logging.handlers.RotatingFileHandler(file_name, mode="a", maxBytes=maxBytes, backupCount=backupCount)
         handler.setLevel(logging_level)
         if formatter is None:
             handler.setFormatter(logging.Formatter(frmt))

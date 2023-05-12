@@ -84,9 +84,7 @@ class ServerErrorException(RemoteException):
 
 
 class RemoteClient(object):
-    def __init__(
-        self, conn, user=None, pwd=None, proxy=None, keyfile=None, certfile=None
-    ):
+    def __init__(self, conn, user=None, pwd=None, proxy=None, keyfile=None, certfile=None):
         """Create a Remote Client
 
         :param conn: Request connection.
@@ -95,9 +93,7 @@ class RemoteClient(object):
             Ex. http://10.102.90.30:80/api
         :param proxy: proxy server. Ex. ('proxy.it', 3128) [default=None]
         """
-        self.logger = getLogger(
-            self.__class__.__module__ + "." + self.__class__.__name__
-        )
+        self.logger = getLogger(self.__class__.__module__ + "." + self.__class__.__name__)
         self.syspath = os.path.expanduser("~")
         self.conn = conn
         self.user = user
@@ -212,15 +208,10 @@ class RemoteClient(object):
 
             # set simple authentication
             if self.user is not None:
-                auth = base64.encodestring("%s:%s" % (self.user, self.pwd)).replace(
-                    "\n", ""
-                )
+                auth = base64.encodestring("%s:%s" % (self.user, self.pwd)).replace("\n", "")
                 headers["Authorization"] = "Basic %s" % auth
 
-            self.logger.info(
-                "Send http %s api request to %s://%s:%s%s"
-                % (method, proto, host, port, path)
-            )
+            self.logger.info("Send http %s api request to %s://%s:%s%s" % (method, proto, host, port, path))
             if data.lower().find("password") < 0:
                 self.logger.debug("Send [headers=%s] [data=%s]" % (headers, data))
             else:
@@ -240,23 +231,11 @@ class RemoteClient(object):
             else:
                 if self.keyfile is None:
                     # python >= 2.7.9
-                    if (
-                        version_info.major == 2
-                        and version_info.minor == 7
-                        and version_info.micro > 8
-                    ):
-                        ssl._create_default_https_context = (
-                            ssl._create_unverified_context
-                        )
+                    if version_info.major == 2 and version_info.minor == 7 and version_info.micro > 8:
+                        ssl._create_default_https_context = ssl._create_unverified_context
                     # python < 2.7.8
-                    elif (
-                        version_info.major == 2
-                        and version_info.minor == 7
-                        and version_info.micro < 9
-                    ):
-                        ssl._create_default_https_context = create_urllib3_context(
-                            cert_reqs=ssl.CERT_NONE
-                        )
+                    elif version_info.major == 2 and version_info.minor == 7 and version_info.micro < 9:
+                        ssl._create_default_https_context = create_urllib3_context(cert_reqs=ssl.CERT_NONE)
                     else:
                         ssl._create_default_https_context = None
 
@@ -275,9 +254,7 @@ class RemoteClient(object):
             conn.request(method, path, data, _headers)
             response = conn.getresponse()
             content_type = response.getheader("content-type")
-            self.logger.info(
-                "Response status: %s %s" % (response.status, response.reason)
-            )
+            self.logger.info("Response status: %s %s" % (response.status, response.reason))
 
         except http_client.HTTPException as ex:
             self.logger.error(ex, exc_info=True)
@@ -388,9 +365,7 @@ class RemoteClient(object):
         # MULTI_STATUS           207    WEBDAV RFC 2518, Section 10.2
         elif re.match("20[0-9]+", str(response.status)):
             res = response.read()
-            self.logger.debug(
-                "Response [content-type=%s] [data=%s]" % (content_type, truncate(res))
-            )
+            self.logger.debug("Response [content-type=%s] [data=%s]" % (content_type, truncate(res)))
             if content_type == "application/json":
                 res_dict = json.loads(res)
                 conn.close()

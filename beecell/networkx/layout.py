@@ -52,10 +52,7 @@ class GridLayout(object):
         ]
         for i in range(0, self._rows):
             for j in range(0, self._cols):
-                res.append(
-                    '<rect x="%s" y="%s" width="%s" height="%s" />'
-                    % (w * j, h * i, w, h)
-                )
+                res.append('<rect x="%s" y="%s" width="%s" height="%s" />' % (w * j, h * i, w, h))
 
         # print nodes
         iw = self._node_width
@@ -68,10 +65,7 @@ class GridLayout(object):
             x = v[0]
             y = v[1]
             res.append('<g id="%s" transform="translate(%s,%s)">' % (oid, x, y))
-            res.append(
-                '<rect x="%s" y="%s" width="%s" height="%s" style="fill:red;" />'
-                % (ix, iy, iw, ih)
-            )
+            res.append('<rect x="%s" y="%s" width="%s" height="%s" style="fill:red;" />' % (ix, iy, iw, ih))
             res.append("</g>")
 
         res.append("</svg>")

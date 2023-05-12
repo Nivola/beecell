@@ -16,15 +16,9 @@ class StringField(fields.StringField):
     widget = widgets.TextInput()
 
     def __init__(self, label=None, _name=None, widget=None, **kwargs):
-        super(StringField, self).__init__(
-            label=label, _name=_name, widget=widget, **kwargs
-        )
+        super(StringField, self).__init__(label=label, _name=_name, widget=widget, **kwargs)
         # replace original implementation with simple string label
-        self.label = (
-            label
-            if label is not None
-            else self.gettext(_name.replace("_", " ").title())
-        )
+        self.label = label if label is not None else self.gettext(_name.replace("_", " ").title())
 
 
 class IntegerField(fields.IntegerField):
@@ -35,15 +29,9 @@ class IntegerField(fields.IntegerField):
     widget = widgets.TextInput()
 
     def __init__(self, label=None, _name=None, widget=None, **kwargs):
-        super(IntegerField, self).__init__(
-            label=label, _name=_name, widget=widget, **kwargs
-        )
+        super(IntegerField, self).__init__(label=label, _name=_name, widget=widget, **kwargs)
         # replace original implementation with simple string label
-        self.label = (
-            label
-            if label is not None
-            else self.gettext(_name.replace("_", " ").title())
-        )
+        self.label = label if label is not None else self.gettext(_name.replace("_", " ").title())
 
 
 class DecimalField(fields.DecimalField):
@@ -58,15 +46,9 @@ class DecimalField(fields.DecimalField):
     widget = widgets.TextInput()
 
     def __init__(self, label=None, _name=None, widget=None, **kwargs):
-        super(DecimalField, self).__init__(
-            label=label, _name=_name, widget=widget, **kwargs
-        )
+        super(DecimalField, self).__init__(label=label, _name=_name, widget=widget, **kwargs)
         # replace original implementation with simple string label
-        self.label = (
-            label
-            if label is not None
-            else self.gettext(_name.replace("_", " ").title())
-        )
+        self.label = label if label is not None else self.gettext(_name.replace("_", " ").title())
 
 
 class FloatField(fields.FloatField):
@@ -77,15 +59,9 @@ class FloatField(fields.FloatField):
     widget = widgets.TextInput()
 
     def __init__(self, label=None, _name=None, widget=None, **kwargs):
-        super(FloatField, self).__init__(
-            label=label, _name=_name, widget=widget, **kwargs
-        )
+        super(FloatField, self).__init__(label=label, _name=_name, widget=widget, **kwargs)
         # replace original implementation with simple string label
-        self.label = (
-            label
-            if label is not None
-            else self.gettext(_name.replace("_", " ").title())
-        )
+        self.label = label if label is not None else self.gettext(_name.replace("_", " ").title())
 
 
 class BooleanField(fields.BooleanField):
@@ -98,15 +74,9 @@ class BooleanField(fields.BooleanField):
     widget = widgets.CheckboxInput()
 
     def __init__(self, label=None, _name=None, widget=None, **kwargs):
-        super(BooleanField, self).__init__(
-            label=label, _name=_name, widget=widget, **kwargs
-        )
+        super(BooleanField, self).__init__(label=label, _name=_name, widget=widget, **kwargs)
         # replace original implementation with simple string label
-        self.label = (
-            label
-            if label is not None
-            else self.gettext(_name.replace("_", " ").title())
-        )
+        self.label = label if label is not None else self.gettext(_name.replace("_", " ").title())
 
 
 class DateTimeField(fields.DateTimeField):
@@ -115,15 +85,9 @@ class DateTimeField(fields.DateTimeField):
     widget = widgets.TextInput()
 
     def __init__(self, label=None, _name=None, widget=None, **kwargs):
-        super(DateTimeField, self).__init__(
-            label=label, _name=_name, widget=widget, **kwargs
-        )
+        super(DateTimeField, self).__init__(label=label, _name=_name, widget=widget, **kwargs)
         # replace original implementation with simple string label
-        self.label = (
-            label
-            if label is not None
-            else self.gettext(_name.replace("_", " ").title())
-        )
+        self.label = label if label is not None else self.gettext(_name.replace("_", " ").title())
 
 
 class DateField(DateTimeField):
@@ -192,15 +156,7 @@ class SelectField(fields.SelectField):
 
     widget = widgets.Select()
 
-    def __init__(
-        self, label=None, validators=None, coerce=text_type, choices=None, **kwargs
-    ):
-        super(SelectField, self).__init__(
-            label=label, validators=validators, coerce=coerce, choices=choices, **kwargs
-        )
+    def __init__(self, label=None, validators=None, coerce=text_type, choices=None, **kwargs):
+        super(SelectField, self).__init__(label=label, validators=validators, coerce=coerce, choices=choices, **kwargs)
         # replace original implementation with simple string label
-        self.label = (
-            label
-            if label is not None
-            else self.gettext(label.replace("_", " ").title())
-        )
+        self.label = label if label is not None else self.gettext(label.replace("_", " ").title())

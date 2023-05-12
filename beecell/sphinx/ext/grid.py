@@ -43,8 +43,7 @@ def visit_apinode_html(self, node):
     if node["title"] is not None:
         title = "<b>%s</b><br>" % node["title"]
     html = [
-        '<div class="col-1"><i class="label label-success">%s</i></div>'
-        % node["method"],
+        '<div class="col-1"><i class="label label-success">%s</i></div>' % node["method"],
         '<div class="col-5"><i class="%s"></i>&nbsp;' % (user),
         '<i class="%s"></i>&nbsp;' % (sync),
         '<i class="link">%s</i></div>' % (node["uri"]),

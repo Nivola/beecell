@@ -67,9 +67,7 @@ class SwaggerHelper(object):
                     elif field_type == "list":
                         try:
                             kvargs["type"] = "array"
-                            kvargs["collectionFormat"] = value.metadata.get(
-                                "collection_format", ""
-                            )
+                            kvargs["collectionFormat"] = value.metadata.get("collection_format", "")
                             subfield_type = value.inner.__class__.__name__.lower()
                             kvargs["items"] = {"type": subfield_type}
                         except:
@@ -87,9 +85,7 @@ class SwaggerHelper(object):
 
 class ApiValidator(object):
     def __init__(self, schema, uri, method):
-        self.logger = getLogger(
-            self.__class__.__module__ + "." + self.__class__.__name__
-        )
+        self.logger = getLogger(self.__class__.__module__ + "." + self.__class__.__name__)
 
         self.data = None
         self.code = None
@@ -185,9 +181,7 @@ class ApiValidator(object):
 
     def get_schema(self):
         if self.uri in self.master_schema["paths"]:
-            self.base_schema = self.master_schema["paths"][self.uri][self.method][
-                "parameters"
-            ]
+            self.base_schema = self.master_schema["paths"][self.uri][self.method]["parameters"]
             self.schema = self.base_schema["responses"]
         else:
             raise Exception("Swager schema for %s is not defined" % self.uri)
@@ -206,18 +200,12 @@ class ApiValidator(object):
 
         res = s.symmetric_difference(t).symmetric_difference(key)
         if len(res) > 0:
-            self.logger.error(
-                "Schema and data does not superimpose for keys: %s" % ", ".join(res)
-            )
-            raise Exception(
-                "Schema and data does not superimpose for keys: %s" % ", ".join(res)
-            )
+            self.logger.error("Schema and data does not superimpose for keys: %s" % ", ".join(res))
+            raise Exception("Schema and data does not superimpose for keys: %s" % ", ".join(res))
         self.logger.debug("Schema and response keys are the same")
 
     def validate(self, response):
-        validate_api_call(
-            self.master_schema, raw_request=response.request, raw_response=response
-        )
+        validate_api_call(self.master_schema, raw_request=response.request, raw_response=response)
         self.code = str(response.status_code)
         if response.content != "":
             self.data = response.json()

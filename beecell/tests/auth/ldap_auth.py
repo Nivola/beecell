@@ -46,9 +46,7 @@ class LdapAuthTestCase(BeecellTestCase):
             bind_user=self.conf("ldap_ad.bind_user"),
             bind_pwd=self.conf("ldap_ad.bind_pwd"),
         )
-        user = self.auth_provider.login(
-            self.conf("ldap_ad.user"), self.conf("ldap_ad.pwd")
-        )
+        user = self.auth_provider.login(self.conf("ldap_ad.user"), self.conf("ldap_ad.pwd"))
         self.logger.debug(user.get_groups())
         for k, v in user.get_attributes().items():
             self.logger.debug("%s: %s" % (k, v))

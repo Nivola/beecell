@@ -165,15 +165,11 @@ def watch_test(func):
 
     @wraps(func)
     def inner(*args, **kwargs):  # 1
-        logging.getLogger("beecell.test").info(
-            "========== %s ==========" % (func.func_name)
-        )
+        logging.getLogger("beecell.test").info("========== %s ==========" % (func.func_name))
         start = time()
         ret = func(*args, **kwargs)  # 2
         elapsed = nround(time() - start, 4)
-        logging.getLogger("beecell.test").info(
-            "========== %s ========== : %ss\n" % (func.func_name, elapsed)
-        )
+        logging.getLogger("beecell.test").info("========== %s ========== : %ss\n" % (func.func_name, elapsed))
         return ret
 
     return inner

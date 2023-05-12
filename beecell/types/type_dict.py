@@ -31,14 +31,14 @@ def dict_get(data: Union[list, dict], key: str, separator: str = ".", default=No
     keys = key.split(separator)
     res = data
     for k in keys:
-        if isinstance(res, list):
+        if type(res) == dict:
+            if res is not None:
+                res = res.get(k, {})
+        else:
             try:
                 res = res[int(k)]
             except:
                 res = {}
-        else:
-            if res is not None:
-                res = res.get(k, {})
     if res is None or res == {}:
         res = default
 
@@ -110,9 +110,7 @@ def flatten_dict(data, delimiter=":", loopArray=True):
     def items():
         for key, value in data.items():
             if isinstance(value, dict):
-                for subkey, subvalue in flatten_dict(
-                    value, delimiter=delimiter, loopArray=loopArray
-                ).items():
+                for subkey, subvalue in flatten_dict(value, delimiter=delimiter, loopArray=loopArray).items():
                     yield key + delimiter + subkey, subvalue
             elif isinstance(value, list):
                 if loopArray:
@@ -122,20 +120,14 @@ def flatten_dict(data, delimiter=":", loopArray=True):
                             for subkey, subvalue in flatten_dict(
                                 itemArray, delimiter=delimiter, loopArray=loopArray
                             ).items():
-                                yield key + delimiter + str(
-                                    x
-                                ) + delimiter + subkey, subvalue
+                                yield key + delimiter + str(x) + delimiter + subkey, subvalue
                         else:
                             yield key + delimiter + str(x), itemArray
                         x += 1
                 else:
                     res = []
                     for itemArray in value:
-                        res.append(
-                            flatten_dict(
-                                itemArray, delimiter=delimiter, loopArray=loopArray
-                            )
-                        )
+                        res.append(flatten_dict(itemArray, delimiter=delimiter, loopArray=loopArray))
                     yield key, res
             else:
                 yield key, value

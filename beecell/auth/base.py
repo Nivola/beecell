@@ -17,9 +17,7 @@ class SystemUser(UserMixin):
     login_count = None
 
     def __init__(self, uid, email, password, active, login_ip=None, domain=None):
-        self.logger = logging.getLogger(
-            self.__class__.__module__ + "." + self.__class__.__name__
-        )
+        self.logger = logging.getLogger(self.__class__.__module__ + "." + self.__class__.__name__)
 
         self.id = uid
         self.email = email
@@ -135,9 +133,7 @@ class AbstractAuth(object):
     """
 
     def __init__(self, user_class):
-        self.logger = logging.getLogger(
-            self.__class__.__module__ + "." + self.__class__.__name__
-        )
+        self.logger = logging.getLogger(self.__class__.__module__ + "." + self.__class__.__name__)
 
         self.user_class = user_class
 

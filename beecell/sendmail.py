@@ -13,9 +13,7 @@ from email.mime.text import MIMEText
 
 class Mailer(object):
     def __init__(self, mailserver, mailport=None, mail_login=None, mail_pw=None):
-        self.logger = logging.getLogger(
-            self.__class__.__module__ + "." + self.__class__.__name__
-        )
+        self.logger = logging.getLogger(self.__class__.__module__ + "." + self.__class__.__name__)
 
         self.mailserver = mailserver
         self.mailport = mailport
@@ -46,9 +44,7 @@ class Mailer(object):
             with open(path, "rb") as file:
                 part.set_payload(file.read())
             encoders.encode_base64(part)
-            part.add_header(
-                "Content-Disposition", "attachment; filename={}".format(Path(path).name)
-            )
+            part.add_header("Content-Disposition", "attachment; filename={}".format(Path(path).name))
             msg.attach(part)
 
         # log raw email contents

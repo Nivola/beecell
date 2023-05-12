@@ -103,8 +103,7 @@ class TableWidget(object):
                 hidden += text_type(subfield)
             else:
                 html.append(
-                    "<tr><th>%s</th><td>%s%s</td></tr>"
-                    % (text_type(subfield.label), hidden, text_type(subfield))
+                    "<tr><th>%s</th><td>%s%s</td></tr>" % (text_type(subfield.label), hidden, text_type(subfield))
                 )
                 hidden = ""
         if self.with_table_tag:
@@ -224,9 +223,7 @@ class FileInput(object):
 
     def __call__(self, field, **kwargs):
         kwargs.setdefault("id", field.id)
-        return HTMLString(
-            "<input %s>" % html_params(name=field.name, type="file", **kwargs)
-        )
+        return HTMLString("<input %s>" % html_params(name=field.name, type="file", **kwargs))
 
 
 class SubmitInput(Input):
@@ -284,9 +281,7 @@ class Select(object):
         if self.multiple:
             kwargs["multiple"] = True
 
-        html = [
-            '<select class="form-control" id="%s" name="%s">' % (field.id, field.name)
-        ]
+        html = ['<select class="form-control" id="%s" name="%s">' % (field.id, field.name)]
         for val, label, selected in field.iter_choices():
             html.append(self.render_option(val, label, selected))
         html.append("</select>")
@@ -298,10 +293,7 @@ class Select(object):
         options = dict(kwargs, value=value)
         if selected:
             options["selected"] = True
-        return HTMLString(
-            "<option %s>%s</option>"
-            % (html_params(**options), escape(text_type(label)))
-        )
+        return HTMLString("<option %s>%s</option>" % (html_params(**options), escape(text_type(label))))
 
 
 class Option(object):
@@ -312,6 +304,4 @@ class Option(object):
     """
 
     def __call__(self, field, **kwargs):
-        return Select.render_option(
-            field._value(), field.label, field.checked, **kwargs
-        )
+        return Select.render_option(field._value(), field.label, field.checked, **kwargs)

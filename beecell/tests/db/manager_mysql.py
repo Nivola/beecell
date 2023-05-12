@@ -45,9 +45,7 @@ class MysqlManagerTestCase(BeecellTestCase):
         self.logger.debug(desc)
 
     def test_query_table(self):
-        res = self.manager.query_table(
-            "user", where=None, fields="*", rows=20, offset=0
-        )
+        res = self.manager.query_table("user", where=None, fields="*", rows=20, offset=0)
         for item in res:
             self.logger.debug(item)
 

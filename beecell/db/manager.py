@@ -130,9 +130,7 @@ class ConnectionManager(object):
     """Abstract Connection manager"""
 
     def __init__(self):
-        self.logger = logging.getLogger(
-            self.__class__.__module__ + "." + self.__class__.__name__
-        )
+        self.logger = logging.getLogger(self.__class__.__module__ + "." + self.__class__.__name__)
 
     def get_session(self):
         """Open a database session.
@@ -278,9 +276,7 @@ class RedisManager(ConnectionManager):
             res = []
             for conn in self.sentinel.sentinels:
                 conn_args = conn.connection_pool.connection_kwargs
-                res.append(
-                    ("%s:%s" % (conn_args["host"], conn_args["port"]), conn.ping())
-                )
+                res.append(("%s:%s" % (conn_args["host"], conn_args["port"]), conn.ping()))
                 self.logger.debug("Ping redis sentinel %s: %s" % (conn, res))
             return res
         except redis.exceptions.ConnectionError as ex:
@@ -315,9 +311,7 @@ class RedisManager(ConnectionManager):
         if self.conn is not None:
             info = self.info()
             min_replicas_to_write = int(
-                self.conn.config_get(pattern="min-replicas-to-write").get(
-                    "min-replicas-to-write", 0
-                )
+                self.conn.config_get(pattern="min-replicas-to-write").get("min-replicas-to-write", 0)
             )
             min_slaves_good_slaves = int(info.get("min_slaves_good_slaves"))
             status = False
@@ -610,17 +604,13 @@ class SqlManager(ConnectionManager):
             kwargs["port"] = kwargs.get("port", 3306)
             kwargs["user"] = kwargs.get("user", "root")
             kwargs["db"] = kwargs.get("db", "mysql")
-            connection_string = (
-                "mysql+pymysql://{user}:{pwd}@{host}:{port}/{db}".format(**kwargs)
-            )
+            connection_string = "mysql+pymysql://{user}:{pwd}@{host}:{port}/{db}".format(**kwargs)
             manager = MysqlManager
         elif engine == "postgres":
             kwargs["port"] = kwargs.get("port", 5432)
             kwargs["user"] = kwargs.get("user", "postgres")
             kwargs["db"] = kwargs.get("db", "postgres")
-            connection_string = "postgresql://{user}:{pwd}@{host}:{port}/{db}".format(
-                **kwargs
-            )
+            connection_string = "postgresql://{user}:{pwd}@{host}:{port}/{db}".format(**kwargs)
             manager = PostgresManager
         else:
             raise SqlManagerError("engine %s can not be managed by SqlManager" % engine)
@@ -641,9 +631,7 @@ class SqlManager(ConnectionManager):
         )
         self.tunnel.start()
         self.orig_db_uri = self.db_uri
-        self.db_uri.replace(db_host, "127.0.0.1").replace(
-            db_port, self.tunnel.local_bind_port
-        )
+        self.db_uri.replace(db_host, "127.0.0.1").replace(db_port, self.tunnel.local_bind_port)
 
     def close_tunnel(self):
         self.tunnel.stop()
@@ -661,15 +649,11 @@ class SqlManager(ConnectionManager):
                 autoflush=True,
                 expire_on_commit=True,
             )
-            self.logger1.debug(
-                "New db session %s over engine %s" % (self.db_session, self.engine)
-            )
+            self.logger1.debug("New db session %s over engine %s" % (self.db_session, self.engine))
         else:
             raise SqlManagerError("Engine already configured")
 
-    def create_pool_engine(
-        self, pool_size=10, max_overflow=10, pool_recycle=3600, pool_timeout=30
-    ):
+    def create_pool_engine(self, pool_size=10, max_overflow=10, pool_recycle=3600, pool_timeout=30):
         """Create an engine with connection pool
 
         :param pool_size: [optional] [default=]
@@ -694,9 +678,7 @@ class SqlManager(ConnectionManager):
                 autoflush=True,
                 expire_on_commit=True,
             )
-            self.logger1.debug(
-                "New db session %s over engine %s" % (self.db_session, self.engine)
-            )
+            self.logger1.debug("New db session %s over engine %s" % (self.db_session, self.engine))
         else:
             raise SqlManagerError("Engine already configured")
 
@@ -709,9 +691,9 @@ class SqlManager(ConnectionManager):
             pid = os.getpid()
             if connection_record.info["pid"] != pid:
                 connection_record.connection = connection_proxy.connection = None
-                error = (
-                    "Connection record belongs to pid %s, attempting to check out in pid %s"
-                    % (connection_record.info["pid"], pid)
+                error = "Connection record belongs to pid %s, attempting to check out in pid %s" % (
+                    connection_record.info["pid"],
+                    pid,
                 )
                 self.logger1.error(error)
                 raise exc.DisconnectionError(error)
@@ -1074,9 +1056,7 @@ class SqlManager(ConnectionManager):
             if self.engine:
                 conn = self.engine.connect()
                 return conn
-            raise SqlManagerError(
-                "There isn't active db session to use. Session can not be opened."
-            )
+            raise SqlManagerError("There isn't active db session to use. Session can not be opened.")
         except exc.DBAPIError as e:
             # an exception is raised, Connection is invalidated. Connection
             # pool will be refresh
@@ -1099,9 +1079,7 @@ class SqlManager(ConnectionManager):
                 # session._model_changes = {}
                 self.logger1.debug("Open session: %s" % session)
                 return session
-            raise SqlManagerError(
-                "There isn't active db session to use. Session can not be opened."
-            )
+            raise SqlManagerError("There isn't active db session to use. Session can not be opened.")
         except (exc.DBAPIError, Exception) as e:
             self.logger1.error(e)
             # an exception is raised, Connection is invalidated. Connection
@@ -1137,8 +1115,7 @@ class MysqlManager(SqlManager):
         """Get schemas list"""
         res = {}
         result = self.active_connection.execute(
-            "select table_schema, count(table_name) "
-            "from information_schema.tables group by table_schema"
+            "select table_schema, count(table_name) " "from information_schema.tables group by table_schema"
         )
         for row in result:
             res[row[0]] = {"db": "", "schema": row[0], "tables": row[1]}
@@ -1190,9 +1167,7 @@ class MysqlManager(SqlManager):
             "Trigger_priv, Create_tablespace_priv, max_connections, max_user_connections, "
             "password_expired, password_last_changed, account_locked from mysql.user"
         )
-        result2 = self.active_connection.execute(
-            "SELECT * from information_schema.SCHEMA_PRIVILEGES;"
-        )
+        result2 = self.active_connection.execute("SELECT * from information_schema.SCHEMA_PRIVILEGES;")
         privs = {}
         for r in result2:
             try:
@@ -1260,10 +1235,7 @@ class MysqlManager(SqlManager):
         :param password: user password
         """
         name, host = name.split("@")
-        stm = text(
-            "CREATE USER IF NOT EXISTS '%s'@'%s' IDENTIFIED BY '%s';"
-            % (name, host, password)
-        )
+        stm = text("CREATE USER IF NOT EXISTS '%s'@'%s' IDENTIFIED BY '%s';" % (name, host, password))
         self.active_connection.execute(stm)
         res = True
         self.logger.debug("Create user %s: %s" % (name, res))
@@ -1344,9 +1316,7 @@ class MysqlManager(SqlManager):
         from sqlalchemy import Table, MetaData
 
         metadata = MetaData()
-        table_obj = Table(
-            table_name, metadata, autoload=True, autoload_with=self.engine
-        )
+        table_obj = Table(table_name, metadata, autoload=True, autoload_with=self.engine)
         self.logger.debug("Get description for table %s" % table_name)
         return [
             {
@@ -1414,9 +1384,7 @@ class MysqlManager(SqlManager):
         return res, total
 
     @manage_connection
-    def query_table(
-        self, table_name, where=None, fields="*", rows=20, offset=0, order=None
-    ):
+    def query_table(self, table_name, where=None, fields="*", rows=20, offset=0, order=None):
         """Query a table
 
         :param table_name: name of the table to query [optional]
@@ -1558,8 +1526,7 @@ class MysqlManager(SqlManager):
         """Get cluster status"""
         res = {}
         result = self.active_connection.execute(
-            "select MEMBER_HOST, MEMBER_PORT, MEMBER_STATE "
-            "from performance_schema.replication_group_members;"
+            "select MEMBER_HOST, MEMBER_PORT, MEMBER_STATE " "from performance_schema.replication_group_members;"
         )
         for row in result:
             res[row[0]] = {
@@ -1574,21 +1541,15 @@ class MysqlManager(SqlManager):
     def get_galera_cluster_status(self):
         """Get galera cluster status"""
         res = {}
-        result = self.active_connection.execute(
-            "SHOW GLOBAL STATUS LIKE 'wsrep_cluster_status';"
-        )
+        result = self.active_connection.execute("SHOW GLOBAL STATUS LIKE 'wsrep_cluster_status';")
         for row in result:
             res[row[0]] = row[1]
 
-        result = self.active_connection.execute(
-            "SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size';"
-        )
+        result = self.active_connection.execute("SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size';")
         for row in result:
             res[row[0]] = row[1]
 
-        result = self.active_connection.execute(
-            "SHOW STATUS LIKE 'wsrep_local_state_comment';"
-        )
+        result = self.active_connection.execute("SHOW STATUS LIKE 'wsrep_local_state_comment';")
         for row in result:
             res[row[0]] = row[1]
 
@@ -1746,12 +1707,10 @@ class PostgresManager(SqlManager):
         """Get schemas list"""
         res = []
         result = self.active_connection.execute(
-            "SELECT catalog_name, schema_name, schema_owner FROM "
-            "information_schema.schemata;"
+            "SELECT catalog_name, schema_name, schema_owner FROM " "information_schema.schemata;"
         )
         tables = self.active_connection.execute(
-            "SELECT table_schema , count(table_name) FROM information_schema.tables"
-            " group by table_schema;"
+            "SELECT table_schema , count(table_name) FROM information_schema.tables" " group by table_schema;"
         )
         table_idx = {t[0]: t[1] for t in tables}
         for row in result:

@@ -230,9 +230,7 @@ class LdapAuth(AbstractAuth):
                 # check retry
                 if cur_retry < max_retry:
                     cur_retry += 1
-                    res = self.authenticate(
-                        username, password, max_retry=max_retry, cur_retry=cur_retry
-                    )
+                    res = self.authenticate(username, password, max_retry=max_retry, cur_retry=cur_retry)
                     return res
                 else:
                     raise AuthError("", "Ldap authentication error: %s" % ex, code=7)
