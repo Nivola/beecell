@@ -4,6 +4,7 @@
 
 import logging
 from flask_login import UserMixin
+from typing import List, Union
 
 
 class SystemUser(UserMixin):
@@ -19,15 +20,15 @@ class SystemUser(UserMixin):
     def __init__(self, uid, email, password, active, login_ip=None, domain=None):
         self.logger = logging.getLogger(self.__class__.__module__ + "." + self.__class__.__name__)
 
-        self.id = uid
-        self.email = email
-        self.password = password
+        self.id: str = uid
+        self.email: str = email
+        self.password: str = password
         self.active = active
-        self.domain = domain
-        self._roles = None
+        self.domain: str = domain
+        self._roles: List[str] = None
         self._perms = None
         self._attrib = None
-        self.current_login_ip = login_ip
+        self.current_login_ip: str = login_ip
 
         self.logger.debug("Create flask_login user instance: %s, %s" % (uid, email))
 
