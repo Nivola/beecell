@@ -39,13 +39,14 @@ class Mailer(object):
             part2 = MIMEText(html, "html")
             msg.attach(part2)
 
-        for path in files:
-            part = MIMEBase("application", "octet-stream")
-            with open(path, "rb") as file:
-                part.set_payload(file.read())
-            encoders.encode_base64(part)
-            part.add_header("Content-Disposition", "attachment; filename={}".format(Path(path).name))
-            msg.attach(part)
+        if files is not None:
+            for path in files:
+                part = MIMEBase("application", "octet-stream")
+                with open(path, "rb") as file:
+                    part.set_payload(file.read())
+                encoders.encode_base64(part)
+                part.add_header("Content-Disposition", "attachment; filename={}".format(Path(path).name))
+                msg.attach(part)
 
         # log raw email contents
         # self.logger.debug('Prepare email message: %s' % msg)
