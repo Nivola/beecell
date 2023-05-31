@@ -1,3 +1,4 @@
+from __future__ import annotations
 import binascii
 import zlib
 import json
@@ -24,10 +25,10 @@ class IdentityMgr(object):
     """
 
     def __init__(self) -> None:
+        self._user: str = None
         self._expire = None
         self._uuid: str = None
         self._mgr: RedisManager = None
-        self._key_value: str = None
         self._identity: dict = None
         self._compressed_perms: str = None
         self._fullcompressed_perms: str = None
@@ -35,6 +36,15 @@ class IdentityMgr(object):
         self._perms: List[List] = None
         self._fullperms: List[List] = None
         pass
+
+    @property
+    def ttl(self) -> int:
+        return self._mgr.conn.ttl(PREFIX + self._uuid)
+
+    @ttl.setter
+    def ttl(self, expire: int) -> int:
+        self._mgr.conn.expire(PREFIX + self._uuid, expire)
+        self._mgr.conn.expire(PREFIX_INDEX + self.user, expire)
 
     @property
     def expire(self) -> int:
@@ -49,15 +59,17 @@ class IdentityMgr(object):
 
         :param never_expire: if True identity key never expires
         """
-        self._key_value = pickle.dumps(self._identity)
+        key_value = pickle.dumps(self._identity)
         user = self._identity.get("user", {}).get("id")
-        self._mgr.conn.setex(PREFIX + self._uuid, self.expire, self._key_value)
-        if never_expire:
-            self._mgr.conn.persist(PREFIX + self._uuid)
+        self._mgr.conn.setex(PREFIX + self._uuid, self.expire, key_value)
         # add identity to identity user index
         self._mgr.conn.lpush(PREFIX_INDEX + user, self._uuid)
         # set index expire time
-        self._mgr.conn.expire(PREFIX_INDEX + user, self.expire)
+        if never_expire:
+            self._mgr.conn.persist(PREFIX + self._uuid)
+            self._mgr.conn.persist(PREFIX_INDEX + user)
+        else:
+            self._mgr.conn.expire(PREFIX_INDEX + user, self.expire)
 
     def _remove(self):
         """Remove beehive identity with token uid"""
@@ -77,13 +89,14 @@ class IdentityMgr(object):
         :raises AuthError: raise :class:`AuthError`
         """
         try:
-            self._key_value = self._mgr.conn.get(PREFIX + self._uuid)
-            if self._key_value is not None:
-                self._identity = pickle.loads(self._key_value)
+            key_value = self._mgr.conn.get(PREFIX + self._uuid)
+            if key_value is not None:
+                self._identity = pickle.loads(key_value)
                 if "fullperms" not in self._identity:
                     self._identity["fullperms"] = self._identity.get("user", {}).get("perms")
                 self._compressed_perms = self._identity.get("user", {}).get("perms")
                 self._fullcompressed_perms = self._identity["fullperms"]
+
             if update_ttl:
                 self.reset_ttl()
             else:
@@ -91,27 +104,33 @@ class IdentityMgr(object):
         except Exception as ex:
             raise AuthError(ex, desc="", code=10)
 
-    def reset_ttl(self):
+    def reset_ttl(self, never_expire=False):
         """reset  identity ttl
 
         :raises AuthError: raise :class:`AuthError`
         """
+        from beecell.debug import dbgprint
+        dbgprint(never_expire=never_expire, uuid=self )
         try:
-            self._mgr.conn.expire(PREFIX + self._uuid, self.expire)
-            self._mgr.conn.expire(PREFIX_INDEX + self.user, self.expire)
+            if never_expire:
+                self._mgr.conn.persist(PREFIX + self._uuid)
+                self._mgr.conn.persist(PREFIX_INDEX + self.user)
+            else:
+                self._mgr.conn.expire(PREFIX + self._uuid, self.expire)
+                self._mgr.conn.expire(PREFIX_INDEX + self.user, self.expire)
         # set index expire time
 
         except Exception as ex:
             raise AuthError(ex, desc="", code=10)
 
-    def save(self):
+    def save(self, never_expire=False):
         """
         Save identity if not modified only reset ttl
         """
         if self._modified:
-            self._store()
+            self._store(never_expire)
         else:
-            self.reset_ttl()
+            self.reset_ttl(never_expire)
 
     @property
     def ttl(self) -> int:
@@ -123,6 +142,11 @@ class IdentityMgr(object):
             return self._mgr.conn.ttl(PREFIX + self._uuid)
         except Exception as ex:
             raise AuthError(ex, desc="", code=10)
+
+    @ttl.setter
+    def ttl(self, value):
+        self._expire = value
+        self.reset_ttl(False)
 
     @property
     def identity(self) -> dict:
@@ -138,6 +162,12 @@ class IdentityMgr(object):
         except Exception as ex:
             raise AuthError(ex)
 
+    @identity.setter
+    def identity(self, identity: dict):
+        self._modified = True
+        self._identity = identity
+        self._compressed_perms = self._identity.get("user", {}).get("perms")
+
     @property
     def user(self) -> str:
         """
@@ -145,9 +175,12 @@ class IdentityMgr(object):
         :raises AuthError: raise :class:`AuthError`
         """
         try:
+            if self._user is not None:
+                return self._user
             if self._identity is None:
                 self._get()
-            return self._identity.get("user", {}).get("id")
+            self._user = self._identity.get("user", {}).get("id")
+            return self._user
         except Exception as ex:
             raise AuthError(ex, desc="", code=10)
 
@@ -285,28 +318,110 @@ class IdentityMgr(object):
         if store:
             self._store()
 
+    @staticmethod
+    def set_identity(uuid, identity, redismanager: RedisManager, expire=True, expire_time=None) -> IdentityMgr:
+        """Set beehive identity with token uid
 
-def identity_mgr_factory(uuid: str, controller=None, module=None, apimanager=None, redismanager=None) -> IdentityMgr:
+        :param uid: authorization token
+        :param identity: dictionary with login identity
+        :param expire: if True identity key expire after xx seconds
+        :param expire_time: [optional] det expire time in seconds
+        """
+        idmgr = IdentityMgr()
+        idmgr._uuid = uuid
+        idmgr.expire = expire_time
+        idmgr._mgr = redismanager
+        idmgr.identity = identity
+        idmgr.save(never_expire=not expire)
+        return idmgr
+
+        if expire_time is None:
+            expire_time = self.expire
+
+        val = pickle.dumps(identity)
+        user = dict_get(identity, "user.id")
+        self.module.redis_identity_manager.conn.setex(self.prefix + uid, expire_time, val)
+        if expire is False:
+            self.module.redis_identity_manager.conn.persist(self.prefix + uid)
+
+        # add identity to identity user index
+        self.module.redis_identity_manager.conn.lpush(self.prefix_index + user, uid)
+        # set index expire time
+        self.module.redis_identity_manager.conn.expire(self.prefix_index + user, expire_time)
+
+        self.logger.info("Set identity %s in redis" % uid)
+
+    @staticmethod
+    def get_identity(uuid, redismanager: RedisManager) -> dict:
+        """Get identity
+        if identity does not exixte raise AuthError
+        :param uid: identity id
+        :param redimanager identity manager
+        :return: {'uid':..., 'user':..., timestamp':..., 'pubkey':..., 'seckey':...}
+        """
+        imgr = IdentityMgr()
+        imgr._uuid = uuid
+        imgr._mgr = redismanager
+        imgr._get()
+        data = imgr.identity
+        data["ttl"] = imgr.ttl
+        return data
+
+    @staticmethod
+    def get_identities(redismanager: RedisManager):
+        """Get identities
+
+        :return: [{'uid':..., 'user':..., timestamp':..., 'pubkey':..., 'seckey':...}, ..]
+        """
+        try:
+            res = []
+            for key in redismanager.conn.keys(PREFIX + "*"):
+                try:
+                    identity = redismanager.conn.get(key)
+                except Exception:
+                    continue
+                data = pickle.loads(identity)
+                data["ttl"] = redismanager.conn.ttl(key)
+                res.append(data)
+            return res
+        except Exception as ex:
+            raise AuthError(info=ex, desc="No identities found")
+
+    @staticmethod
+    def factory(
+        uuid: str, controller=None, module=None, apimanager=None, redismanager: RedisManager = None
+    ) -> IdentityMgr:
+        """
+        IdentityMgr factory
+        """
+        try:
+            ret = IdentityMgr()
+            ret._uuid = uuid
+            if redismanager is not None:
+                ret._mgr = redismanager
+            elif apimanager is not None:
+                ret.expire = apimanager.expire
+                ret._mgr = apimanager.redis_identity_manager
+            elif module is not None:
+                ret.expire = module.api_manager.expire
+                ret._mgr = module.api_manager.redis_identity_manager
+            elif controller is not None:
+                ret._mgr = controller.module.api_manager.redis_identity_manager
+                ret.expire = controller.module.api_manager.expire
+            else:
+                raise AuthError("cannot find a redis connection", desc="", code=10)
+            ret._get()
+            return ret
+        except Exception as ex:
+            raise AuthError(info=ex, desc="", code=10)
+
+
+def identity_mgr_factory(
+    uuid: str, controller=None, module=None, apimanager=None, redismanager: RedisManager = None
+) -> IdentityMgr:
     """
     IdentityMgr factory
     """
-    try:
-        ret = IdentityMgr()
-        ret._uuid = uuid
-        if redismanager is not None:
-            ret._mgr = redismanager
-        elif apimanager is not None:
-            ret.expire = apimanager.expire
-            ret._mgr = apimanager.redis_identity_manager
-        elif module is not None:
-            ret.expire = module.api_manager.expire
-            ret._mgr = module.api_manager.redis_identity_manager
-        elif controller is not None:
-            ret._mgr = controller.module.api_manager.redis_identity_manager
-            ret.expire = controller.module.api_manager.expire
-        else:
-            raise AuthError("cannot find a redis connection", desc="", code=10)
-        ret._get()
-        return ret
-    except Exception as ex:
-        raise AuthError(ex, desc="", code=10)
+    return IdentityMgr.factory(
+        uuid, controller=controller, module=module, apimanager=apimanager, redismanager=redismanager
+    )
