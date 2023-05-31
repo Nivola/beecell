@@ -13,6 +13,7 @@ from typing import List, Union
 
 PREFIX = "identity:"
 PREFIX_INDEX = "identity:index:"
+EXPIRE = 3600
 
 
 class IdentityMgr(object):
@@ -48,7 +49,7 @@ class IdentityMgr(object):
 
     @property
     def expire(self) -> int:
-        return self._expire if type(self._expire) == int else 3600
+        return self._expire if type(self._expire) == int else EXPIRE
 
     @expire.setter
     def expire(self, value):
@@ -110,14 +111,15 @@ class IdentityMgr(object):
         :raises AuthError: raise :class:`AuthError`
         """
         from beecell.debug import dbgprint
-        dbgprint(never_expire=never_expire, uuid=self )
+        dbgprint(never_expire=never_expire, uuid=self._uuid )
         try:
             if never_expire:
                 self._mgr.conn.persist(PREFIX + self._uuid)
                 self._mgr.conn.persist(PREFIX_INDEX + self.user)
             else:
-                self._mgr.conn.expire(PREFIX + self._uuid, self.expire)
-                self._mgr.conn.expire(PREFIX_INDEX + self.user, self.expire)
+                ttl = self._expire if type(self._expire) == int else EXPIRE
+                self._mgr.conn.expire(PREFIX + self._uuid, ttl)
+                self._mgr.conn.expire(PREFIX_INDEX + self.user, ttl)
         # set index expire time
 
         except Exception as ex:
@@ -146,7 +148,7 @@ class IdentityMgr(object):
     @ttl.setter
     def ttl(self, value):
         self._expire = value
-        self.reset_ttl(False)
+        self.reset_ttl()
 
     @property
     def identity(self) -> dict:
@@ -243,20 +245,6 @@ class IdentityMgr(object):
         """
         Verify if identity can execute an action over a certain object type.
         |0-pid  |1-oid |2-type     |3-definition                         | 4-objid       | 5-aid|6-action
-        |985    |124   |'service'  |'ServiceType.ServiceDefinition'      |'*//*'         |1     |'*'    |
-        |1009   |127   |'service'  |'ServiceType.ServiceProcess'         |'*//*'         |1     |'*'    |
-        |969    |122   |'service'  |'ServiceType'                        |'*'            |1     |'*'    |
-        |1017   |128   |'service'  |'ServiceCatalog'                     |'*'            |1     |'*'    |
-        |1025   |129   |'service'  |'ServiceJob'                         |'*'            |1     |'*'    |
-        |1041   |131   |'service'  |'ServicePriceList.ServicePriceMetric'|'*//*'         |1     |'*'    |
-        |1033   |130   |'service'  |'ServicePriceList'                   |'*'            |1     |'*'    |
-        |1073   |135   |'ssh'      |'SshGroup.SshNode.SshUser'           |'*//*//*'      |1     |'*'    |
-        |1065   |134   |'ssh'      |'SshGroup.SshNode'                   |'*//*'         |1     |'*'    |
-        |1057   |133   |'ssh'      |'SshGroup'                           |'*'            |1     |'*'    |
-        |1081   |136   |'ssh'      |'SshKey'                             |'*'            |1     |'*'    |
-        |1089   |137   |'ssh'      |'SshLogin'                           |'*'            |1     |'*'    |
-        |3554372|444299|'resource' |'Zabbix.Host'                        |'*//*'         |1     |'*'    |
-        |3554396|444302|'resource' |'Zabbix.Hostgroup'                   |'*//*'         |1     |'*'    |
         |3554420|444305|'resource' |'Zabbix.Template'                    |'*//*'         |1     |'*'    |
         |3554348|444296|'container'|'Zabbix'                             |'*'            |1     |'*'    |
         |1871913|233990|'ssh'      |'SshKey'                             |'8d83c41bdd'   |2     |'view' |
@@ -335,21 +323,21 @@ class IdentityMgr(object):
         idmgr.save(never_expire=not expire)
         return idmgr
 
-        if expire_time is None:
-            expire_time = self.expire
+        # if expire_time is None:
+        #     expire_time = self.expire
 
-        val = pickle.dumps(identity)
-        user = dict_get(identity, "user.id")
-        self.module.redis_identity_manager.conn.setex(self.prefix + uid, expire_time, val)
-        if expire is False:
-            self.module.redis_identity_manager.conn.persist(self.prefix + uid)
+        # val = pickle.dumps(identity)
+        # user = dict_get(identity, "user.id")
+        # self.module.redis_identity_manager.conn.setex(self.prefix + uid, expire_time, val)
+        # if expire is False:
+        #     self.module.redis_identity_manager.conn.persist(self.prefix + uid)
 
-        # add identity to identity user index
-        self.module.redis_identity_manager.conn.lpush(self.prefix_index + user, uid)
-        # set index expire time
-        self.module.redis_identity_manager.conn.expire(self.prefix_index + user, expire_time)
+        # # add identity to identity user index
+        # self.module.redis_identity_manager.conn.lpush(self.prefix_index + user, uid)
+        # # set index expire time
+        # self.module.redis_identity_manager.conn.expire(self.prefix_index + user, expire_time)
 
-        self.logger.info("Set identity %s in redis" % uid)
+        # self.logger.info("Set identity %s in redis" % uid)
 
     @staticmethod
     def get_identity(uuid, redismanager: RedisManager) -> dict:
@@ -363,8 +351,10 @@ class IdentityMgr(object):
         imgr._uuid = uuid
         imgr._mgr = redismanager
         imgr._get()
-        data = imgr.identity
+        data = imgr._identity
         data["ttl"] = imgr.ttl
+        from beecell.debug import dbgprint
+        dbgprint(result=data)
         return data
 
     @staticmethod
