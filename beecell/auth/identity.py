@@ -82,8 +82,8 @@ class IdentityMgr(object):
             self._mgr.conn.lrem(PREFIX_INDEX + user, 1, self._uuid)
 
         except Exception as ex:
-            dbgprint(ex)
-            raise AuthError(exdesc="", code=10)
+            ##dbgprint(ex)
+            raise AuthError(info=str(ex),  desc="", code=AuthError.CONNECTIONERROR)
 
     def _get(self, update_ttl: bool = True):
         """Get identity from redis
@@ -102,10 +102,10 @@ class IdentityMgr(object):
                 if update_ttl:
                     self.reset_ttl()
             else:
-                raise AuthError("Identity %s does not exist or is expired" % self._uuid, desc="", code=1)
+                raise AuthError(info="Identity %s does not exist or is expired" % self._uuid, desc="", code=AuthError.TOKENEXPIRED)
         except Exception as ex:
-            dbgprint(ex)
-            raise AuthError(ex, desc="", code=10)
+            ##dbgprint(ex)
+            raise AuthError(info=str(ex), desc="", code=AuthError.UNDEFINED)
 
     def reset_ttl(self, never_expire=False):
         """reset  identity ttl
@@ -113,7 +113,7 @@ class IdentityMgr(object):
         :raises AuthError: raise :class:`AuthError`
         """
 
-        dbgprint(never_expire=never_expire, uuid=self._uuid)
+        ##dbgprint(never_expire=never_expire, uuid=self._uuid)
         try:
             if never_expire:
                 self._mgr.conn.persist(PREFIX + self._uuid)
@@ -125,8 +125,8 @@ class IdentityMgr(object):
         # set index expire time
 
         except Exception as ex:
-            dbgprint(ex)
-            raise AuthError(ex, desc="", code=10)
+            ##dbgprint(ex)
+            raise AuthError(info=str(ex), desc="", code=AuthError.CONNECTIONERROR)
 
     def save(self, never_expire=False):
         """
@@ -146,8 +146,8 @@ class IdentityMgr(object):
         try:
             return self._mgr.conn.ttl(PREFIX + self._uuid)
         except Exception as ex:
-            dbgprint(ex)
-            raise AuthError(ex, desc="", code=10)
+            ##dbgprint(ex)
+            raise AuthError(info=str(ex), desc="", code=AuthError.CONNECTIONERROR)
 
     @property
     def identity(self) -> dict:
@@ -160,9 +160,11 @@ class IdentityMgr(object):
             if self._identity is None:
                 self._get()
             return self._identity
+        except AuthError as ex:
+                raise ex
         except Exception as ex:
-            dbgprint(ex)
-            raise AuthError(ex)
+            ##dbgprint(ex)
+            raise AuthError(info=str(ex), desc="", code=AuthError.UNDEFINED)
 
     @property
     def user(self) -> str:
@@ -177,9 +179,12 @@ class IdentityMgr(object):
                 self._get()
             self._user = self._identity.get("user", {}).get("id")
             return self._user
+
+        except AuthError as ex:
+            raise ex
         except Exception as ex:
-            dbgprint(ex)
-            raise AuthError(ex, desc="", code=10)
+            ##dbgprint(ex)
+            raise AuthError(info=str(ex), desc="", code=AuthError.UNDEFINED)
 
     @property
     def full_perms(self) -> List[List]:
@@ -195,8 +200,8 @@ class IdentityMgr(object):
             return self._fullperms
 
         except Exception as ex:
-            dbgprint(ex)
-            raise AuthError(ex, desc="", code=10)
+            ##dbgprint(ex)
+            raise AuthError(info=str(ex), desc="", code=AuthError.UNDEFINED)
 
     @property
     def perms(self) -> List[List]:
@@ -211,8 +216,8 @@ class IdentityMgr(object):
                 self._perms = json.loads(zlib.decompress(binascii.a2b_base64(self._compressed_perms)))
             return self._perms
         except Exception as ex:
-            dbgprint(ex)
-            raise AuthError(ex, desc="", code=10)
+            ##dbgprint(ex)
+            raise AuthError(info=str(ex), desc="", code=AuthError.UNDEFINED)
 
     @perms.setter
     def perms(self, newperms: List[List]):
@@ -230,8 +235,8 @@ class IdentityMgr(object):
             self._modified = True
 
         except Exception as ex:
-            dbgprint(ex)
-            raise AuthError(ex, desc="", code=10)
+            ##dbgprint(ex)
+            raise AuthError(info=str(ex), desc="", code=AuthError.UNDEFINED)
 
     def restore_full_perms(self):
         self._identity["user"]["perms"] = self._fullcompressed_perms
@@ -281,8 +286,8 @@ class IdentityMgr(object):
                                         return True
             return False
         except Exception as ex:
-            dbgprint(ex)
-            raise AuthError(ex, desc="", code=10)
+            ##dbgprint(ex)
+            raise AuthError(info=str(ex), desc="", code=10)
 
     def set_perms(self, newperms: List[List], store: bool = True):
         """
@@ -296,10 +301,10 @@ class IdentityMgr(object):
             check_action = check_per[6]
             if not self.can(action=check_action, objtype=check_objtype, objid=check_objid, objdef=check_objdef):
                 raise AuthError(
-                    "action %s, on %s %s %s cannot be perfomed by user"
+                    info="action %s, on %s %s %s cannot be perfomed by user"
                     % (check_action, check_objtype, check_objdef, check_objid),
                     desc="",
-                    code=1,
+                    code=AuthError.FORBIDDEN,
                 )
         self.perms = newperms
         if store:
@@ -315,7 +320,7 @@ class IdentityMgr(object):
         :param expire_time: [optional] det expire time in seconds
         """
 
-        dbgprint(uuid=uuid, identity=identity)
+        ##dbgprint(uuid=uuid, identity=identity)
         idmgr = IdentityMgr()
         idmgr._uuid = uuid
         idmgr._expire = expire_time if type(expire_time) == int else EXPIRE
@@ -362,7 +367,7 @@ class IdentityMgr(object):
             data["ttl"] = imgr.ttl
 
 
-        dbgprint(result=data)
+        ##dbgprint(result=data)
         return data
 
     @staticmethod
@@ -377,15 +382,15 @@ class IdentityMgr(object):
                 try:
                     identity = redismanager.conn.get(key)
                 except Exception as ex:
-                    dbgprint(ex)
+                    ##dbgprint(ex)
                     continue
                 data = pickle.loads(identity)
                 data["ttl"] = redismanager.conn.ttl(key)
                 res.append(data)
             return res
         except Exception as ex:
-            dbgprint(ex)
-            raise AuthError(info=ex, desc="No identities found")
+            ##dbgprint(ex)
+            raise AuthError(info=str(ex), desc="No identities found", code=AuthError.UNDEFINED)
 
     @staticmethod
     def factory(
@@ -400,21 +405,24 @@ class IdentityMgr(object):
             if redismanager is not None:
                 ret._mgr = redismanager
             elif apimanager is not None:
-                ret.expire = apimanager.expire
+                ret.set_expire(apimanager.expire)
                 ret._mgr = apimanager.redis_identity_manager
             elif module is not None:
-                ret.expire = module.api_manager.expire
+                ret.set_expire(module.api_manager.expire)
                 ret._mgr = module.api_manager.redis_identity_manager
             elif controller is not None:
+                ret.set_expire(controller.module.api_manager.expire)
                 ret._mgr = controller.module.api_manager.redis_identity_manager
-                ret.expire = controller.module.api_manager.expire
             else:
-                raise AuthError("cannot find a redis connection", desc="", code=10)
+                raise AuthError(info="cannot find a redis connection", desc="", code=AuthError.CONNECTIONERROR)
+
+            ##dbgprint( idmgr=ret),
             ret._get()
+            ##dbgprint( idmgr=ret),
             return ret
         except Exception as ex:
-            dbgprint(ex)
-            raise AuthError(info=ex, desc="", code=10)
+            ##dbgprint(ex)
+            raise AuthError(info=ex, desc="", code=AuthError.PASSWORDEXPIRED)
 
 
 def identity_mgr_factory(
