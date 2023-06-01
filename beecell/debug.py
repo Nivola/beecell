@@ -52,8 +52,8 @@ def dbgprint(*args, **kwargs):
     def p(label, value):
         if isinstance(value, Exception):
             # Print exception information and stack trace entries from traceback object tb to file. This differs from print_tb() in the following ways:
-            # traceback.print_exception(type(value), value, None)
             print("exception", type(value), value, sep=":")
+            traceback.print_exc()
         else:
             print(label, type(value), value, sep=":")
 
