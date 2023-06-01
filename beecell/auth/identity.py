@@ -97,8 +97,8 @@ class IdentityMgr(object):
                 self._compressed_perms = self._identity.get("user", {}).get("perms")
                 self._fullcompressed_perms = self._identity["fullperms"]
 
-            if update_ttl:
-                self.reset_ttl()
+                if update_ttl:
+                    self.reset_ttl()
             else:
                 raise AuthError("Identity %s does not exist or is expired" % self._uuid, desc="", code=1)
         except Exception as ex:
