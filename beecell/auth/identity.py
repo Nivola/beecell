@@ -27,7 +27,7 @@ class IdentityMgr(object):
 
     def __init__(self) -> None:
         self._user: str = None
-        self._expire = None
+        self._expire = EXPIRE
         self._uuid: str = None
         self._mgr: RedisManager = None
         self._identity: dict = None
@@ -49,11 +49,10 @@ class IdentityMgr(object):
 
     @property
     def expire(self) -> int:
-        return self._expire if type(self._expire) == int else EXPIRE
+        return self._expire
 
-    @expire.setter
-    def expire(self, value):
-        self._expire = value
+    def set_expire(self, value):
+        self._expire = value if type(value) == int else EXPIRE
 
     def _store(self, never_expire=False):
         """Set beehive identity
@@ -62,7 +61,7 @@ class IdentityMgr(object):
         """
         key_value = pickle.dumps(self._identity)
         user = self._identity.get("user", {}).get("id")
-        self._mgr.conn.setex(PREFIX + self._uuid, self.expire, key_value)
+        self._mgr.conn.setex(PREFIX + self._uuid, self._expire, key_value)
         # add identity to identity user index
         self._mgr.conn.lpush(PREFIX_INDEX + user, self._uuid)
         # set index expire time
@@ -111,7 +110,8 @@ class IdentityMgr(object):
         :raises AuthError: raise :class:`AuthError`
         """
         from beecell.debug import dbgprint
-        dbgprint(never_expire=never_expire, uuid=self._uuid )
+
+        dbgprint(never_expire=never_expire, uuid=self._uuid)
         try:
             if never_expire:
                 self._mgr.conn.persist(PREFIX + self._uuid)
@@ -145,11 +145,6 @@ class IdentityMgr(object):
         except Exception as ex:
             raise AuthError(ex, desc="", code=10)
 
-    @ttl.setter
-    def ttl(self, value):
-        self._expire = value
-        self.reset_ttl()
-
     @property
     def identity(self) -> dict:
         """
@@ -163,12 +158,6 @@ class IdentityMgr(object):
             return self._identity
         except Exception as ex:
             raise AuthError(ex)
-
-    @identity.setter
-    def identity(self, identity: dict):
-        self._modified = True
-        self._identity = identity
-        self._compressed_perms = self._identity.get("user", {}).get("perms")
 
     @property
     def user(self) -> str:
@@ -315,12 +304,18 @@ class IdentityMgr(object):
         :param expire: if True identity key expire after xx seconds
         :param expire_time: [optional] det expire time in seconds
         """
+        from beecell.debug import dbgprint
+
+        dbgprint(uuid=uuid, identity=identity)
         idmgr = IdentityMgr()
         idmgr._uuid = uuid
-        idmgr.expire = expire_time
+        idmgr._expire = expire_time if type(expire_time) == int else EXPIRE
         idmgr._mgr = redismanager
-        idmgr.identity = identity
-        idmgr.save(never_expire=not expire)
+
+        idmgr._modified = True
+        idmgr._identity = identity
+        idmgr._compressed_perms = idmgr._identity.get("user", {}).get("perms")
+        idmgr._store(never_expire=not expire)
         return idmgr
 
         # if expire_time is None:
@@ -340,7 +335,7 @@ class IdentityMgr(object):
         # self.logger.info("Set identity %s in redis" % uid)
 
     @staticmethod
-    def get_identity(uuid, redismanager: RedisManager) -> dict:
+    def get_identity(uuid, redismanager: RedisManager, update_ttl: bool = False) -> dict:
         """Get identity
         if identity does not exixte raise AuthError
         :param uid: identity id
@@ -350,10 +345,15 @@ class IdentityMgr(object):
         imgr = IdentityMgr()
         imgr._uuid = uuid
         imgr._mgr = redismanager
-        imgr._get()
+        imgr._get(update_ttl=update_ttl)
         data = imgr._identity
-        data["ttl"] = imgr.ttl
+        if update_ttl:
+            data["ttl"] = imgr._expire
+        else:
+            data["ttl"] = imgr.ttl
+
         from beecell.debug import dbgprint
+
         dbgprint(result=data)
         return data
 
