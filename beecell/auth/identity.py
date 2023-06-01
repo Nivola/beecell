@@ -4,6 +4,7 @@ import zlib
 import json
 import pickle
 from beecell.db.manager import RedisManager
+from beecell.debug import dbgprint
 from .base import AuthError
 
 # from beecell.db.manager import RedisManager
@@ -81,6 +82,7 @@ class IdentityMgr(object):
             self._mgr.conn.lrem(PREFIX_INDEX + user, 1, self._uuid)
 
         except Exception as ex:
+            dbgprint(ex)
             raise AuthError(exdesc="", code=10)
 
     def _get(self, update_ttl: bool = True):
@@ -102,6 +104,7 @@ class IdentityMgr(object):
             else:
                 raise AuthError("Identity %s does not exist or is expired" % self._uuid, desc="", code=1)
         except Exception as ex:
+            dbgprint(ex)
             raise AuthError(ex, desc="", code=10)
 
     def reset_ttl(self, never_expire=False):
@@ -109,7 +112,6 @@ class IdentityMgr(object):
 
         :raises AuthError: raise :class:`AuthError`
         """
-        from beecell.debug import dbgprint
 
         dbgprint(never_expire=never_expire, uuid=self._uuid)
         try:
@@ -123,6 +125,7 @@ class IdentityMgr(object):
         # set index expire time
 
         except Exception as ex:
+            dbgprint(ex)
             raise AuthError(ex, desc="", code=10)
 
     def save(self, never_expire=False):
@@ -143,6 +146,7 @@ class IdentityMgr(object):
         try:
             return self._mgr.conn.ttl(PREFIX + self._uuid)
         except Exception as ex:
+            dbgprint(ex)
             raise AuthError(ex, desc="", code=10)
 
     @property
@@ -157,6 +161,7 @@ class IdentityMgr(object):
                 self._get()
             return self._identity
         except Exception as ex:
+            dbgprint(ex)
             raise AuthError(ex)
 
     @property
@@ -173,6 +178,7 @@ class IdentityMgr(object):
             self._user = self._identity.get("user", {}).get("id")
             return self._user
         except Exception as ex:
+            dbgprint(ex)
             raise AuthError(ex, desc="", code=10)
 
     @property
@@ -189,6 +195,7 @@ class IdentityMgr(object):
             return self._fullperms
 
         except Exception as ex:
+            dbgprint(ex)
             raise AuthError(ex, desc="", code=10)
 
     @property
@@ -204,6 +211,7 @@ class IdentityMgr(object):
                 self._perms = json.loads(zlib.decompress(binascii.a2b_base64(self._compressed_perms)))
             return self._perms
         except Exception as ex:
+            dbgprint(ex)
             raise AuthError(ex, desc="", code=10)
 
     @perms.setter
@@ -222,6 +230,7 @@ class IdentityMgr(object):
             self._modified = True
 
         except Exception as ex:
+            dbgprint(ex)
             raise AuthError(ex, desc="", code=10)
 
     def restore_full_perms(self):
@@ -272,6 +281,7 @@ class IdentityMgr(object):
                                         return True
             return False
         except Exception as ex:
+            dbgprint(ex)
             raise AuthError(ex, desc="", code=10)
 
     def set_perms(self, newperms: List[List], store: bool = True):
@@ -304,7 +314,6 @@ class IdentityMgr(object):
         :param expire: if True identity key expire after xx seconds
         :param expire_time: [optional] det expire time in seconds
         """
-        from beecell.debug import dbgprint
 
         dbgprint(uuid=uuid, identity=identity)
         idmgr = IdentityMgr()
@@ -352,7 +361,6 @@ class IdentityMgr(object):
         else:
             data["ttl"] = imgr.ttl
 
-        from beecell.debug import dbgprint
 
         dbgprint(result=data)
         return data
@@ -368,13 +376,15 @@ class IdentityMgr(object):
             for key in redismanager.conn.keys(PREFIX + "*"):
                 try:
                     identity = redismanager.conn.get(key)
-                except Exception:
+                except Exception as ex:
+                    dbgprint(ex)
                     continue
                 data = pickle.loads(identity)
                 data["ttl"] = redismanager.conn.ttl(key)
                 res.append(data)
             return res
         except Exception as ex:
+            dbgprint(ex)
             raise AuthError(info=ex, desc="No identities found")
 
     @staticmethod
@@ -403,6 +413,7 @@ class IdentityMgr(object):
             ret._get()
             return ret
         except Exception as ex:
+            dbgprint(ex)
             raise AuthError(info=ex, desc="", code=10)
 
 
