@@ -247,6 +247,7 @@ class IdentityMgr(object):
     def can(self, action: str = None, objtype: str = None, objid: str = None, objdef: str = None):
         """
         Verify if identity can execute an action over a certain object type.
+        usate solo 2-type 3-definition 4-objid 6-action
         |0-pid  |1-oid |2-type     |3-definition                         | 4-objid       | 5-aid|6-action
         |3554420|444305|'resource' |'Zabbix.Template'                    |'*//*'         |1     |'*'    |
         |3554348|444296|'container'|'Zabbix'                             |'*'            |1     |'*'    |
