@@ -78,7 +78,7 @@ class ElasticsearchHandler(Handler):
 
         from elasticsearch import Elasticsearch
 
-        self.client: Elasticsearch = client
+        self.elasticsearch: Elasticsearch = client
         self.index = index
         self.tags = tags
         self.custom_fields = custom_fields
@@ -96,16 +96,20 @@ class ElasticsearchHandler(Handler):
         output to the stream.
         """
         record.api_id = getattr(record, "api_id", "")
+        
         msg = self.format(record)
         date = datetime.now()
         msg["date"] = date
         msg["tags"] = self.tags
         msg.update(self.custom_fields)
+
         # ex. logstash-2024.03.23
         index = "%s-%s" % (self.index, date.strftime("%Y.%m.%d"))
+        logger.debug("_emit - index: %s" % index)
+
         # self.client.index(index=index, body=msg, request_timeout=5, doc_type="doc")
-        self.client._request_timeout = 5
-        self.client.index(index=index, body=msg)
+        self.elasticsearch._request_timeout = 5
+        self.elasticsearch.index(index=index, body=msg)
 
     def emit(self, record):
         """
