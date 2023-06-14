@@ -25,7 +25,11 @@ class Mailer(object):
         msg = MIMEMultipart()
         msg["Subject"] = subject
         msg["From"] = me
-        msg["To"] = you
+
+        if isinstance(you, str):
+            msg["To"] = you
+        elif isinstance(you, list):
+            msg["To"] = ", ".join(you)
 
         # Record the MIME types of both parts - text/plain and text/html.
         # Attach parts into message container.
