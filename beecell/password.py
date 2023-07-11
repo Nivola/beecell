@@ -59,10 +59,13 @@ def obscure_data(data, fields=None):
         return obscure_string(data, fields)
 
     for key, value in data.items():
+        
         if isinstance(value, dict):
             obscure_data(value, fields)
-        elif isinstance(data, str) or isinstance(data, bytes):
+
+        elif isinstance(value, str) or isinstance(value, bytes):
             for field in fields:
+                # print("%s - %s" % (key, field))
                 if key.lower().find(field) >= 0:
                     data[key] = "xxxxxx"
 
@@ -80,6 +83,13 @@ def obscure_string(data, fields=None):
         fields = ["password", "pwd", "passwd", "pass"]
 
     for field in fields:
-        if data.lower().find(field) >= 0:
-            data = "xxxxxx"
+        # logger.debug("+++++ obscure_string - %s - %s" % (type(data), type(field)))
+        if type(data) is bytes:
+            # logger.debug("+++++ obscure_string - data: %s" % (data))
+            if data.lower().find(str.encode(field)) >= 0:
+                data = "xxxxxx"    
+        
+        else:
+            if data.lower().find(field) >= 0:
+                data = "xxxxxx"
     return data
