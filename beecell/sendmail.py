@@ -11,6 +11,18 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 
+def check_email(email):
+    logger = logging.getLogger("beecell.sendmail")
+    regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+
+    import re
+    if re.fullmatch(regex, email):
+        logger.debug("Valid email: %s" % email)
+        return True
+    else:
+        logger.debug("Invalid email: %s" % email)
+        return False
+
 class Mailer(object):
     def __init__(self, mailserver, mailport=None, mail_login=None, mail_pw=None):
         self.logger = logging.getLogger(self.__class__.__module__ + "." + self.__class__.__name__)
