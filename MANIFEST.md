@@ -5,7 +5,7 @@ Flask-WTF==0.15.1
 psutil==5.8.0
 redis==3.5.3
 passlib==1.7.4
-PyMySQL==1.0.2
+pymysql==1.0.2
 ujson==4.1.0
 hiredis==2.0.0
 gevent==21.8.0
