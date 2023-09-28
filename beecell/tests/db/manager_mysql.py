@@ -21,7 +21,7 @@ class MysqlManagerTestCase(BeecellTestCase):
 
         db_uri = self.conf("mysql.conn")
         self.schema = self.conf("mysql.schema")
-        self.manager = MysqlManager(1, db_uri + "/" + self.schema, connect_timeout=10)
+        self.manager = MysqlManager(1, db_uri + "/" + self.schema, connect_timeout=30)
         self.manager.create_simple_engine()
 
     def tearDown(self):

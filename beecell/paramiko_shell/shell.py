@@ -53,7 +53,7 @@ class ParamikoShell(object):
         self.client = SSHClient()
         self.client.set_missing_host_key_policy(MissingHostKeyPolicy())
 
-        self.timeout = 10.0
+        self.timeout = 30.0
         self.host_user = user  # user used to connect in the host
         self.keepalive = 30
 
@@ -236,7 +236,7 @@ class ParamikoShell(object):
         :param dirname: nameof the directory
         :return: True if all is ok
         """
-        res = self.cmd("mkdir -p %s" % dirname, timeout=5.0)
+        res = self.cmd("mkdir -p %s" % dirname, timeout=30.0)
         if res.get("stderr") != "":
             return False
         return True
@@ -249,8 +249,8 @@ class ParamikoShell(object):
         :param group: directory group owner
         :return: True if all is ok
         """
-        res = self.cmd("chown -R $(id -u %s):%s %s" % (user, group, dirname), timeout=5.0)
-        # res = self.cmd('chown -R $(id -u %s) %s' % (user, dirname), timeout=5.0)
+        res = self.cmd("chown -R $(id -u %s):%s %s" % (user, group, dirname), timeout=30.0)
+        # res = self.cmd('chown -R $(id -u %s) %s' % (user, dirname), timeout=30.0)
         if res.get("stderr") != "":
             return False
         return True
@@ -262,7 +262,7 @@ class ParamikoShell(object):
         :param acl: directory acl
         :return: True if all is ok
         """
-        res = self.cmd("chmod -R %s %s" % (acl, dirname), timeout=5.0)
+        res = self.cmd("chmod -R %s %s" % (acl, dirname), timeout=30.0)
         if res.get("stderr") != "":
             return False
         return True

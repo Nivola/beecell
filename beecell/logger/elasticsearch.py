@@ -107,8 +107,8 @@ class ElasticsearchHandler(Handler):
         index = "%s-%s" % (self.index, date.strftime("%Y.%m.%d"))
         logger.debug("_emit - index: %s" % index)
 
-        # self.client.index(index=index, body=msg, request_timeout=5, doc_type="doc")
-        self.elasticsearch._request_timeout = 5
+        # self.client.index(index=index, body=msg, request_timeout=30, doc_type="doc")
+        self.elasticsearch._request_timeout = 30
         self.elasticsearch.index(index=index, body=msg)
 
     def emit(self, record):

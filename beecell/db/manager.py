@@ -168,7 +168,7 @@ class RedisManager(ConnectionManager):
     def __init__(
         self,
         redis_uri,
-        timeout=5,
+        timeout=30,
         max_connections=200,
         sentinels=None,
         sentinel_name=None,
@@ -578,7 +578,7 @@ class SqlManager(ConnectionManager):
     :param connect_timeout: connection timeout in seconds [default=5]
     """
 
-    def __init__(self, sql_id, db_uri, connect_timeout=5):
+    def __init__(self, sql_id, db_uri, connect_timeout=30):
         ConnectionManager.__init__(self)
 
         self.logger1 = logging.getLogger("sqlalchemy.pool")
@@ -1100,7 +1100,7 @@ class SqlManager(ConnectionManager):
 
 
 class MysqlManager(SqlManager):
-    def __init__(self, mysql_id, db_uri, connect_timeout=5):
+    def __init__(self, mysql_id, db_uri, connect_timeout=30):
         """
         :param mysql_id: mysql manager id
         :param db_uri: database connection string. Ex. mysql+pymysql://<user>:<pwd>@<host>:<port>/<db>
@@ -1681,7 +1681,7 @@ class MysqlManager(SqlManager):
 
 
 class PostgresManager(SqlManager):
-    def __init__(self, mysql_id, db_uri, connect_timeout=5):
+    def __init__(self, mysql_id, db_uri, connect_timeout=30):
         """
         :param mysql_id: mysql manager id
         :param db_uri: database connection string. Ex. mysql+pymysql://<user>:<pwd>@<host>:<port>/<db>

@@ -5,7 +5,7 @@ if __name__ == "__main__":
     uuid = "2a33d817-c215-4702-9c8e-ab88b22432e8"
     manager = RedisManager(
         "redis://:t5vo5ChFCCe8I1toguvOFXFUW1jU9WSJr4H13aNiOAV@dev-node06.tstsddc.csi.it:30185/0",
-        timeout=5,
+        timeout=30,
         max_connections=200,
     )
     idm = identity_mgr_factory(uuid, redismanager=manager)
