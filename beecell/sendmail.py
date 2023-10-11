@@ -15,6 +15,10 @@ def check_email(email):
     logger = logging.getLogger("beecell.sendmail")
     regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
 
+    if email is None:
+        logger.debug("Email None: %s" % email)
+        return False
+
     import re
     if re.fullmatch(regex, email):
         logger.debug("Valid email: %s" % email)

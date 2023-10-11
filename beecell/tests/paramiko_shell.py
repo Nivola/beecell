@@ -38,7 +38,7 @@ class ShellTestCase(BeecellTestCase):
     def test_run_tunnel_with_password(self):
         self.client = ParamikoShell(self.host, self.user, pwd=self.pwd, tunnel=self.tunnel)
         self.client.create_tunnel()
-        res = self.client.cmd("ls", timeout=5.0)
+        res = self.client.cmd("ls", timeout=30.0)
         self.logger.info(res)
         self.client.close_tunnel()
 
@@ -46,17 +46,17 @@ class ShellTestCase(BeecellTestCase):
         self.logger.info("connecting to host " + self.host + "...")
         self.client = ParamikoShell(self.host, self.user, pwd=self.pwd)
         self.logger.info("connection ok")
-        res = self.client.cmd("ls", timeout=5.0)
+        res = self.client.cmd("ls", timeout=30.0)
         self.logger.info(res)
 
     def test_run_with_keyfile(self):
         self.client = ParamikoShell(self.host, self.user, keyfile=self.keyfile)
-        res = self.client.cmd("ls", timeout=5.0)
+        res = self.client.cmd("ls", timeout=30.0)
         self.logger.info(res)
 
     def test_run_with_keystring(self):
         self.client = ParamikoShell(self.host, self.user, keystring=self.key_string)
-        res = self.client.cmd("ls", timeout=5.0)
+        res = self.client.cmd("ls", timeout=30.0)
         self.logger.info(res)
 
 

@@ -14,7 +14,7 @@ class LdapAuth(AbstractAuth):
         host,
         user_class,
         port=None,
-        timeout=20,
+        timeout=30,
         ssl=False,
         dn="DC=users",
         search_filter=None,
