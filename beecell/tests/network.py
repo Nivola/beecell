@@ -3,7 +3,6 @@
 # (C) Copyright 2018-2022 CSI-Piemonte
 
 from beecell.network import InternetProtocol
-from beecell.sendmail import Mailer
 from beecell.tests.test_util import runtest
 from beecell.tests.test_util import BeecellTestCase
 

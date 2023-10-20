@@ -2,7 +2,6 @@
 #
 # (C) Copyright 2018-2022 CSI-Piemonte
 
-from inspect import getmembers, isclass
 from struct import pack
 from logging import getLogger
 from socket import inet_ntoa

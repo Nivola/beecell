@@ -2,8 +2,6 @@
 #
 # (C) Copyright 2018-2022 CSI-Piemonte
 
-from inspect import isclass
-
 
 def getmembers(obj, predicate=None):
     """Return all members of an object as (name, value) pairs sorted by name.

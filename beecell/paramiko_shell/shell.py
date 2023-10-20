@@ -15,7 +15,7 @@ import sys
 from six import StringIO, ensure_text, ensure_binary
 from paramiko import RSAKey
 from paramiko.client import SSHClient, MissingHostKeyPolicy
-from gevent.os import make_nonblocking, nb_read, nb_write
+from gevent.os import make_nonblocking, nb_write
 from sshtunnel import SSHTunnelForwarder
 
 try:
@@ -163,16 +163,6 @@ class ParamikoShell(object):
         self.tunnel.stop()
 
     def cmd1(self, cmd):
-        from six import b, u, ensure_text
-
-        try:
-            import termios
-            import tty
-
-            has_termios = True
-        except ImportError:
-            has_termios = False
-
         channel = self.client.get_transport().open_session()
         channel.settimeout(5)
         channel.setblocking(1)
