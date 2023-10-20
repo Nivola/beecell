@@ -2,8 +2,8 @@
 #
 # (C) Copyright 2018-2022 CSI-Piemonte
 
-import networkx as nx
 from random import randint
+import networkx as nx
 
 
 class GridLayout(object):

@@ -2,8 +2,8 @@
 #
 # (C) Copyright 2018-2022 CSI-Piemonte
 
-from six import b, ensure_text, ensure_binary
 from logging import getLogger
+from six import b, ensure_text, ensure_binary
 from cryptography.fernet import Fernet
 
 logger = getLogger(__name__)

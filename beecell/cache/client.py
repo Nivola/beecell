@@ -2,15 +2,13 @@
 #
 # (C) Copyright 2018-2022 CSI-Piemonte
 
-from beecell.simple import jsonDumps
-
 import logging
-import ujson as json
-from beecell.simple import truncate
-import redis
 import pickle
 import codecs
 from typing import Any
+import ujson as json
+import redis
+from beecell.simple import truncate, jsonDumps
 
 
 class CacheClient(object):

@@ -2,8 +2,8 @@
 #
 # (C) Copyright 2018-2022 CSI-Piemonte
 
-from .base import AuthError, AbstractAuth
 from beecell.db import QueryError
+from .base import AuthError, AbstractAuth
 
 
 class DatabaseAuth(AbstractAuth):

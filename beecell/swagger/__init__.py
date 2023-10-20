@@ -2,13 +2,13 @@
 #
 # (C) Copyright 2018-2022 CSI-Piemonte
 
-from flex.core import validate_api_call
 from logging import getLogger
+from copy import deepcopy
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 from apispec_webframeworks.flask import FlaskPlugin
 from marshmallow.validate import OneOf
-from copy import deepcopy
+from flex.core import validate_api_call
 
 logger = getLogger(__name__)
 

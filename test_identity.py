@@ -1,5 +1,5 @@
 from beecell.db.manager import RedisManager
-from beecell.auth import  IdentityMgr , identity_mgr_factory
+from beecell.auth import  identity_mgr_factory
 
 if __name__ == "__main__":
     uuid = "2a33d817-c215-4702-9c8e-ab88b22432e8"

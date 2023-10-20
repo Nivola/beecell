@@ -3,7 +3,6 @@
 # (C) Copyright 2018-2022 CSI-Piemonte
 
 from inspect import isclass
-from re import compile as re_compile
 
 
 def getmembers(obj, predicate=None):

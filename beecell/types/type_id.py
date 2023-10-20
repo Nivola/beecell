@@ -7,9 +7,9 @@ from os import urandom
 from string import ascii_letters, digits
 from uuid import uuid4
 from random import choice
-from six import ensure_text
 from re import match
 from logging import getLogger
+from six import ensure_text
 
 logger = getLogger(__name__)
 

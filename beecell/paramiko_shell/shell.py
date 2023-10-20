@@ -7,14 +7,14 @@
 import os
 from os import popen
 from tempfile import NamedTemporaryFile
-from paramiko.client import SSHClient, MissingHostKeyPolicy
-from paramiko import RSAKey
 from logging import getLogger
-from six import StringIO, ensure_text, ensure_binary
 import fcntl
 import termios
 import struct
 import sys
+from six import StringIO, ensure_text, ensure_binary
+from paramiko import RSAKey
+from paramiko.client import SSHClient, MissingHostKeyPolicy
 from gevent.os import make_nonblocking, nb_read, nb_write
 from sshtunnel import SSHTunnelForwarder
 

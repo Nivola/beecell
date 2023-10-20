@@ -2,11 +2,9 @@
 #
 # (C) Copyright 2018-2022 CSI-Piemonte
 
-from beecell.simple import jsonDumps
-
-import json
 from bson import BSON
 from flask import request
+from beecell.simple import jsonDumps
 
 
 def get_error(exception, code, data, mime="json"):

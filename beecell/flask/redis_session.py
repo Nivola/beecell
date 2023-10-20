@@ -4,7 +4,6 @@
 
 import pickle
 import logging
-from datetime import timedelta
 from uuid import uuid4
 from redis import Redis
 from werkzeug.datastructures import CallbackDict

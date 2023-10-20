@@ -4,9 +4,9 @@
 
 
 import logging
-import pika
 import time
 import pickle
+import pika
 from pika.exceptions import AMQPError, AMQPConnectionError
 
 

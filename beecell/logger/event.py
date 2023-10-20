@@ -2,13 +2,12 @@
 #
 # (C) Copyright 2018-2022 CSI-Piemonte
 
-from beecell.simple import jsonDumps
-
 import time
 import json
 import logging
 import multiprocessing
 import threading
+from beecell.simple import jsonDumps
 
 
 class Event(object):

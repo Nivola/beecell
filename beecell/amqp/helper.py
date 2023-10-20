@@ -3,9 +3,9 @@
 # (C) Copyright 2018-2022 CSI-Piemonte
 
 
-import pika
-import pickle
 import logging
+import pickle
+import pika
 
 logger = logging.getLogger(__name__)
 

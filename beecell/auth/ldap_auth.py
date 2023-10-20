@@ -2,8 +2,8 @@
 #
 # (C) Copyright 2018-2022 CSI-Piemonte
 
-import ldap
 from six import ensure_str
+import ldap
 from beecell.simple import truncate
 from .base import AuthError, AbstractAuth
 

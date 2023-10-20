@@ -4,18 +4,18 @@
 
 import socket
 import os
-import paramiko
-from logging import getLogger
-from six.moves import http_client
-import urllib3
-import ujson as json
 import base64
 import ssl
 import re
-from beecell.simple import truncate
-from urllib3.util.ssl_ import create_urllib3_context
+from logging import getLogger
 from sys import version_info
+import paramiko
+import urllib3
+from urllib3.util.ssl_ import create_urllib3_context
+from six.moves import http_client
 from six.moves.urllib.parse import urlparse
+import ujson as json
+from beecell.simple import truncate
 
 urllib3.disable_warnings()
 

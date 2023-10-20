@@ -2,13 +2,13 @@
 #
 # (C) Copyright 2018-2022 CSI-Piemonte
 
-import psutil
 from logging import getLogger
 from time import gmtime, strftime
 from datetime import datetime
+import traceback
+import psutil
 from beecell.server.uwsgi_server.wrapper import uwsgi_util
 from beecell.simple import truncate
-import traceback
 
 
 class UwsgiManagerError(Exception):

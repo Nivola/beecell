@@ -3,8 +3,8 @@
 # (C) Copyright 2018-2022 CSI-Piemonte
 
 import logging
+from typing import List
 from flask_login import UserMixin
-from typing import List, Union
 
 
 class SystemUser(UserMixin):

@@ -2,10 +2,10 @@
 #
 # (C) Copyright 2018-2022 CSI-Piemonte
 
-from yaml import full_load
-from ujson import loads
-from six import b
 import xml.etree.ElementTree as et
+from yaml import full_load
+from six import b
+from ujson import loads
 
 # from xmltodict import parse as xmltodict
 

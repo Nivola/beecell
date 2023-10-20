@@ -2,9 +2,9 @@
 #
 # (C) Copyright 2018-2022 CSI-Piemonte
 
+from base64 import b64decode, b64encode
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
-from base64 import b64decode, b64encode
 from six import ensure_binary, ensure_text
 
 
