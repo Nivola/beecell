@@ -9,7 +9,7 @@ import ssl
 import re
 from logging import getLogger
 from sys import version_info
-import paramiko
+from paramiko import SSHClient, MissingHostKeyPolicy 
 import urllib3
 from urllib3.util.ssl_ import create_urllib3_context
 from six.moves import http_client
@@ -144,8 +144,8 @@ class RemoteClient(object):
         :param port: port to connect [default=22]
         """
         try:
-            client = paramiko.SSHClient()
-            client.set_missing_host_key_policy(paramiko.MissingHostKeyPolicy())
+            client = SSHClient()
+            client.set_missing_host_key_policy(MissingHostKeyPolicy())
             client.connect(
                 self.conn.get("host"),
                 self.conn.get("port", port),
