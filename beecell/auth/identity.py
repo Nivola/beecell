@@ -83,7 +83,7 @@ class IdentityMgr(object):
 
         except Exception as ex:
             ##dbgprint(ex)
-            raise AuthError(info=str(ex),  desc="", code=AuthError.CONNECTIONERROR)
+            raise AuthError(info=str(ex), desc="", code=AuthError.CONNECTIONERROR)
 
     def _get(self, update_ttl: bool = True):
         """Get identity from redis
@@ -102,7 +102,9 @@ class IdentityMgr(object):
                 if update_ttl:
                     self.reset_ttl()
             else:
-                raise AuthError(info="Identity %s does not exist or is expired" % self._uuid, desc="", code=AuthError.TOKENEXPIRED)
+                raise AuthError(
+                    info="Identity %s does not exist or is expired" % self._uuid, desc="", code=AuthError.TOKENEXPIRED
+                )
         except Exception as ex:
             ##dbgprint(ex)
             raise AuthError(info=str(ex), desc="", code=AuthError.UNDEFINED)
@@ -161,7 +163,7 @@ class IdentityMgr(object):
                 self._get()
             return self._identity
         except AuthError as ex:
-                raise ex
+            raise ex
         except Exception as ex:
             ##dbgprint(ex)
             raise AuthError(info=str(ex), desc="", code=AuthError.UNDEFINED)
@@ -366,7 +368,6 @@ class IdentityMgr(object):
             data["ttl"] = imgr._expire
         else:
             data["ttl"] = imgr.ttl
-
 
         ##dbgprint(result=data)
         return data

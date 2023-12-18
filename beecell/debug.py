@@ -5,6 +5,7 @@ import traceback
 import os
 import sys
 import logging
+
 CODE_DBG_PORT = 5678
 
 
@@ -39,14 +40,14 @@ def debug_cmp():
     """Check configurations for debugging and enable debug if needed"""
     # debugpy_enabled = uwsgi_util.opt.get("debugpy_enabled", None)
 
-    debugpy_uwsgi = os.environ.get("DEBUG_UWSGI", "NO")== "YES"
-    debugpy_worker = os.environ.get("DEBUG_WORKER", "NO")== "YES"
+    debugpy_uwsgi = os.environ.get("DEBUG_UWSGI", "NO") == "YES"
+    debugpy_worker = os.environ.get("DEBUG_WORKER", "NO") == "YES"
     debugpy_enabled = debugpy_uwsgi or debugpy_worker
     ####################################
     # if debugpy_enabled != None and debugpy_enabled and not bool(uwsgi_util.opt.get("master", False)):
     if debugpy_enabled:
-        dbgport: int = int (os.environ.get("DEBUG_PORT", 5680))
-        dbgtimeout: int = int (os.environ.get("DEBUG_TIMEOUT", 120))
+        dbgport: int = int(os.environ.get("DEBUG_PORT", 5680))
+        dbgtimeout: int = int(os.environ.get("DEBUG_TIMEOUT", 120))
         # 1-ENABLE GEVENT SUPPORT
         os.environ["GEVENT_SUPPORT"] = "True"
         # 2-GET POD NAME
@@ -62,8 +63,8 @@ def debug_cmp():
             import debugpy
 
             debugpy_logger.debug("🐞⚡️debugpy⚡️ ❱❱❱ debugging mode ENABLED for POD %s", hostname)
-            debugpy.listen(("0.0.0.0", dbgport ))
-            debugpy_logger.debug("🐞⚡️debugpy⚡️ ❱❱❱ Listening at 0.0.0.0:%s 🤔 ❌", dbgport )
+            debugpy.listen(("0.0.0.0", dbgport))
+            debugpy_logger.debug("🐞⚡️debugpy⚡️ ❱❱❱ Listening at 0.0.0.0:%s 🤔 ❌", dbgport)
             # 6- TASK TIME FOR WAITING CLIENT TO CONNECT
             # debugpy.wait_for_client()
             # class T(threading.Thread):
@@ -76,7 +77,6 @@ def debug_cmp():
             debugpy_logger.debug("🐞⚡️debugpy⚡️ ❱❱❱ Debugger Client Connected 🤓 ✅")
         except RuntimeError:
             debugpy_logger.error("🐞⚡️debugpy⚡️ ❱❱❱ - Got Runtime error.")
-
 
 
 def dbgprint(*args, **kwargs):
@@ -110,5 +110,6 @@ def dbgprint(*args, **kwargs):
         # print(k, type(kwargs[k]), kwargs[k], sep=":")
     print("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||")
 
-if os.environ.get("DEBUG_ENABLED")== "YES":
+
+if os.environ.get("DEBUG_ENABLED") == "YES":
     debug_cmp()

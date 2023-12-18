@@ -96,7 +96,7 @@ class ElasticsearchHandler(Handler):
         output to the stream.
         """
         record.api_id = getattr(record, "api_id", "")
-        
+
         msg = self.format(record)
         date = datetime.now()
         msg["date"] = date
