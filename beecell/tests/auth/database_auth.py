@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2022 CSI-Piemonte
+# (C) Copyright 2018-2023 CSI-Piemonte
 
 from sqlalchemy import Column, String, Integer, Boolean
 from sqlalchemy.ext.declarative import declarative_base
@@ -11,18 +11,16 @@ from beecell.tests.test_util import BeecellTestCase, runtest
 import bcrypt
 
 
-tests = [
-    'test_login'
-]
+tests = ["test_login"]
 
 session = None
 Base = declarative_base()
 
 
 class User(Base):
-    """User
-    """
-    __tablename__ = 'user'
+    """User"""
+
+    __tablename__ = "user"
 
     id = Column(Integer, primary_key=True)
     uuid = Column(String(50), unique=True)
@@ -35,9 +33,9 @@ class User(Base):
     def _check_password(self, password):
         # verifying the password
         if is_encrypted(self.password):
-            res = (decrypt_data(self.password) == password.encode('utf-8'))
+            res = decrypt_data(self.password) == password.encode("utf-8")
         else:
-            res = bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
+            res = bcrypt.checkpw(password.encode("utf-8"), self.password.encode("utf-8"))
         return res
 
 
@@ -57,11 +55,11 @@ class DbAuthTestCase(BeecellTestCase):
     def setUp(self):
         BeecellTestCase.setUp(self)
 
-        self.manager = SqlManager(1, self.conf('authdb.conn'), connect_timeout=self.conf('authdb.timeout'))
+        self.manager = SqlManager(1, self.conf("authdb.conn"), connect_timeout=self.conf("authdb.timeout"))
         self.manager.create_simple_engine()
         self.auth_provider = DatabaseAuth(AuthDbManager, self.manager, SystemUser)
-        self.user = self.conf('authdb.user')
-        self.password = self.conf('authdb.pwd')
+        self.user = self.conf("authdb.user")
+        self.password = self.conf("authdb.pwd")
 
     def tearDown(self):
         BeecellTestCase.tearDown(self)
@@ -74,5 +72,5 @@ class DbAuthTestCase(BeecellTestCase):
         self.manager.release_session(session)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runtest(DbAuthTestCase, tests)

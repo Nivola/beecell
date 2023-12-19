@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2022 CSI-Piemonte
+# (C) Copyright 2018-2023 CSI-Piemonte
 
 import time
 import logging
@@ -10,9 +10,9 @@ from beecell.server.uwsgi_server.wrapper import uwsgi_util
 
 
 def watch(func):
-    """Decorator function used to capture elapsed time. Configure 'watch' logger to save data.
-    """
-    def inner(*args, **kwargs): #1
+    """Decorator function used to capture elapsed time. Configure 'watch' logger to save data."""
+
+    def inner(*args, **kwargs):  # 1
         # get start time
         start = time.time()
 
@@ -24,16 +24,25 @@ def watch(func):
         uw_rid = uwsgi_util.request_id()
 
         # execute inner function
-        ret = func(*args, **kwargs) #2
+        ret = func(*args, **kwargs)  # 2
 
         # calculate elasped time
         elapsed = round(time.time() - start, 5)
 
         # log execution info in watch logger
-        info = '%s:%s - %s %s %s - %s:%s - %s' % (cp.ident, ct.ident, uw_pid, uw_mid, uw_rid, func.__module__,
-                                                  func.func_name, elapsed)
+        info = "%s:%s - %s %s %s - %s:%s - %s" % (
+            cp.ident,
+            ct.ident,
+            uw_pid,
+            uw_mid,
+            uw_rid,
+            func.__module__,
+            func.func_name,
+            elapsed,
+        )
 
         # log info in runtime logger
-        logging.getLogger('beehive.util.watch').info(info)
+        logging.getLogger("beehive.util.watch").info(info)
         return ret
+
     return inner

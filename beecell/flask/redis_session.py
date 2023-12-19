@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2022 CSI-Piemonte
+# (C) Copyright 2018-2023 CSI-Piemonte
 
 import pickle
 import logging
@@ -15,7 +15,7 @@ class RedisSession(CallbackDict, SessionMixin):
     def __init__(self, initial=None, sid=None, new=False):
         def on_update(self):
             self.modified = True
-            
+
         CallbackDict.__init__(self, initial, on_update)
         self.sid = sid
         self.new = new
@@ -27,9 +27,9 @@ class RedisSessionInterface(SessionInterface):
     session_class = RedisSession
     session_duration = 1800
 
-    def __init__(self, redis=None, prefix='session:'):
-        self.logger = logging.getLogger(self.__class__.__module__ + '.'+self.__class__.__name__)
-        
+    def __init__(self, redis=None, prefix="session:"):
+        self.logger = logging.getLogger(self.__class__.__module__ + "." + self.__class__.__name__)
+
         if redis is None:
             redis = Redis()
 
@@ -60,33 +60,44 @@ class RedisSessionInterface(SessionInterface):
         if not session:
             self.redis.delete(self.prefix + session.sid)
             if session.modified:
-                response.delete_cookie(app.session_cookie_name,
-                                       domain=domain)
+                response.delete_cookie(app.session_cookie_name, domain=domain)
             return
-        
+
         redis_exp = self.get_redis_expiration_time(app, session)
         cookie_exp = self.get_expiration_time(app, session)
         val = self.serializer.dumps(dict(session))
         self.redis.setex(self.prefix + session.sid, redis_exp, val)
-        response.set_cookie(app.session_cookie_name, session.sid, expires=cookie_exp, httponly=True, domain=domain)
+        response.set_cookie(
+            app.session_cookie_name,
+            session.sid,
+            expires=cookie_exp,
+            httponly=True,
+            domain=domain,
+        )
 
     def save_session2(self, app, session, response):
         domain = self.get_cookie_domain(app)
         path = self.get_cookie_path(app)
         if not session:
             if session.modified:
-                response.delete_cookie(app.session_cookie_name,
-                                       domain=domain, path=path)
+                response.delete_cookie(app.session_cookie_name, domain=domain, path=path)
             return
         httponly = self.get_cookie_httponly(app)
         secure = self.get_cookie_secure(app)
         redis_exp = self.get_redis_expiration_time(app, session)
         expires = self.get_expiration_time(app, session)
         val = self.serializer.dumps(dict(session))
-        self.redis.setex(self.prefix + session.sid, redis_exp, val)        
-        
-        response.set_cookie(app.session_cookie_name, val, expires=expires, httponly=httponly,
-                            domain=domain, path=path, secure=secure)
+        self.redis.setex(self.prefix + session.sid, redis_exp, val)
+
+        response.set_cookie(
+            app.session_cookie_name,
+            val,
+            expires=expires,
+            httponly=httponly,
+            domain=domain,
+            path=path,
+            secure=secure,
+        )
 
     def remove_session(self, session, sid=None):
         if session is None:
@@ -101,14 +112,14 @@ class RedisSessionInterface(SessionInterface):
             return data
         else:
             return None
-        
+
     def list_sessions(self):
         sessions = []
-        for key in self.redis.keys('%s*' % self.prefix):
+        for key in self.redis.keys("%s*" % self.prefix):
             val = self.redis.get(key)
             data = self.serializer.loads(val)
-            data['ttl'] = self.redis.ttl(key)
-            data['sid'] = key[len(self.prefix):]
+            data["ttl"] = self.redis.ttl(key)
+            data["sid"] = key[len(self.prefix) :]
             sessions.append(data)
-        
+
         return sessions

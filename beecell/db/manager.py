@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2022 CSI-Piemonte
+# (C) Copyright 2018-2023 CSI-Piemonte
 
 import logging
 from sqlalchemy.exc import OperationalError
@@ -52,44 +52,56 @@ def parse_redis_uri(uri):
 
     """
     # redis cluster
-    if uri.find('redis-cluster') >= 0:
-        redis_uri = uri.replace('redis-cluster://', '')
-        host_ports = redis_uri.split(',')
+    if uri.find("redis-cluster") >= 0:
+        redis_uri = uri.replace("redis-cluster://", "")
+        host_ports = redis_uri.split(",")
         cluster_nodes = []
         for host_port in host_ports:
-            host, port = host_port.split(':')
-            cluster_nodes.append({'host': host, 'port': port})
-        res = {'type': 'cluster', 'nodes': cluster_nodes}
+            host, port = host_port.split(":")
+            cluster_nodes.append({"host": host, "port": port})
+        res = {"type": "cluster", "nodes": cluster_nodes}
 
     # redis with sentinel
-    elif uri.find('redis-sentinel') >= 0:
+    elif uri.find("redis-sentinel") >= 0:
         pwd = None
-        if uri.find('@') > 0:
-            redis_uri = uri.replace('redis-sentinel://:', '')
-            pwd, redis_uri = redis_uri.split('@')
+        if uri.find("@") > 0:
+            redis_uri = uri.replace("redis-sentinel://:", "")
+            pwd, redis_uri = redis_uri.split("@")
         else:
-            redis_uri = uri.replace('redis-sentinel://', '')
-        hosts, group, port = redis_uri.split(':')
-        port, db = port.split('/')
-        res = {'type': 'sentinel', 'hosts': hosts.split(','), 'port': int(port), 'db': int(db), 'pwd': pwd,
-               'group': group}
+            redis_uri = uri.replace("redis-sentinel://", "")
+        hosts, group, port = redis_uri.split(":")
+        port, db = port.split("/")
+        res = {
+            "type": "sentinel",
+            "hosts": hosts.split(","),
+            "port": int(port),
+            "db": int(db),
+            "pwd": pwd,
+            "group": group,
+        }
 
     # single redis node
-    elif uri.find('redis') >= 0:
+    elif uri.find("redis") >= 0:
         pwd = None
-        if uri.find('@') > 0:
-            redis_uri = uri.replace('redis://:', '')
-            pwd, redis_uri = redis_uri.split('@')
+        if uri.find("@") > 0:
+            redis_uri = uri.replace("redis://:", "")
+            pwd, redis_uri = redis_uri.split("@")
         else:
-            redis_uri = uri.replace('redis://', '')
-        host, port = redis_uri.split(':')
-        port, db = port.split('/')
-        res = {'type': 'single', 'host': host, 'port': int(port), 'db': int(db), 'pwd': pwd}
+            redis_uri = uri.replace("redis://", "")
+        host, port = redis_uri.split(":")
+        port, db = port.split("/")
+        res = {
+            "type": "single",
+            "host": host,
+            "port": int(port),
+            "db": int(db),
+            "pwd": pwd,
+        }
 
     # single redis node
     else:
         host, port, db = uri.split(";")
-        res = {'type': 'single', 'host': host, 'port': int(port), 'db': int(db)}
+        res = {"type": "single", "host": host, "port": int(port), "db": int(db)}
 
     return res
 
@@ -115,23 +127,23 @@ def compile_query(query):
 
 
 class ConnectionManager(object):
-    """Abstract Connection manager
-    """
+    """Abstract Connection manager"""
+
     def __init__(self):
-        self.logger = logging.getLogger(self.__class__.__module__+ '.' + self.__class__.__name__)
+        self.logger = logging.getLogger(self.__class__.__module__ + "." + self.__class__.__name__)
 
     def get_session(self):
         """Open a database session.
-        
+
         :return: session object
         """
         return NotImplemented
-        
+
     def release_session(self, session):
         """Close active database session.
-        
+
         :param session: active session to close
-        """        
+        """
         return NotImplemented
 
 
@@ -152,10 +164,20 @@ class RedisManager(ConnectionManager):
         - ``localhost:6379:1``
         - ``redis-cluster://localhost:6379,localhost:6380``
     """
-    def __init__(self, redis_uri, timeout=5, max_connections=200, sentinels=None, sentinel_name=None,
-                 sentinel_pwd=None, db=0, pwd=None):
+
+    def __init__(
+        self,
+        redis_uri,
+        timeout=30,
+        max_connections=200,
+        sentinels=None,
+        sentinel_name=None,
+        sentinel_pwd=None,
+        db=0,
+        pwd=None,
+    ):
         ConnectionManager.__init__(self)
-        
+
         self.is_single = False
         self.is_cluster = False
         self.is_sentinel = False
@@ -172,46 +194,70 @@ class RedisManager(ConnectionManager):
         if sentinels is not None:
             self.is_sentinel = True
             if sentinel_name is None:
-                raise RedisManagerError('sentinel group name must be specified')
-            #if sentinel_pwd is None:
+                raise RedisManagerError("sentinel group name must be specified")
+            # if sentinel_pwd is None:
             #    raise RedisManagerError('sentinel password must be specified')
             sentinel_kwargs = {}
             if sentinel_pwd is not None:
-                sentinel_kwargs = {'password': sentinel_pwd}
-            self.sentinel = Sentinel(sentinels, socket_timeout=self.socket_timeout, sentinel_kwargs=sentinel_kwargs)
+                sentinel_kwargs = {"password": sentinel_pwd}
+            self.sentinel = Sentinel(
+                sentinels,
+                socket_timeout=self.socket_timeout,
+                sentinel_kwargs=sentinel_kwargs,
+            )
             self.sentinel_name = sentinel_name
 
         # single redis node
-        elif redis_uri.find('redis') >= 0:
-            self.is_single = True            
+        elif redis_uri.find("redis") >= 0:
+            self.is_single = True
             pwd = None
-            if redis_uri.find('@') > 0:
-                redis_uri = redis_uri.replace('redis://:', '')
-                pwd, redis_uri = redis_uri.split('@')
+            if redis_uri.find("@") > 0:
+                redis_uri = redis_uri.replace("redis://:", "")
+                pwd, redis_uri = redis_uri.split("@")
             else:
-                redis_uri = redis_uri.replace('redis://', '')
-            host, port = redis_uri.split(':')
+                redis_uri = redis_uri.replace("redis://", "")
+            host, port = redis_uri.split(":")
             self.hosts = [redis_uri]
-            port, db = port.split('/')
-            self.server = redis.StrictRedis(host=host, port=int(port), db=int(db), password=pwd,
-                                            socket_timeout=timeout, retry_on_timeout=False, connection_pool=None,
-                                            max_connections=max_connections)
+            port, db = port.split("/")
+            self.server = redis.StrictRedis(
+                host=host,
+                port=int(port),
+                db=int(db),
+                password=pwd,
+                socket_timeout=timeout,
+                retry_on_timeout=False,
+                connection_pool=None,
+                max_connections=max_connections,
+            )
 
         # single redis node
         else:
             self.is_single = True
-            host, port, db = redis_uri.split(';')
-            self.hosts = ['%s:%s' % (host, port)]
-            self.server = redis.StrictRedis(host=host, port=int(port), db=int(db), password=None,
-                                            socket_timeout=timeout, retry_on_timeout=False, connection_pool=None,
-                                            max_connections=max_connections)
-    
+            host, port, db = redis_uri.split(";")
+            self.hosts = ["%s:%s" % (host, port)]
+            self.server = redis.StrictRedis(
+                host=host,
+                port=int(port),
+                db=int(db),
+                password=None,
+                socket_timeout=timeout,
+                retry_on_timeout=False,
+                connection_pool=None,
+                max_connections=max_connections,
+            )
+
     @property
     def conn(self):
         if self.is_sentinel is True:
-            self.server = self.sentinel.master_for(self.sentinel_name, socket_timeout=self.socket_timeout,
-                                                   db=int(self.db), password=self.pwd, retry_on_timeout=False,
-                                                   connection_pool=None, max_connections=self.max_connections)
+            self.server = self.sentinel.master_for(
+                self.sentinel_name,
+                socket_timeout=self.socket_timeout,
+                db=int(self.db),
+                password=self.pwd,
+                retry_on_timeout=False,
+                connection_pool=None,
+                max_connections=self.max_connections,
+            )
         return self.server
 
     def ping(self):
@@ -219,7 +265,7 @@ class RedisManager(ConnectionManager):
             res = self.conn.ping()
             if self.is_cluster is True and res == {}:
                 res = {host: False for host in self.hosts}
-            self.logger.debug('Ping redis %s: %s' % (self.conn, res))
+            self.logger.debug("Ping redis %s: %s" % (self.conn, res))
             return res
         except redis.exceptions.ConnectionError as ex:
             self.logger.error(ex)
@@ -230,22 +276,22 @@ class RedisManager(ConnectionManager):
             res = []
             for conn in self.sentinel.sentinels:
                 conn_args = conn.connection_pool.connection_kwargs
-                res.append(('%s:%s' % (conn_args['host'], conn_args['port']), conn.ping()))
-                self.logger.debug('Ping redis sentinel %s: %s' % (conn, res))
+                res.append(("%s:%s" % (conn_args["host"], conn_args["port"]), conn.ping()))
+                self.logger.debug("Ping redis sentinel %s: %s" % (conn, res))
             return res
         except redis.exceptions.ConnectionError as ex:
             self.logger.error(ex)
             return False
 
     def sentinel_discover(self):
-        res = {'master': None, 'slave': None}
+        res = {"master": None, "slave": None}
         if self.is_sentinel is True:
-            res['master'] = self.sentinel.discover_master(self.sentinel_name)
-            res['slave'] = self.sentinel.discover_slaves(self.sentinel_name)
+            res["master"] = self.sentinel.discover_master(self.sentinel_name)
+            res["slave"] = self.sentinel.discover_slaves(self.sentinel_name)
         return res
 
     def sentinel_status(self):
-        '''
+        """
         "role": "master",
         "connected_slaves": 1,
         "min_slaves_good_slaves": 1,
@@ -260,65 +306,66 @@ class RedisManager(ConnectionManager):
 
 
         :return:
-        '''
+        """
         resp = {}
         if self.conn is not None:
             info = self.info()
-            min_replicas_to_write = int(self.conn.config_get(pattern='min-replicas-to-write')
-                                        .get('min-replicas-to-write', 0))
-            min_slaves_good_slaves = int(info.get('min_slaves_good_slaves'))
+            min_replicas_to_write = int(
+                self.conn.config_get(pattern="min-replicas-to-write").get("min-replicas-to-write", 0)
+            )
+            min_slaves_good_slaves = int(info.get("min_slaves_good_slaves"))
             status = False
             if min_slaves_good_slaves >= min_replicas_to_write:
                 status = True
             master = self.sentinel.discover_master(self.sentinel_name)
-            master = {'ip': master[0], 'port': master[1]}
-            connected_slaves = info.get('connected_slaves')
+            master = {"ip": master[0], "port": master[1]}
+            connected_slaves = info.get("connected_slaves")
             slaves = []
             for i in range(int(connected_slaves)):
-                slaves.append(info.get('slave%s' % i))
+                slaves.append(info.get("slave%s" % i))
             resp = {
-                'status': status,
-                'master': master,
-                'slaves': slaves,
-                'connected_slaves': info.get('connected_slaves'),
-                'min_slaves_good_slaves': min_slaves_good_slaves,
-                'master_failover_state': info.get('master_failover_state'),
-                'master_repl_offset': info.get('master_repl_offset'),
+                "status": status,
+                "master": master,
+                "slaves": slaves,
+                "connected_slaves": info.get("connected_slaves"),
+                "min_slaves_good_slaves": min_slaves_good_slaves,
+                "master_failover_state": info.get("master_failover_state"),
+                "master_repl_offset": info.get("master_repl_offset"),
             }
         return resp
 
     def shutdown(self):
         res = self.conn.shutdown()
-        self.logger.debug('Shutdown redis %s: %s' % (self.conn, res))
-        return res        
-    
-    def info(self):
-        res = self.conn.info()
-        self.logger.debug('Get redis %s info: %s' % (self.conn, res))
+        self.logger.debug("Shutdown redis %s: %s" % (self.conn, res))
         return res
 
-    def config(self, pattern='*'):
+    def info(self):
+        res = self.conn.info()
+        self.logger.debug("Get redis %s info: %s" % (self.conn, res))
+        return res
+
+    def config(self, pattern="*"):
         """Get server configuration.
-        
+
         :param pattern: configuration search pattern [default='*']
         :return: list of configurations
-        """        
+        """
         res = self.conn.config_get(pattern=pattern)
         return res
 
     def size(self):
         res = self.conn.dbsize()
-        self.logger.debug('Db size redis %s: %s' % (self.conn, res))
+        self.logger.debug("Db size redis %s: %s" % (self.conn, res))
         return res
 
     def cleandb(self):
         res = self.conn.flushdb()
-        self.logger.debug('Clean redis %s: %s' % (self.conn, res))
+        self.logger.debug("Clean redis %s: %s" % (self.conn, res))
         return res
-    
-    def inspect(self, pattern='*', debug=False):
+
+    def inspect(self, pattern="*", debug=False):
         """Inspect keys in current db.
-        
+
         :param pattern: key search pattern [default='*']
         :return: list of tuple (key, type, ttl)
         """
@@ -328,12 +375,19 @@ class RedisManager(ConnectionManager):
         data = []
         for key in keys:
             if debug is True:
-                data.append((key, self.conn.type(key), self.conn.ttl(key), self.conn.debug_object(key)))
+                data.append(
+                    (
+                        key,
+                        self.conn.type(key),
+                        self.conn.ttl(key),
+                        self.conn.debug_object(key),
+                    )
+                )
             else:
                 data.append((key, self.conn.type(key), self.conn.ttl(key)))
         return data
 
-    def scan(self, pattern='*', cursor=0, count=10):
+    def scan(self, pattern="*", cursor=0, count=10):
         """Scan keys in current db.
 
         :param pattern: key search pattern [default='*']
@@ -343,10 +397,10 @@ class RedisManager(ConnectionManager):
         """
         keys = self.conn.scan(cursor=cursor, match=pattern, count=count)
         return keys
-    
-    def delete(self, pattern='*'):
+
+    def delete(self, pattern="*"):
         """Delete keys by pattern in current db.
-        
+
         :param pattern: key search pattern [default='*']
         :return: list of tuple (key, type, ttl)
         """
@@ -367,7 +421,7 @@ class RedisManager(ConnectionManager):
 
     def query(self, keys, ttl=False):
         """Query key list value.
-        
+
         :param ttl: if True return for every key (value, ttl)
         :param keys: keys list from inspect
         :return: lists of keys with value
@@ -377,23 +431,23 @@ class RedisManager(ConnectionManager):
             ktype = key[1]
             kname = key[0]
             kttl = key[2]
-            
+
             def get_value(kvalue, kttl):
                 if ttl is True:
                     return (kvalue, kttl)
-                else: 
+                else:
                     return kvalue
-            
-            if ktype == 'hash':
+
+            if ktype == "hash":
                 data[kname] = get_value(self.conn.hgetall(kname), kttl)
-            elif ktype == 'list':
+            elif ktype == "list":
                 items = []
                 for index in range(0, self.conn.llen(kname)):
                     items.append(self.conn.lindex(kname, index))
                 data[kname] = get_value(items, kttl)
-            elif ktype == 'string':
+            elif ktype == "string":
                 data[kname] = get_value(self.conn.get(kname), kttl)
-            elif ktype == 'set':
+            elif ktype == "set":
                 items = []
                 for item in self.conn.sscan_iter(kname):
                     items.append(item)
@@ -457,6 +511,7 @@ class RedisManager(ConnectionManager):
         :return: value
         :raise RedisManagerError: if key was not found
         """
+
         def get_data(key):
             task_data = self.conn.get(key)
             task_ttl = self.conn.ttl(key)
@@ -470,7 +525,7 @@ class RedisManager(ConnectionManager):
             sleep(delay)
             retry += 1
 
-        err = 'Key %s not found' % key
+        err = "Key %s not found" % key
         raise RedisManagerError(err)
 
     def lrange(self, *args, **kwargs):
@@ -499,7 +554,7 @@ def manage_connection(method):
         try:
             connection = ref.engine.connect()
             ref.active_connection = connection
-            ref.logger.debug('Get connection : %s' % connection)
+            ref.logger.debug("Get connection : %s" % connection)
             res = method(ref, *args, **kwargs)
         except OperationalError as ex:
             ref.logger.error(ex, exc_info=True)
@@ -512,6 +567,7 @@ def manage_connection(method):
                 connection.close()
                 ref.engine.dispose()
         return res
+
     return inner
 
 
@@ -521,49 +577,50 @@ class SqlManager(ConnectionManager):
     :param db_uri: database connection string. Ex. mysql+pymysql://<user>:<pwd>@<host>:<port>/<db>
     :param connect_timeout: connection timeout in seconds [default=5]
     """
-    def __init__(self, sql_id, db_uri, connect_timeout=5):
+
+    def __init__(self, sql_id, db_uri, connect_timeout=30):
         ConnectionManager.__init__(self)
-        
-        self.logger1 = logging.getLogger('sqlalchemy.pool')
-        
+
+        self.logger1 = logging.getLogger("sqlalchemy.pool")
+
         self.id = sql_id
         self.db_uri = db_uri
         self.orig_db_uri = db_uri
         self.connect_timeout = connect_timeout
-        
+
         # engine
         self.engine = None
         self.db_session = None
 
         # ssh tunnel
         self.tunnel = None
-        
+
         self.ping_query = "SELECT 1"
 
     @staticmethod
     def get_instance(engine, *args, **kwargs):
-        connect_timeout = kwargs.pop('connect_timeout', 5)
-        if engine == 'mysql':
-            kwargs['port'] = kwargs.get('port', 3306)
-            kwargs['user'] = kwargs.get('user', 'root')
-            kwargs['db'] = kwargs.get('db', 'mysql')
-            connection_string = 'mysql+pymysql://{user}:{pwd}@{host}:{port}/{db}'.format(**kwargs)
+        connect_timeout = kwargs.pop("connect_timeout", 5)
+        if engine == "mysql":
+            kwargs["port"] = kwargs.get("port", 3306)
+            kwargs["user"] = kwargs.get("user", "root")
+            kwargs["db"] = kwargs.get("db", "mysql")
+            connection_string = "mysql+pymysql://{user}:{pwd}@{host}:{port}/{db}".format(**kwargs)
             manager = MysqlManager
-        elif engine == 'postgres':
-            kwargs['port'] = kwargs.get('port', 5432)
-            kwargs['user'] = kwargs.get('user', 'postgres')
-            kwargs['db'] = kwargs.get('db', 'postgres')
-            connection_string = 'postgresql://{user}:{pwd}@{host}:{port}/{db}'.format(**kwargs)
+        elif engine == "postgres":
+            kwargs["port"] = kwargs.get("port", 5432)
+            kwargs["user"] = kwargs.get("user", "postgres")
+            kwargs["db"] = kwargs.get("db", "postgres")
+            connection_string = "postgresql://{user}:{pwd}@{host}:{port}/{db}".format(**kwargs)
             manager = PostgresManager
         else:
-            raise SqlManagerError('engine %s can not be managed by SqlManager' % engine)
+            raise SqlManagerError("engine %s can not be managed by SqlManager" % engine)
         return manager(engine, connection_string, connect_timeout)
 
-    def create_tunnel(self, host, pwd, user='root', port=22):
+    def create_tunnel(self, host, pwd, user="root", port=22):
         # parse db_uri
         # mysql+pymysql://<user>:<pwd>@<host>:<port>/<db>
-        db_host, db_port = self.db_uri.split('@')[1].split(':')
-        db_port = int(db_port.split('/')[0])
+        db_host, db_port = self.db_uri.split("@")[1].split(":")
+        db_port = int(db_port.split("/")[0])
 
         self.tunnel = SSHTunnelForwarder(
             logger=self.logger,
@@ -574,23 +631,28 @@ class SqlManager(ConnectionManager):
         )
         self.tunnel.start()
         self.orig_db_uri = self.db_uri
-        self.db_uri.replace(db_host, '127.0.0.1').replace(db_port, self.tunnel.local_bind_port)
+        self.db_uri.replace(db_host, "127.0.0.1").replace(db_port, self.tunnel.local_bind_port)
 
     def close_tunnel(self):
         self.tunnel.stop()
         self.db_uri = self.orig_db_uri
 
     def create_simple_engine(self):
-        """Create an engine with basic configuration and no connection pool """
+        """Create an engine with basic configuration and no connection pool"""
         if not self.engine:
-            args = {'connect_timeout': self.connect_timeout}
+            args = {"connect_timeout": self.connect_timeout}
             self.engine = create_engine(self.db_uri, connect_args=args)
-            self.logger1.debug('New simple engine : %s' % self.engine)
-            self.db_session = sessionmaker(bind=self.engine, autocommit=False, autoflush=True, expire_on_commit=True)
-            self.logger1.debug('New db session %s over engine %s' % (self.db_session, self.engine))
+            self.logger1.debug("New simple engine : %s" % self.engine)
+            self.db_session = sessionmaker(
+                bind=self.engine,
+                autocommit=False,
+                autoflush=True,
+                expire_on_commit=True,
+            )
+            self.logger1.debug("New db session %s over engine %s" % (self.db_session, self.engine))
         else:
-            raise SqlManagerError('Engine already configured')            
-    
+            raise SqlManagerError("Engine already configured")
+
     def create_pool_engine(self, pool_size=10, max_overflow=10, pool_recycle=3600, pool_timeout=30):
         """Create an engine with connection pool
 
@@ -599,45 +661,58 @@ class SqlManager(ConnectionManager):
         :param pool_recycle: [optional] [default=]
         """
         if not self.engine:
-            args = {'connect_timeout': self.connect_timeout}
-            self.engine = create_engine(self.db_uri, pool_size=pool_size, max_overflow=max_overflow,
-                                        pool_recycle=pool_recycle, pool_timeout=pool_timeout, connect_args=args)
-            self.logger1.debug('New connection pool engine : %s' % self.engine)
-            
-            self.db_session = sessionmaker(bind=self.engine, autocommit=False, autoflush=True, expire_on_commit=True)
-            self.logger1.debug('New db session %s over engine %s' % (self.db_session, self.engine))
+            args = {"connect_timeout": self.connect_timeout}
+            self.engine = create_engine(
+                self.db_uri,
+                pool_size=pool_size,
+                max_overflow=max_overflow,
+                pool_recycle=pool_recycle,
+                pool_timeout=pool_timeout,
+                connect_args=args,
+            )
+            self.logger1.debug("New connection pool engine : %s" % self.engine)
+
+            self.db_session = sessionmaker(
+                bind=self.engine,
+                autocommit=False,
+                autoflush=True,
+                expire_on_commit=True,
+            )
+            self.logger1.debug("New db session %s over engine %s" % (self.db_session, self.engine))
         else:
-            raise SqlManagerError('Engine already configured')
-        
+            raise SqlManagerError("Engine already configured")
+
         @event.listens_for(self.engine, "connect")
         def connect(dbapi_connection, connection_record):
-            connection_record.info['pid'] = os.getpid()
-        
+            connection_record.info["pid"] = os.getpid()
+
         @event.listens_for(self.engine, "checkout")
         def checkout(dbapi_connection, connection_record, connection_proxy):
             pid = os.getpid()
-            if connection_record.info['pid'] != pid:
+            if connection_record.info["pid"] != pid:
                 connection_record.connection = connection_proxy.connection = None
-                error = "Connection record belongs to pid %s, attempting to check out in pid %s" % \
-                        (connection_record.info['pid'], pid)
+                error = "Connection record belongs to pid %s, attempting to check out in pid %s" % (
+                    connection_record.info["pid"],
+                    pid,
+                )
                 self.logger1.error(error)
                 raise exc.DisconnectionError(error)
-                
+
             cursor = dbapi_connection.cursor()
             try:
                 cursor.execute(self.ping_query)
-                self.logger1.debug('Ping connection OK')
+                self.logger1.debug("Ping connection OK")
             except:
                 # optional - dispose the whole pool
                 # instead of invalidating one at a time
                 # connection_proxy._pool.dispose()
-        
+
                 # raise DisconnectionError - pool will try
                 # connecting again up to three times before raising.
                 connection_record.connection = connection_proxy.connection = None
-                self.logger1.error('Invalidate connection')
-                raise exc.DisconnectionError('Connection ping fails')
-            cursor.close()             
+                self.logger1.error("Invalidate connection")
+                raise exc.DisconnectionError("Connection ping fails")
+            cursor.close()
 
     def get_engine(self):
         return self.engine
@@ -653,7 +728,7 @@ class SqlManager(ConnectionManager):
         try:
             connection = self.engine.connect()
             res = statements(connection)
-            self.logger.debug('Exec statements: %s' % truncate(res))
+            self.logger.debug("Exec statements: %s" % truncate(res))
         except Exception as ex:
             self.logger.error(ex, exc_info=True)
             raise
@@ -684,12 +759,12 @@ class SqlManager(ConnectionManager):
     def ping(self, *args, **kwargs):
         """Ping dbms engine"""
         self.active_connection.execute(self.ping_query)
-        self.logger.debug('Ping dbms %s: OK' % self.engine)
+        self.logger.debug("Ping dbms %s: OK" % self.engine)
         return True
 
     def invalidate_connection_pool(self):
         self.engine.dispose()
-    
+
     # def get_dbs(self):
     #     """Get dbs list
     #     """
@@ -975,7 +1050,7 @@ class SqlManager(ConnectionManager):
     #             connection.close()
     #             self.engine.dispose()
     #     return res, total
-    
+
     def get_connection(self):
         try:
             if self.engine:
@@ -983,18 +1058,18 @@ class SqlManager(ConnectionManager):
                 return conn
             raise SqlManagerError("There isn't active db session to use. Session can not be opened.")
         except exc.DBAPIError as e:
-            # an exception is raised, Connection is invalidated. Connection 
+            # an exception is raised, Connection is invalidated. Connection
             # pool will be refresh
             if e.connection_invalidated:
                 self.logger1.warning("Connection was invalidated!")
                 self.engine.connect()
-    
+
     def release_connection(self, conn):
         conn.close()
-        
+
     def get_session(self):
         """Open a database session.
-        
+
         :return: session object
         """
         try:
@@ -1002,21 +1077,21 @@ class SqlManager(ConnectionManager):
                 session = self.db_session()
                 # workaround when use sqlalchemy and flask-sqlalchemy
                 # session._model_changes = {}
-                self.logger1.debug('Open session: %s' % session)
+                self.logger1.debug("Open session: %s" % session)
                 return session
             raise SqlManagerError("There isn't active db session to use. Session can not be opened.")
         except (exc.DBAPIError, Exception) as e:
             self.logger1.error(e)
-            # an exception is raised, Connection is invalidated. Connection 
+            # an exception is raised, Connection is invalidated. Connection
             # pool will be refresh
             # if e.connection_invalidated:
             #    self.logger1.warning("Connection was invalidated! Try to reconnect")
             #    self.engine.connect()
             raise SqlManagerError(e)
-            
-    def release_session(self, session):        
+
+    def release_session(self, session):
         """Close active database session.
-        
+
         :param session: active session to close
         """
         if session is not None:
@@ -1025,40 +1100,32 @@ class SqlManager(ConnectionManager):
 
 
 class MysqlManager(SqlManager):
-    def __init__(self, mysql_id, db_uri, connect_timeout=5):
+    def __init__(self, mysql_id, db_uri, connect_timeout=30):
         """
         :param mysql_id: mysql manager id
         :param db_uri: database connection string. Ex. mysql+pymysql://<user>:<pwd>@<host>:<port>/<db>
         :param connect_timeout: connection timeout in seconds [default=5]
         """
         SqlManager.__init__(self, mysql_id, db_uri, connect_timeout)
-        
+
         self.ping_query = "SELECT 1"
 
     @manage_connection
     def get_schemas(self):
-        """Get schemas list
-        """
+        """Get schemas list"""
         res = {}
-        result = self.active_connection.execute('select table_schema, count(table_name) '
-                                                'from information_schema.tables group by table_schema')
+        result = self.active_connection.execute(
+            "select table_schema, count(table_name) " "from information_schema.tables group by table_schema"
+        )
         for row in result:
-            res[row[0]] = {
-                'db': '',
-                'schema': row[0],
-                'tables': row[1]
-            }
+            res[row[0]] = {"db": "", "schema": row[0], "tables": row[1]}
         # add empty schema
-        result = self.active_connection.execute('show databases')
+        result = self.active_connection.execute("show databases")
         for row in result:
             if row[0] not in res.keys():
-                res[row[0]] = {
-                    'db': '',
-                    'schema': row[0],
-                    'tables': 0
-                }
+                res[row[0]] = {"db": "", "schema": row[0], "tables": 0}
         res = list(res.values())
-        self.logger.debug('Get schema list: %s' % res)
+        self.logger.debug("Get schema list: %s" % res)
         return res
 
     @manage_connection
@@ -1068,11 +1135,11 @@ class MysqlManager(SqlManager):
         :param schema_name: schema name
         :param charset: charset [optional]
         """
-        stm = 'CREATE DATABASE IF NOT EXISTS %s' % schema_name
+        stm = "CREATE DATABASE IF NOT EXISTS %s" % schema_name
         if charset is not None:
-            stm += 'CHARACTER SET = %s' % charset
+            stm += "CHARACTER SET = %s" % charset
         res = self.active_connection.execute(stm)
-        self.logger.debug('Create schema %s: %s' % (schema_name, res))
+        self.logger.debug("Create schema %s: %s" % (schema_name, res))
         return res
 
     @manage_connection
@@ -1081,80 +1148,83 @@ class MysqlManager(SqlManager):
 
         :param schema_name: schema name
         """
-        stm = 'DROP DATABASE IF EXISTS %s' % schema_name
+        stm = "DROP DATABASE IF EXISTS %s" % schema_name
         res = self.active_connection.execute(stm)
-        self.logger.debug('Drop schema %s: %s' % (schema_name, res))
+        self.logger.debug("Drop schema %s: %s" % (schema_name, res))
         return res
 
     @manage_connection
     def get_users(self):
-        """Get users list
-        """
+        """Get users list"""
         res = []
-        result = self.active_connection.execute('select Host, User, Select_priv, Insert_priv, Update_priv, Delete_priv, '
-                                    'Create_priv, Drop_priv, Reload_priv, Shutdown_priv, Process_priv, File_priv, '
-                                    'Grant_priv, References_priv, Index_priv, Alter_priv, Show_db_priv, '
-                                    'Super_priv, Create_tmp_table_priv, Lock_tables_priv, Execute_priv, '
-                                    'Repl_slave_priv, Repl_client_priv, Create_view_priv, Show_view_priv, '
-                                    'Create_routine_priv, Alter_routine_priv, Create_user_priv, Event_priv, '
-                                    'Trigger_priv, Create_tablespace_priv, max_connections, max_user_connections, '
-                                    'password_expired, password_last_changed, account_locked from mysql.user')
-        result2 = self.active_connection.execute('SELECT * from information_schema.SCHEMA_PRIVILEGES;')
+        result = self.active_connection.execute(
+            "select Host, User, Select_priv, Insert_priv, Update_priv, Delete_priv, "
+            "Create_priv, Drop_priv, Reload_priv, Shutdown_priv, Process_priv, File_priv, "
+            "Grant_priv, References_priv, Index_priv, Alter_priv, Show_db_priv, "
+            "Super_priv, Create_tmp_table_priv, Lock_tables_priv, Execute_priv, "
+            "Repl_slave_priv, Repl_client_priv, Create_view_priv, Show_view_priv, "
+            "Create_routine_priv, Alter_routine_priv, Create_user_priv, Event_priv, "
+            "Trigger_priv, Create_tablespace_priv, max_connections, max_user_connections, "
+            "password_expired, password_last_changed, account_locked from mysql.user"
+        )
+        result2 = self.active_connection.execute("SELECT * from information_schema.SCHEMA_PRIVILEGES;")
         privs = {}
         for r in result2:
             try:
-                privs[r[0]].append({'schema': r[2], 'privilege_type': r[3]})
+                privs[r[0]].append({"schema": r[2], "privilege_type": r[3]})
             except:
-                privs[r[0]] = [{'schema': r[2], 'privilege_type': r[3]}]
+                privs[r[0]] = [{"schema": r[2], "privilege_type": r[3]}]
 
         for row in result:
             name = "'%s'@'%s'" % (row[1], row[0])
-            res.append({
-                'host': row[0],
-                'user': row[1],
-                'privileges': {
-                    'common': {
-                        'Select': row[2],
-                        'Insert': row[3],
-                        'Update': row[4],
-                        'Delete': row[5],
-                        'Create': row[6],
-                        'Drop': row[7],
-                        'Reload': row[8],
-                        'Shutdown': row[9],
-                        'Process': row[10],
-                        'File': row[11],
-                        'Grant': row[12],
-                        'References': row[13],
-                        'Index': row[14],
-                        'Alter': row[15],
-                        'Show_db': row[16],
-                        'Super': row[17],
-                        'Create_tmp_table': row[18],
-                        'Lock_tables': row[19],
-                        'Execute': row[20],
-                        'Repl_slave': row[21],
-                        'Repl_client': row[22],
-                        'Create_view': row[23],
-                        'Show_view': row[24],
-                        'Create_routine': row[25],
-                        'Alter_routine': row[26],
-                        'Create_user': row[27],
-                        'Event': row[28],
-                        'Trigger': row[29],
-                        'Create_tablespace': row[30]
+            res.append(
+                {
+                    "host": row[0],
+                    "user": row[1],
+                    "privileges": {
+                        "common": {
+                            "Select": row[2],
+                            "Insert": row[3],
+                            "Update": row[4],
+                            "Delete": row[5],
+                            "Create": row[6],
+                            "Drop": row[7],
+                            "Reload": row[8],
+                            "Shutdown": row[9],
+                            "Process": row[10],
+                            "File": row[11],
+                            "Grant": row[12],
+                            "References": row[13],
+                            "Index": row[14],
+                            "Alter": row[15],
+                            "Show_db": row[16],
+                            "Super": row[17],
+                            "Create_tmp_table": row[18],
+                            "Lock_tables": row[19],
+                            "Execute": row[20],
+                            "Repl_slave": row[21],
+                            "Repl_client": row[22],
+                            "Create_view": row[23],
+                            "Show_view": row[24],
+                            "Create_routine": row[25],
+                            "Alter_routine": row[26],
+                            "Create_user": row[27],
+                            "Event": row[28],
+                            "Trigger": row[29],
+                            "Create_tablespace": row[30],
+                        },
+                        "schema": privs.get(name, []),
                     },
-                    'schema': privs.get(name, [])
-                },
-                'configs': {
-                    'max_connections': row[31],
-                    'max_user_connections': row[32],
-                    'password_expired': row[33],
-                    'password_last_changed': format_date(row[34]),
-                    'account_locked': row[35],
+                    "configs": {
+                        "max_connections": row[31],
+                        "max_user_connections": row[32],
+                        "password_expired": row[33],
+                        "password_last_changed": format_date(row[34]),
+                        "account_locked": row[35],
+                    },
                 }
-            })
-        self.logger.debug('Get users list: %s' % truncate(res))
+            )
+        self.logger.debug("Get users list: %s" % truncate(res))
         return res
 
     @manage_connection
@@ -1164,11 +1234,11 @@ class MysqlManager(SqlManager):
         :param name: user name. Syntax <name>@<host>
         :param password: user password
         """
-        name, host = name.split('@')
+        name, host = name.split("@")
         stm = text("CREATE USER IF NOT EXISTS '%s'@'%s' IDENTIFIED BY '%s';" % (name, host, password))
         self.active_connection.execute(stm)
         res = True
-        self.logger.debug('Create user %s: %s' % (name, res))
+        self.logger.debug("Create user %s: %s" % (name, res))
         return res
 
     @manage_connection
@@ -1182,7 +1252,7 @@ class MysqlManager(SqlManager):
         res = {}
         stm = text("GRANT ALL privileges ON `%s`.* TO '%s'@'%s'" % (schema, name, host))
         self.active_connection.execute(stm)
-        self.logger.debug('Grant schema %s to user %s: %s' % (schema, name, res))
+        self.logger.debug("Grant schema %s to user %s: %s" % (schema, name, res))
         return True
 
     @manage_connection
@@ -1191,18 +1261,18 @@ class MysqlManager(SqlManager):
 
         :param name: user name
         """
-        name, host = name.split('@')
-        newname = '\'%s\'@\'%s\'' % (name, host)
-        if host == '%':
-            newname = '\'%s\'' % name
+        name, host = name.split("@")
+        newname = "'%s'@'%s'" % (name, host)
+        if host == "%":
+            newname = "'%s'" % name
 
-        stm = 'DROP USER IF EXISTS %s' % newname
+        stm = "DROP USER IF EXISTS %s" % newname
         res = self.active_connection.execute(stm)
-        self.logger.debug('Drop user %s: %s' % (name, res))
+        self.logger.debug("Drop user %s: %s" % (name, res))
         return res
 
     def get_tables_names(self):
-        """Get list of tables name """
+        """Get list of tables name"""
         tables = self.engine.table_names()
         self.logger.debug("Get table list: %s" % tables)
         return tables
@@ -1216,21 +1286,25 @@ class MysqlManager(SqlManager):
         :raise Exception:
         """
         res = []
-        sql = "select table_name, table_type, engine, table_rows, data_length, index_length, " \
-              "auto_increment from information_schema.tables where " \
-              "table_schema='%s' order by table_name"
+        sql = (
+            "select table_name, table_type, engine, table_rows, data_length, index_length, "
+            "auto_increment from information_schema.tables where "
+            "table_schema='%s' order by table_name"
+        )
         result = self.active_connection.execute(sql % schema)
         for row in result:
-            res.append({
-                'table_name': row[0],
-                'table_type': row[1],
-                'table_engine': row[2],
-                'table_rows': row[3],
-                #'data_length': row[4],
-                #'index_length': row[5],
-                #'auto_increment': row[4]
-            })
-        self.logger.debug('Get tables for schema %s: %s' % (schema, res))
+            res.append(
+                {
+                    "table_name": row[0],
+                    "table_type": row[1],
+                    "table_engine": row[2],
+                    "table_rows": row[3],
+                    #'data_length': row[4],
+                    #'index_length': row[5],
+                    #'auto_increment': row[4]
+                }
+            )
+        self.logger.debug("Get tables for schema %s: %s" % (schema, res))
         return res
 
     def get_table_description(self, table_name):
@@ -1240,20 +1314,25 @@ class MysqlManager(SqlManager):
         :return: list of columns description (name, type, default, is index, is nullable, is primary key, is unique)
         """
         from sqlalchemy import Table, MetaData
+
         metadata = MetaData()
         table_obj = Table(table_name, metadata, autoload=True, autoload_with=self.engine)
         self.logger.debug("Get description for table %s" % table_name)
-        return [{
-            'name': c.name,
-            'type': str(c.type),
-            'default': c.default,
-            'index': c.index,
-            'is_nullable': c.nullable,
-            'is_primary_key': c.primary_key,
-            'is_unique': c.unique} for c in table_obj.columns]
+        return [
+            {
+                "name": c.name,
+                "type": str(c.type),
+                "default": c.default,
+                "index": c.index,
+                "is_nullable": c.nullable,
+                "is_primary_key": c.primary_key,
+                "is_unique": c.unique,
+            }
+            for c in table_obj.columns
+        ]
 
     @manage_connection
-    def query(self, query, rows=20, offset=0, count_field='id'):
+    def query(self, query, rows=20, offset=0, count_field="id"):
         """Make a custom query
 
         :param query: query statement
@@ -1279,7 +1358,7 @@ class MysqlManager(SqlManager):
         # query = "%s LIMIT %s OFFSET %s" % (query, rows, offset)
 
         # get columns name
-        #col_names = [c['name'] for c in self.get_table_description(table_name)]
+        # col_names = [c['name'] for c in self.get_table_description(table_name)]
 
         # query tables
         # total = self.active_connection.execute(query_count).fetchone()[0]
@@ -1336,7 +1415,7 @@ class MysqlManager(SqlManager):
         query = "%s LIMIT %s OFFSET %s" % (query, rows, offset)
 
         # get columns name
-        col_names = [c['name'] for c in self.get_table_description(table_name)]
+        col_names = [c["name"] for c in self.get_table_description(table_name)]
 
         # query tables
         total = self.active_connection.execute(query_count).fetchone()[0]
@@ -1345,11 +1424,7 @@ class MysqlManager(SqlManager):
             cols = {}
             i = 0
             for col in row:
-                if type(col) is datetime:
-                    #col = str(col)
-                    col = col
                 if type(col) is str and col.find('{"') > -1:
-                    # col = str(json.loads(col))
                     col = json.loads(col)
                 cols[col_names[i]] = col
                 i += 1
@@ -1368,17 +1443,19 @@ class MysqlManager(SqlManager):
             "SET FOREIGN_KEY_CHECKS = 0;",
             "SET @tables = '';",
             "SET @views = '';",
-            "SET SESSION group_concat_max_len = 10240;"
+            "SET SESSION group_concat_max_len = 10240;",
         ]
-        end = [
-            "SET FOREIGN_KEY_CHECKS = 1"
-        ]
+        end = ["SET FOREIGN_KEY_CHECKS = 1"]
 
-        select_tables = "SELECT GROUP_CONCAT(table_schema, '.', table_name) FROM information_schema.tables " \
-                        "WHERE table_type='BASE TABLE' and table_schema = '%s';" % schema
+        select_tables = (
+            "SELECT GROUP_CONCAT(table_schema, '.', table_name) FROM information_schema.tables "
+            "WHERE table_type='BASE TABLE' and table_schema = '%s';" % schema
+        )
 
-        select_views = "SELECT GROUP_CONCAT(table_schema, '.', table_name) FROM information_schema.tables " \
-                       "WHERE table_type='VIEW' and table_schema = '%s';" % schema
+        select_views = (
+            "SELECT GROUP_CONCAT(table_schema, '.', table_name) FROM information_schema.tables "
+            "WHERE table_type='VIEW' and table_schema = '%s';" % schema
+        )
 
         set_tables = "SET @tables = '%s';"
         set_views = "SET @views = '%s';"
@@ -1387,7 +1464,7 @@ class MysqlManager(SqlManager):
             "SET @tables = CONCAT('DROP TABLE ', @tables);",
             "PREPARE stmt FROM @tables;",
             "EXECUTE stmt;",
-            "DEALLOCATE PREPARE stmt;"
+            "DEALLOCATE PREPARE stmt;",
         ]
 
         drop_views = [
@@ -1395,7 +1472,7 @@ class MysqlManager(SqlManager):
             "SET @views = CONCAT('DROP VIEW ', @views);",
             "PREPARE stmt FROM @views;",
             "EXECUTE stmt;",
-            "DEALLOCATE PREPARE stmt;"
+            "DEALLOCATE PREPARE stmt;",
         ]
 
         try:
@@ -1436,8 +1513,8 @@ class MysqlManager(SqlManager):
             trans.commit()
         except:
             trans.rollback()
-            self.logger.error('Error during drop all', exc_info=True)
-            raise SqlManagerError('Error during drop all')
+            self.logger.error("Error during drop all", exc_info=True)
+            raise SqlManagerError("Error during drop all")
         finally:
             if connection is not None:
                 connection.close()
@@ -1446,109 +1523,144 @@ class MysqlManager(SqlManager):
 
     @manage_connection
     def get_cluster_status(self):
-        """Get cluster status
-        """
+        """Get cluster status"""
         res = {}
-        result = self.active_connection.execute('select MEMBER_HOST, MEMBER_PORT, MEMBER_STATE '
-                                                'from performance_schema.replication_group_members;')
+        result = self.active_connection.execute(
+            "select MEMBER_HOST, MEMBER_PORT, MEMBER_STATE " "from performance_schema.replication_group_members;"
+        )
         for row in result:
             res[row[0]] = {
-                'MEMBER_HOST': row[0],
-                'MEMBER_PORT': row[1],
-                'MEMBER_STATE': row[2]
+                "MEMBER_HOST": row[0],
+                "MEMBER_PORT": row[1],
+                "MEMBER_STATE": row[2],
             }
-        self.logger.debug('Get mysql cluster status: %s' % res)
+        self.logger.debug("Get mysql cluster status: %s" % res)
         return res
 
     @manage_connection
     def get_galera_cluster_status(self):
-        """Get galera cluster status
-        """
+        """Get galera cluster status"""
         res = {}
-        result = self.active_connection.execute('SHOW GLOBAL STATUS LIKE \'wsrep_cluster_status\';')
+        result = self.active_connection.execute("SHOW GLOBAL STATUS LIKE 'wsrep_cluster_status';")
         for row in result:
             res[row[0]] = row[1]
 
-        result = self.active_connection.execute('SHOW GLOBAL STATUS LIKE \'wsrep_cluster_size\';')
+        result = self.active_connection.execute("SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size';")
         for row in result:
             res[row[0]] = row[1]
 
-        result = self.active_connection.execute('SHOW STATUS LIKE \'wsrep_local_state_comment\';')
+        result = self.active_connection.execute("SHOW STATUS LIKE 'wsrep_local_state_comment';")
         for row in result:
             res[row[0]] = row[1]
 
-        self.logger.debug('Get mariadb galera cluster status: %s' % res)
+        self.logger.debug("Get mariadb galera cluster status: %s" % res)
         return res
 
     @manage_connection
     def get_replica_master_status(self):
-        """Get replica master status
-        """
-        connection = None
+        """Get replica master status"""
+        # connection = None
         res = {}
-        result = self.active_connection.execute('SHOW MASTER STATUS;')
+        result = self.active_connection.execute("SHOW MASTER STATUS;")
         for row in result:
             res[row[0]] = row[1]
 
-        self.logger.debug('Get mariadb replica master status: %s' % res)
+        self.logger.debug("Get mariadb replica master status: %s" % res)
         return res
 
     @manage_connection
     def get_replica_slave_status(self):
-        """Get replica slave status
-        """
+        """Get replica slave status"""
         desc = [
-            'Slave_IO_State', 'Master_Host', 'Master_User', 'Master_Port', 'Connect_Retry', 'Master_Log_File',
-            'Read_Master_Log_Pos', 'Relay_Log_File', 'Relay_Log_Pos', 'Relay_Master_Log_File', 'Slave_IO_Running',
-            'Slave_SQL_Running', 'Replicate_Do_DB', 'Replicate_Ignore_DB', 'Replicate_Do_Table',
-            'Replicate_Ignore_Table', 'Replicate_Wild_Do_Table', 'Replicate_Wild_Ignore_Table', 'Last_Errno',
-            'Last_Error', 'Skip_Counter', 'Exec_Master_Log_Pos', 'Relay_Log_Space', 'Until_Condition', 'Until_Log_File',
-            'Until_Log_Pos', 'Master_SSL_Allowed', 'Master_SSL_CA_File', 'Master_SSL_CA_Path', 'Master_SSL_Cert',
-            'Master_SSL_Cipher', 'Master_SSL_Key', 'Seconds_Behind_Master', 'Master_SSL_Verify_Server_Cert',
-            'Last_IO_Errno', 'Last_IO_Error', 'Last_SQL_Errno', 'Last_SQL_Error', 'Replicate_Ignore_Server_Ids',
-            'Master_Server_Id', 'Master_SSL_Crl', 'Master_SSL_Crlpath', 'Using_Gtid', 'Gtid_IO_Pos',
-            'Replicate_Do_Domain_Ids', 'Replicate_Ignore_Domain_Ids', 'Parallel_Mode', 'SQL_Delay',
-            'SQL_Remaining_Delay', 'Slave_SQL_Running_State', 'Slave_DDL_Groups', 'Slave_Non_Transactional_Groups',
-            'Slave_Transactional_Groups'
+            "Slave_IO_State",
+            "Master_Host",
+            "Master_User",
+            "Master_Port",
+            "Connect_Retry",
+            "Master_Log_File",
+            "Read_Master_Log_Pos",
+            "Relay_Log_File",
+            "Relay_Log_Pos",
+            "Relay_Master_Log_File",
+            "Slave_IO_Running",
+            "Slave_SQL_Running",
+            "Replicate_Do_DB",
+            "Replicate_Ignore_DB",
+            "Replicate_Do_Table",
+            "Replicate_Ignore_Table",
+            "Replicate_Wild_Do_Table",
+            "Replicate_Wild_Ignore_Table",
+            "Last_Errno",
+            "Last_Error",
+            "Skip_Counter",
+            "Exec_Master_Log_Pos",
+            "Relay_Log_Space",
+            "Until_Condition",
+            "Until_Log_File",
+            "Until_Log_Pos",
+            "Master_SSL_Allowed",
+            "Master_SSL_CA_File",
+            "Master_SSL_CA_Path",
+            "Master_SSL_Cert",
+            "Master_SSL_Cipher",
+            "Master_SSL_Key",
+            "Seconds_Behind_Master",
+            "Master_SSL_Verify_Server_Cert",
+            "Last_IO_Errno",
+            "Last_IO_Error",
+            "Last_SQL_Errno",
+            "Last_SQL_Error",
+            "Replicate_Ignore_Server_Ids",
+            "Master_Server_Id",
+            "Master_SSL_Crl",
+            "Master_SSL_Crlpath",
+            "Using_Gtid",
+            "Gtid_IO_Pos",
+            "Replicate_Do_Domain_Ids",
+            "Replicate_Ignore_Domain_Ids",
+            "Parallel_Mode",
+            "SQL_Delay",
+            "SQL_Remaining_Delay",
+            "Slave_SQL_Running_State",
+            "Slave_DDL_Groups",
+            "Slave_Non_Transactional_Groups",
+            "Slave_Transactional_Groups",
         ]
         res = []
-        result = self.active_connection.execute('SHOW SLAVE STATUS;')
+        result = self.active_connection.execute("SHOW SLAVE STATUS;")
         for row in result:
             item = {}
             for i in range(len(row)):
                 item[desc[i]] = row[i]
             res.append(item)
 
-        self.logger.debug('Get mariadb replica slave status: %s' % res)
+        self.logger.debug("Get mariadb replica slave status: %s" % res)
         return res
 
     @manage_connection
     def stop_replica_on_slave(self):
-        """stop replica on slave
-        """
+        """stop replica on slave"""
         res = True
-        self.active_connection.execute('STOP SLAVE;')
-        self.logger.debug('stop replica on slave')
+        self.active_connection.execute("STOP SLAVE;")
+        self.logger.debug("stop replica on slave")
         return res
 
     @manage_connection
     def start_replica_on_slave(self):
-        """start replica on slave
-        """
+        """start replica on slave"""
         res = True
-        self.active_connection.execute('START SLAVE;')
-        self.logger.debug('start replica on slave')
+        self.active_connection.execute("START SLAVE;")
+        self.logger.debug("start replica on slave")
         return res
 
     @manage_connection
     def show_binary_log(self):
-        """show binary log
-        """
+        """show binary log"""
         res = {}
-        result = self.active_connection.execute('SHOW BINARY LOGS;')
+        result = self.active_connection.execute("SHOW BINARY LOGS;")
         for row in result:
             res[row[0]] = row[1]
-        self.logger.debug('show binary log: %s' % res)
+        self.logger.debug("show binary log: %s" % res)
         return res
 
     @manage_connection
@@ -1561,55 +1673,57 @@ class MysqlManager(SqlManager):
 
         if date is None:
             date = datetime.today() - timedelta(days=1)
-            date = '%s-%s-%s' % (date.year, date.month, date.day)
+            date = "%s-%s-%s" % (date.year, date.month, date.day)
 
         self.active_connection.execute("PURGE BINARY LOGS BEFORE '%s';" % date)
-        self.logger.debug('purge binary log')
+        self.logger.debug("purge binary log")
         return res
 
 
 class PostgresManager(SqlManager):
-    def __init__(self, mysql_id, db_uri, connect_timeout=5):
+    def __init__(self, mysql_id, db_uri, connect_timeout=30):
         """
         :param mysql_id: mysql manager id
         :param db_uri: database connection string. Ex. mysql+pymysql://<user>:<pwd>@<host>:<port>/<db>
         :param connect_timeout: connection timeout in seconds [default=5]
         """
         SqlManager.__init__(self, mysql_id, db_uri, connect_timeout)
-        
+
         self.ping_query = "SELECT 1"
 
     @manage_connection
     def get_dbs(self, *args, **kwargs):
         """Get dbs list"""
         res = {}
-        result = self.active_connection.execute('SELECT * FROM pg_catalog.pg_database;')
+        result = self.active_connection.execute("SELECT * FROM pg_catalog.pg_database;")
         for row in result:
-            res[row[0]] = {
-                'db': row[0]
-            }
+            res[row[0]] = {"db": row[0]}
         res = list(res.values())
-        self.logger.debug('Get db list: %s' % res)
+        self.logger.debug("Get db list: %s" % res)
         return res
 
     @manage_connection
     def get_schemas(self, *args, **kwargs):
         """Get schemas list"""
         res = []
-        result = self.active_connection.execute('SELECT catalog_name, schema_name, schema_owner FROM '
-                                                'information_schema.schemata;')
-        tables = self.active_connection.execute('SELECT table_schema , count(table_name) FROM information_schema.tables'
-                                                ' group by table_schema;')
+        result = self.active_connection.execute(
+            "SELECT catalog_name, schema_name, schema_owner FROM " "information_schema.schemata;"
+        )
+        tables = self.active_connection.execute(
+            "SELECT table_schema , count(table_name) FROM information_schema.tables" " group by table_schema;"
+        )
         table_idx = {t[0]: t[1] for t in tables}
         for row in result:
-            res.append({
-                'db': row[0],
-                'schema': row[1],
-                'owner': row[2],
-                'tables': table_idx.get(row[1], 0)
-            })
+            res.append(
+                {
+                    "db": row[0],
+                    "schema": row[1],
+                    "owner": row[2],
+                    "tables": table_idx.get(row[1], 0),
+                }
+            )
         # res = list(res.values())
-        self.logger.debug('Get schema list: %s' % truncate(res))
+        self.logger.debug("Get schema list: %s" % truncate(res))
         return res
 
     @manage_connection
@@ -1619,9 +1733,9 @@ class PostgresManager(SqlManager):
         :param schema_name: schema name
         :param charset: charset [not used]
         """
-        stm = 'CREATE SCHEMA IF NOT EXISTS %s' % schema_name
+        stm = "CREATE SCHEMA IF NOT EXISTS %s" % schema_name
         res = self.active_connection.execute(stm)
-        self.logger.debug('Create schema %s: %s' % (schema_name, res))
+        self.logger.debug("Create schema %s: %s" % (schema_name, res))
         return res
 
     @manage_connection
@@ -1630,15 +1744,14 @@ class PostgresManager(SqlManager):
 
         :param schema_name: schema name
         """
-        stm = 'DROP SCHEMA IF EXISTS %s' % schema_name
+        stm = "DROP SCHEMA IF EXISTS %s" % schema_name
         res = self.active_connection.execute(stm)
-        self.logger.debug('Drop schema %s: %s' % (schema_name, res))
+        self.logger.debug("Drop schema %s: %s" % (schema_name, res))
         return res
 
     @manage_connection
     def get_users(self):
-        """Get users list
-        """
+        """Get users list"""
         res = []
         result = self.active_connection.execute(
             "SELECT usename AS role_name, "
@@ -1649,7 +1762,8 @@ class PostgresManager(SqlManager):
             "ELSE CAST('' AS pg_catalog.text) "
             "END role_attributes "
             "FROM pg_catalog.pg_user "
-            "ORDER BY role_name desc;")
+            "ORDER BY role_name desc;"
+        )
         # result2 = connection.execute('SELECT * from information_schema.SCHEMA_PRIVILEGES;')
         privs = {}
         # for r in result2:
@@ -1659,19 +1773,17 @@ class PostgresManager(SqlManager):
         #         privs[r[0]] = [{'schema': r[2], 'privilege_type': r[3]}]
 
         for row in result:
-            user_role = row[1].split(',')
+            user_role = row[1].split(",")
             name = row[0]
-            res.append({
-                'host': '%',
-                'user': row[0],
-                'privileges': {
-                    'common': user_role,
-                    'schema': privs.get(name, [])
-                },
-                'configs': {
-                },
-            })
-        self.logger.debug('Get users list: %s' % truncate(res))
+            res.append(
+                {
+                    "host": "%",
+                    "user": row[0],
+                    "privileges": {"common": user_role, "schema": privs.get(name, [])},
+                    "configs": {},
+                }
+            )
+        self.logger.debug("Get users list: %s" % truncate(res))
         return res
 
     @manage_connection
@@ -1684,7 +1796,7 @@ class PostgresManager(SqlManager):
         stm = text("CREATE USER %s WITH PASSWORD '%s';" % (name, password))
         self.active_connection.execute(stm)
         res = True
-        self.logger.debug('Create user %s: %s' % (name, res))
+        self.logger.debug("Create user %s: %s" % (name, res))
         return res
 
     # def grant_schema_to_user(self, name, host, schema):
@@ -1719,7 +1831,7 @@ class PostgresManager(SqlManager):
         stm = text("DROP USER IF EXISTS %s;" % name)
         self.active_connection.execute(stm)
         res = True
-        self.logger.debug('Drop user %s' % name)
+        self.logger.debug("Drop user %s" % name)
         return res
 
     @manage_connection
@@ -1731,15 +1843,19 @@ class PostgresManager(SqlManager):
         :raise Exception:
         """
         res = []
-        sql = "SELECT t1.table_name, t1.table_type, t2.reltuples FROM information_schema.tables t1, " \
-              "pg_catalog.pg_class t2 WHERE t1.table_name=t2.relname and table_schema = '%s';"
+        sql = (
+            "SELECT t1.table_name, t1.table_type, t2.reltuples FROM information_schema.tables t1, "
+            "pg_catalog.pg_class t2 WHERE t1.table_name=t2.relname and table_schema = '%s';"
+        )
         result = self.active_connection.execute(sql % schema)
         for row in result:
-            res.append({
-                'table_name': row[0],
-                'table_type': row[1],
-                'table_engine': None,
-                'table_rows': row[2],
-            })
-        self.logger.debug('Get tables for schema %s: %s' % (schema, res))
+            res.append(
+                {
+                    "table_name": row[0],
+                    "table_type": row[1],
+                    "table_engine": None,
+                    "table_rows": row[2],
+                }
+            )
+        self.logger.debug("Get tables for schema %s: %s" % (schema, res))
         return res

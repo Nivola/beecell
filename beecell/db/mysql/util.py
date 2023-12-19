@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2022 CSI-Piemonte
+# (C) Copyright 2018-2023 CSI-Piemonte
 from subprocess import Popen, PIPE
 
 from beecell.simple import run_command
@@ -41,33 +41,40 @@ def compile_query(query):
 
 def get_process_list():
     port = 3308
-    host = '10.102.47.205'
-    user = 'root'
-    pwd = 'testlab'
-    socket = '/var/lib/mysql2/mysql2.sock'
-    cmd = ['mysql', '--port=%s' % port, '--host=%s' % host, '--protocol=tcp', 
-           '--password=%s' % pwd, '--user=%s' % user,  
-           '-e', 'show processlist\G']
+    host = "10.102.47.205"
+    user = "root"
+    pwd = "testlab"
+    socket = "/var/lib/mysql2/mysql2.sock"
+    cmd = [
+        "mysql",
+        "--port=%s" % port,
+        "--host=%s" % host,
+        "--protocol=tcp",
+        "--password=%s" % pwd,
+        "--user=%s" % user,
+        "-e",
+        "show processlist\G",
+    ]
     res = run_command(cmd)
-    
+
     # process exit correctly
     if res[0] == 0:
         process_list = []
         # spit data string into lines
-        datas = res[1].split('\n')
+        datas = res[1].split("\n")
         # remove last element = ' '
         datas.pop()
         # iter datas
         for data in datas:
-            item = data.strip().split(':')
+            item = data.strip().split(":")
             # remove comment line
-            if item[0].find('***') > -1:
+            if item[0].find("***") > -1:
                 process_info = {}
             # first id of a new record
-            elif item[0] == 'Id':
-                process_info['id'] = int(item[1].strip())
+            elif item[0] == "Id":
+                process_info["id"] = int(item[1].strip())
                 process_list.append(process_info)
             else:
                 process_info[(item[0].lower())] = item[1].strip()
-                
+
         return process_list

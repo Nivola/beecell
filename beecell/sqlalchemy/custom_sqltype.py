@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2022 CSI-Piemonte
+# (C) Copyright 2018-2023 CSI-Piemonte
 
 import json
 import sqlalchemy
@@ -16,7 +16,7 @@ class TextDictType(TypeDecorator):
         if value is not None:
             value = jsonDumps(value)
         else:
-            value = '{}'
+            value = "{}"
         return value
 
     def process_result_value(self, value, dialect):
