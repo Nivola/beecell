@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2022 CSI-Piemonte
+# (C) Copyright 2018-2023 CSI-Piemonte
 
 import logging
 from datetime import datetime
@@ -29,7 +29,7 @@ class ElasticsearchFormatter(Formatter):
             message = record.message
         except:
             logger.warning(type(record))
-        record.message = ''
+        record.message = ""
 
         if self.usesTime():
             record.asctime = self.formatTime(record, self.datefmt)
@@ -38,7 +38,7 @@ class ElasticsearchFormatter(Formatter):
         except UnicodeDecodeError as e:
             # Issue 25664. The logger name may be Unicode. Try again ...
             try:
-                record.name = record.name.decode('utf-8')
+                record.name = record.name.decode("utf-8")
                 s = self._fmt % record.__dict__
             except UnicodeDecodeError:
                 raise e
@@ -53,17 +53,17 @@ class ElasticsearchFormatter(Formatter):
 
         # add exception trace to error message
         if record.exc_text:
-            message += ' | ' + record.exc_text
+            message += " | " + record.exc_text
 
         # add message to fianle record
-        s['message'] = message
+        s["message"] = message
         # StringFormatter().replace(message)
 
         return s
 
 
 class ElasticsearchHandler(Handler):
-    def __init__(self, client, index='log', tags=[], **custom_fields):
+    def __init__(self, client, index="log", tags=[], **custom_fields):
         """Initialize the handler.
 
         :param client: elasticsearch.Elasticsearch class instance
@@ -74,9 +74,11 @@ class ElasticsearchHandler(Handler):
         Handler.__init__(self)
 
         if client is None:
-            raise Exception('elasticsearch.Elasticsearch class instance must be specified')
+            raise Exception("elasticsearch.Elasticsearch class instance must be specified")
 
-        self.client = client
+        from elasticsearch import Elasticsearch
+
+        self.elasticsearch: Elasticsearch = client
         self.index = index
         self.tags = tags
         self.custom_fields = custom_fields
@@ -93,15 +95,21 @@ class ElasticsearchHandler(Handler):
         has an 'encoding' attribute, it is used to determine how to do the
         output to the stream.
         """
-        record.api_id = getattr(record, 'api_id', '')
+        record.api_id = getattr(record, "api_id", "")
+
         msg = self.format(record)
         date = datetime.now()
-        msg['date'] = date
-        msg['tags'] = self.tags
+        msg["date"] = date
+        msg["tags"] = self.tags
         msg.update(self.custom_fields)
+
         # ex. logstash-2024.03.23
-        index = '%s-%s' % (self.index, date.strftime('%Y.%m.%d'))
-        self.client.index(index=index, body=msg, request_timeout=5, doc_type='doc')
+        index = "%s-%s" % (self.index, date.strftime("%Y.%m.%d"))
+        logger.debug("_emit - index: %s" % index)
+
+        # self.client.index(index=index, body=msg, request_timeout=30, doc_type="doc")
+        self.elasticsearch._request_timeout = 30
+        self.elasticsearch.index(index=index, body=msg)
 
     def emit(self, record):
         """
@@ -115,6 +123,7 @@ class ElasticsearchHandler(Handler):
         output to the stream.
         """
         import gevent
+
         try:
             gevent.spawn(self._emit, record)
             # self._emit(record)

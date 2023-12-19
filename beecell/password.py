@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2022 CSI-Piemonte
+# (C) Copyright 2018-2023 CSI-Piemonte
 
 from logging import getLogger
 from string import ascii_uppercase, ascii_letters, digits, ascii_lowercase
@@ -21,7 +21,7 @@ def random_password(length=10, strong=False):
     chars = ascii_uppercase + digits + ascii_lowercase
 
     if strong is True:
-        punctuation = '()_-.'
+        punctuation = "()_-."
         randomSource = ascii_letters + digits + punctuation
         password = SystemRandom().choice(ascii_lowercase)
         password += SystemRandom().choice(ascii_uppercase)
@@ -36,9 +36,9 @@ def random_password(length=10, strong=False):
 
         passwordList = list(password)
         SystemRandom().shuffle(passwordList)
-        password = ''.join(passwordList)
+        password = "".join(passwordList)
     else:
-        password = ''
+        password = ""
         for i in range(length):
             password += chars[ord(urandom(1)) % len(chars)]
 
@@ -53,7 +53,7 @@ def obscure_data(data, fields=None):
     :return: obscured data
     """
     if fields is None:
-        fields = ['password', 'pwd', 'passwd', 'pass']
+        fields = ["password", "pwd", "passwd", "pass"]
 
     if isinstance(data, str) or isinstance(data, bytes):
         return obscure_string(data, fields)
@@ -61,10 +61,12 @@ def obscure_data(data, fields=None):
     for key, value in data.items():
         if isinstance(value, dict):
             obscure_data(value, fields)
-        elif isinstance(data, str) or isinstance(data, bytes):
+
+        elif isinstance(value, str) or isinstance(value, bytes):
             for field in fields:
+                # print("%s - %s" % (key, field))
                 if key.lower().find(field) >= 0:
-                    data[key] = 'xxxxxx'
+                    data[key] = "xxxxxx"
 
     return data
 
@@ -77,9 +79,16 @@ def obscure_string(data, fields=None):
     :return: obscured string
     """
     if fields is None:
-        fields = ['password', 'pwd', 'passwd', 'pass']
+        fields = ["password", "pwd", "passwd", "pass"]
 
     for field in fields:
-        if data.lower().find(field) >= 0:
-            data = 'xxxxxx'
+        # logger.debug("+++++ obscure_string - %s - %s" % (type(data), type(field)))
+        if type(data) is bytes:
+            # logger.debug("+++++ obscure_string - data: %s" % (data))
+            if data.lower().find(str.encode(field)) >= 0:
+                data = "xxxxxx"
+
+        else:
+            if data.lower().find(field) >= 0:
+                data = "xxxxxx"
     return data

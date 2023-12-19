@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2022 CSI-Piemonte
+# (C) Copyright 2018-2023 CSI-Piemonte
 
 from setuptools import setup
 from setuptools.command.install import install as _install
@@ -23,86 +23,82 @@ class install(_install):
 
 
 def load_requires():
-    with open('./MANIFEST.md') as f:
+    with open("./MANIFEST.md") as f:
         requires = f.read()
     return requires
 
 
 def load_version():
-    with open('./beecell/VERSION') as f:
+    with open("./beecell/VERSION") as f:
         version = f.read()
     return version
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     version = load_version()
     setup(
-        name='beecell',
+        name="beecell",
         version=version,
-        description='Utility',
-        long_description='Utility',
-        author='CSI Piemonte',
-        author_email='nivola.engineering@csi.it',
-        license='EUPL-1.2',
-        url='',
+        description="Utility",
+        long_description="Utility",
+        author="CSI Piemonte",
+        author_email="nivola.engineering@csi.it",
+        license="EUPL-1.2",
+        url="",
         scripts=[],
         packages=[
-            'beecell',
-            'beecell.amqp',
-            'beecell.auth',
-            'beecell.cache',
-            'beecell.crypto_util',
-            'beecell.db',
-            'beecell.db.mysql',
-            'beecell.flask',
-            'beecell.flask.login',
-            'beecell.flask.login.bootstrap',
-            'beecell.logger',
-            'beecell.logger.server',
-            'beecell.networkx',
-            'beecell.paramiko_shell',
-            'beecell.server',
-            'beecell.server.uwsgi_server',
-            'beecell.sphinx',
-            'beecell.sphinx.ext',
-            'beecell.sqlalchemy',
-            'beecell.swagger',
-            'beecell.test',
-            'beecell.tests',
-            'beecell.tests.auth',
-            'beecell.tests.db',
-            'beecell.types',
+            "beecell",
+            "beecell.amqp",
+            "beecell.auth",
+            "beecell.cache",
+            "beecell.crypto_util",
+            "beecell.db",
+            "beecell.db.mysql",
+            "beecell.flask",
+            "beecell.flask.login",
+            "beecell.flask.login.bootstrap",
+            "beecell.logger",
+            "beecell.logger.server",
+            "beecell.networkx",
+            "beecell.paramiko_shell",
+            "beecell.server",
+            "beecell.server.uwsgi_server",
+            "beecell.sphinx",
+            "beecell.sphinx.ext",
+            "beecell.sqlalchemy",
+            "beecell.swagger",
+            "beecell.test",
+            "beecell.tests",
+            "beecell.tests.auth",
+            "beecell.tests.db",
+            "beecell.types",
         ],
         namespace_packages=[],
         py_modules=[
-            'beecell.crypto',
-            'beecell.file',
-            'beecell.formatter',
-            'beecell.__init__',
-            'beecell.network',
-            'beecell.password',
-            'beecell.perf',
-            'beecell.remote',
-            'beecell.sendmail',
-            'beecell.simple',
+            "beecell.crypto",
+            "beecell.file",
+            "beecell.formatter",
+            "beecell.__init__",
+            "beecell.network",
+            "beecell.password",
+            "beecell.perf",
+            "beecell.remote",
+            "beecell.sendmail",
+            "beecell.simple",
         ],
         classifiers=[
-            'Development Status :: %s' % version,
-            'Programming Language :: Python'
+            "Development Status :: %s" % version,
+            "Programming Language :: Python",
         ],
         entry_points={},
         data_files=[],
-        package_dir={
-            'beecell': 'beecell'
-        },
-        package_data={
-            'beecell': ['VERSION']
-        },
+        package_dir={"beecell": "beecell"},
+        package_data={"beecell": ["VERSION"]},
         install_requires=load_requires(),
         dependency_links=[],
         zip_safe=True,
-        cmdclass={'install': install},
-        keywords='',
-        python_requires='',
+        cmdclass={"install": install},
+        keywords="",
+        python_requires="",
         obsoletes=[],
     )

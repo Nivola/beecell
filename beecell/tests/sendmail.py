@@ -1,22 +1,20 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2022 CSI-Piemonte
+# (C) Copyright 2018-2023 CSI-Piemonte
 
 from beecell.sendmail import Mailer
 from beecell.tests.test_util import runtest
 from beecell.tests.test_util import BeecellTestCase
 
 
-tests = [
-    'test_send'
-]
+tests = ["test_send"]
 
 
 class MailerTestCase(BeecellTestCase):
     def setUp(self):
         BeecellTestCase.setUp(self)
 
-        self.mailer = Mailer(self.conf('sendmail.mailer'))
+        self.mailer = Mailer(self.conf("sendmail.mailer"))
 
     def tearDown(self):
         BeecellTestCase.tearDown(self)
@@ -36,12 +34,12 @@ class MailerTestCase(BeecellTestCase):
         </html>
         """
         # me == the sender's email address
-        me = self.conf('sendmail.sender')
+        me = self.conf("sendmail.sender")
         # you == the recipient's email address
-        you = self.conf('sendmail.receiver')
-        
-        self.mailer.send(me, you, 'test', text, html)
+        you = self.conf("sendmail.receiver")
+
+        self.mailer.send(me, you, "test", text, html)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runtest(MailerTestCase, tests)

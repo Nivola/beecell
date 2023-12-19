@@ -1,7 +1,12 @@
 *.py[co]
 _build/
 *.so
+.vscode
 .project
 .pydevproject
+.scannerwork
 .idea/
 .manage.*
+beecell.egg-info
+build/
+.scannerwork/

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2022 CSI-Piemonte
+# (C) Copyright 2018-2023 CSI-Piemonte
 
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
@@ -82,13 +82,13 @@ class RasCrypto(object):
             pem = private_key.private_bytes(
                 encoding=serialization.Encoding.PEM,
                 format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.NoEncryption()
+                encryption_algorithm=serialization.NoEncryption(),
             )
         else:
             pem = private_key.private_bytes(
-               encoding=serialization.Encoding.PEM,
-               format=serialization.PrivateFormat.PKCS8,
-               encryption_algorithm=serialization.BestAvailableEncryption(ensure_binary(password))
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.PKCS8,
+                encryption_algorithm=serialization.BestAvailableEncryption(ensure_binary(password)),
             )
 
         if base64_encode is True:
@@ -105,7 +105,7 @@ class RasCrypto(object):
         public_key = private_key.public_key()
         pem = public_key.public_bytes(
             encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
         )
         if base64_encode is True:
             pem = b64encode(pem)
@@ -121,7 +121,11 @@ class RasCrypto(object):
         """
         ciphertext = public_key.encrypt(
             ensure_binary(message),
-            padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None)
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None,
+            ),
         )
         if base64_encode is True:
             ciphertext = b64encode(ciphertext)
@@ -139,7 +143,11 @@ class RasCrypto(object):
             ciphertext = b64decode(ciphertext)
         plaintext = private_key.decrypt(
             ciphertext,
-            padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None)
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None,
+            ),
         )
         plaintext = ensure_text(plaintext)
         return plaintext

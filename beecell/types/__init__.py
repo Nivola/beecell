@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2022 CSI-Piemonte
+# (C) Copyright 2018-2023 CSI-Piemonte
 
 
 def is_string(data):
@@ -16,6 +16,6 @@ def is_int(s):
     :param s: the string to validate
     :return: boolean True o False
     """
-    if s[0] in ('-', '+'):
+    if s[0] in ("-", "+"):
         return s[1:].isdigit()
     return s.isdigit()

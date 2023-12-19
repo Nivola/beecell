@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2022 CSI-Piemonte
+# (C) Copyright 2018-2023 CSI-Piemonte
 
 from inspect import isclass
 from re import compile as re_compile
@@ -14,9 +14,9 @@ def str2bool(value: str):
     """
 
     res = None
-    if value in ['False', 'false', 0, 'no', False]:
+    if value in ["False", "false", 0, "no", False]:
         res = False
-    elif value in ['True', 'true', 1, 'yes', 'si', True]:
+    elif value in ["True", "true", 1, "yes", "si", True]:
         res = True
     return res
 
@@ -29,14 +29,14 @@ def bool2str(value):
     """
 
     res = None
-    if value in [False, 0, 'no']:
-        res = 'false'
-    elif value in [True, 1, 'yes', 'si']:
-        res = 'true'
+    if value in [False, 0, "no"]:
+        res = "false"
+    elif value in [True, 1, "yes", "si"]:
+        res = "true"
     return res
 
 
-def truncate(msg:str, size:int=600, replace_new_line:bool=True)->str:
+def truncate(msg: str, size: int = 600, replace_new_line: bool = True) -> str:
     """Truncate message to fixed size.
 
     :param str msg: message to truncate
@@ -45,15 +45,15 @@ def truncate(msg:str, size:int=600, replace_new_line:bool=True)->str:
     """
     msg = str(msg)
     if replace_new_line is True:
-        msg = msg.replace('\n', ' + ')
+        msg = msg.replace("\n", " + ")
 
     if len(msg) > size:
-        return msg[0:size] + '...'
+        return msg[0:size] + "..."
     else:
         return msg
 
 
-def validate_string(data, validation_string=r'[^a-zA-Z0-9\-].'):
+def validate_string(data, validation_string=r"[^a-zA-Z0-9\-]."):
     """Validate a string respect a set of allowed characters
 
     :param data: data to validate
@@ -72,14 +72,14 @@ def split_string_in_chunks(string, pos=100):
     :param pos: position where split
     :return: list of string chunks
     """
-    chunks = [string[i:i + pos] for i in range(0, len(string), pos)]
+    chunks = [string[i : i + pos] for i in range(0, len(string), pos)]
     return chunks
 
 
 def compat(data):
     try:
         if isinstance(data, list):
-            data = '[..]'
+            data = "[..]"
         elif isinstance(data, dict):
             newdata = {}
             for k, v in data.items():
@@ -122,11 +122,11 @@ def get_pretty_size(data):
     TB = GB * 1024
 
     if KB < data < MB:
-        data = '%sKB' % round(data / KB, 2)
+        data = "%sKB" % round(data / KB, 2)
     elif MB <= data < GB:
-        data = '%sMB' % round(data / MB, 2)
+        data = "%sMB" % round(data / MB, 2)
     elif GB <= data < TB:
-        data = '%sGB' % round(data / GB, 2)
+        data = "%sGB" % round(data / GB, 2)
     elif data >= TB:
-        data = '%sTB' % round(data / TB, 2)
+        data = "%sTB" % round(data / TB, 2)
     return data

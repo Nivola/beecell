@@ -1,11 +1,13 @@
-beecell is written and maintained by: 
+beecell is written and maintained by:
 
-* Sergio Tonani
-* Michele Bello
+* Ahmad Nazha
 * Antonio Brasile
-* Gianni Doria
 * Daniela Ferrarini
 * Davide Sacchetto
 * Filippo Vallero
 * Franco Frattini
-* Alessandro More'
+* Gianni Doria
+* Michele Bello
+* Pasquale Lepera
+* Pietro Pilolli
+* Sergio Tonani
