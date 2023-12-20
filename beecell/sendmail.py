@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2022 CSI-Piemonte
+# (C) Copyright 2018-2023 CSI-Piemonte
 
 import logging
 from pathlib import Path
@@ -13,19 +13,21 @@ from email.mime.text import MIMEText
 
 def check_email(email):
     logger = logging.getLogger("beecell.sendmail")
-    regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+    regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b"
 
     if email is None:
         logger.debug("Email None: %s" % email)
         return False
 
     import re
+
     if re.fullmatch(regex, email):
         logger.debug("Valid email: %s" % email)
         return True
     else:
         logger.debug("Invalid email: %s" % email)
         return False
+
 
 class Mailer(object):
     def __init__(self, mailserver, mailport=None, mail_login=None, mail_pw=None):

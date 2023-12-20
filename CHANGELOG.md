@@ -1,5 +1,53 @@
 # Changelog
 
+## Version 1.15.0
+
+* Added ...
+  * setup debug for  code/debugpy
+  * new environment vars for checks and info
+
+
+* Fixed ...
+  * obscure data utility function
+  * checkemail utility function
+  * timeout
+
+
+* Integrated ...
+
+## Version 1.14.0
+
+* Added ...
+  * is_name and is_uuid check methods
+  * added identity manager Class
+
+* Fixed ...
+  * Mailer send with no files attached
+  * log elasticsearch rename client
+  * send email fix multiple recipients
+  * time and timeout optimization
+
+
+
+* Integrated ...
+## Version 1.13.0
+
+* Added ...
+
+* Fixed ...
+  * minor changes
+
+* Integrated ...
+
+## Version 1.12.0
+
+* Added ...
+
+* Fixed ...
+  * minor changes
+
+* Integrated ...
+
 ## Version 1.11.0 (oct 11, 2022)
 * Various bugfixes
 
@@ -70,7 +118,7 @@
 * Fixed ...
     * correct some bugs in ParamikoShell: exit sometimes was not captured, command trace run twice.
     * correct connection release in MysqlManager
-    * correct User._check_password 
+    * correct User._check_password
 * Integrated ...
     * update Copyright to 2020-2021
 * Various bugfixes

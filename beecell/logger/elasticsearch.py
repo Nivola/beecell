@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2022 CSI-Piemonte
+# (C) Copyright 2018-2023 CSI-Piemonte
 
 import logging
 from datetime import datetime
@@ -96,7 +96,7 @@ class ElasticsearchHandler(Handler):
         output to the stream.
         """
         record.api_id = getattr(record, "api_id", "")
-        
+
         msg = self.format(record)
         date = datetime.now()
         msg["date"] = date

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2022 CSI-Piemonte
+# (C) Copyright 2018-2023 CSI-Piemonte
 
 import logging
 from typing import List
@@ -77,18 +77,19 @@ class SystemUser(UserMixin):
 
 class AuthError(Exception):
     """Authentication provider exception."""
-    INVALIDCREDENTIALS:int = 1
-    USERDISABLED:int = 2
-    PASSWORDEXPIRED:int = 3
-    WRONGPASSWORD:int = 4
-    USERNOTEXIST:int = 5
-    CONNECTIONERROR:int = 7
-    UNDEFINED:int = 9
-    DOMAINERROR:int = 10
-    TOKENEXPIRED:int = 11
-    FORBIDDEN:int = 12
 
-    def __init__(self, info:str="", desc:str="", code=None):
+    INVALIDCREDENTIALS: int = 1
+    USERDISABLED: int = 2
+    PASSWORDEXPIRED: int = 3
+    WRONGPASSWORD: int = 4
+    USERNOTEXIST: int = 5
+    CONNECTIONERROR: int = 7
+    UNDEFINED: int = 9
+    DOMAINERROR: int = 10
+    TOKENEXPIRED: int = 11
+    FORBIDDEN: int = 12
+
+    def __init__(self, info: str = "", desc: str = "", code=None):
         """Authentication provider exception.
 
         code:

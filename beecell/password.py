@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2022 CSI-Piemonte
+# (C) Copyright 2018-2023 CSI-Piemonte
 
 from logging import getLogger
 from string import ascii_uppercase, ascii_letters, digits, ascii_lowercase
@@ -59,7 +59,6 @@ def obscure_data(data, fields=None):
         return obscure_string(data, fields)
 
     for key, value in data.items():
-        
         if isinstance(value, dict):
             obscure_data(value, fields)
 
@@ -87,8 +86,8 @@ def obscure_string(data, fields=None):
         if type(data) is bytes:
             # logger.debug("+++++ obscure_string - data: %s" % (data))
             if data.lower().find(str.encode(field)) >= 0:
-                data = "xxxxxx"    
-        
+                data = "xxxxxx"
+
         else:
             if data.lower().find(field) >= 0:
                 data = "xxxxxx"
