@@ -130,7 +130,7 @@ class ApiValidator(object):
         return []
 
     def get_schema_keys(self, data, parent=None, required=None):
-        if required in None:
+        if required is None:
             required = []
         if "$ref" in data:
             # #/responses/NotFound
