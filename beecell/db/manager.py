@@ -404,7 +404,9 @@ class RedisManager(ConnectionManager):
         :param pattern: key search pattern [default='*']
         :return: list of tuple (key, type, ttl)
         """
+        # print("+++++ RedisManager - delete - pattern: %s" % pattern)
         keys = self.conn.keys(pattern)
+        # print("+++++ RedisManager - delete - keys: %s" % keys)
         if len(keys) > 0:
             res = self.conn.delete(*keys)
             return res

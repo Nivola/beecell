@@ -108,12 +108,9 @@ class CacheClient(object):
         :param pattern: key search pattern
         :return: True
         """
-        keys = self.redis_manager.keys(self.prefix + pattern)
-        # print("+++++ delete_by_pattern - keys: %s" % keys)
-        if keys is not None and len(keys) > 0:
-            res = self.redis_manager.delete(*keys)
-            return res
-        return True
+        # print("+++++ CacheClient - delete_by_pattern - pattern: %s" % pattern)
+        res = self.redis_manager.delete(self.prefix + pattern)
+        return res
 
     def extend_ttl(self, key, ttl=600) -> bool:
         """Extend a cache item ttl
