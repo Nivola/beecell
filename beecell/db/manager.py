@@ -409,6 +409,7 @@ class RedisManager(ConnectionManager):
         # print("+++++ RedisManager - delete - keys: %s" % keys)
         if len(keys) > 0:
             res = self.conn.delete(*keys)
+            # print("+++++ RedisManager - delete - res: %s" % res)
             return res
         return None
 
@@ -550,10 +551,10 @@ class RedisManager(ConnectionManager):
     
     # new methods
     def expire(self, name, time: int):
-        self.conn.expire(name, time)
+        return self.conn.expire(name, time)
 
     def keys(self, pattern):
-        self.conn.keys(pattern)
+        return self.conn.keys(pattern)
 
 
 def manage_connection(method):

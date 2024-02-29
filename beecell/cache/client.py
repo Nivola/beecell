@@ -74,9 +74,9 @@ class CacheClient(object):
         :param ttl: item time to live [default=600s]
         :return: True
         """
-        self.redis_manager.expire(self.prefix + key, ttl)
-        self.logger.debug("Set cache item %s expire to %s" % (key, ttl))
-        return True
+        ret = self.redis_manager.expire(self.prefix + key, ttl)
+        self.logger.debug("Set cache item %s expire to %s - ret: %s" % (key, ttl, ret))
+        return ret
 
     def delete(self, key):
         """Delete a cache item
@@ -94,8 +94,9 @@ class CacheClient(object):
         :param pattern: key search pattern
         :return: list of items
         """
+        # print("+++++ CacheClient - get_by_pattern - pattern: %s" % pattern)
         keys = self.redis_manager.keys(self.prefix + pattern)
-        # print("+++++ get_by_pattern - keys: %s" % keys)
+        # print("+++++ CacheClient - get_by_pattern - keys: %s" % keys)
         res = []
         if keys is not None:
             for key in keys:
@@ -118,6 +119,6 @@ class CacheClient(object):
         :param key: cache item key
         :return: True
         """
-        self.redis_manager.expire(self.prefix + key, ttl)
-        self.logger.debug("Extend cache item %s ttl to %s" % (key, ttl))
-        return True
+        ret = self.redis_manager.expire(self.prefix + key, ttl)
+        self.logger.debug("Extend cache item %s ttl to %s - ret: %s" % (key, ttl, ret))
+        return ret
