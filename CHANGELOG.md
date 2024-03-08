@@ -1,5 +1,15 @@
 # Changelog
 
+## Version 1.15.3 ( mar , 2024)
+
+* Added ...
+  - CacheClient with RedisManager: cahce client may use redis-sentinel or redis
+
+* Added ...
+  - fix bug sulle cache get keys
+  - fix bug in cache delete
+
+
 ## Version 1.11.0 (oct 11, 2022)
 * Various bugfixes
 
@@ -70,7 +80,7 @@
 * Fixed ...
     * correct some bugs in ParamikoShell: exit sometimes was not captured, command trace run twice.
     * correct connection release in MysqlManager
-    * correct User._check_password 
+    * correct User._check_password
 * Integrated ...
     * update Copyright to 2020-2021
 * Various bugfixes
