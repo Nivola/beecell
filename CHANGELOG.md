@@ -1,5 +1,15 @@
 # Changelog
 
+## Version 1.15.3 ( mar , 2024)
+
+* Added ...
+  - CacheClient with RedisManager: cahce client may use redis-sentinel or redis
+
+* Added ...
+  - fix bug sulle cache get keys
+  - fix bug in cache delete
+
+
 ## Version 1.15.0
 
 * Added ...
