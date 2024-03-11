@@ -96,7 +96,7 @@ class AsyncConsumer(object):
             on_open_callback=self.on_connection_open,
             on_open_error_callback=self.on_connection_error,
             on_close_callback=self.on_connection_closed,
-            stop_ioloop_on_close=False,
+            # stop_ioloop_on_close=False,
         )
 
     def close_connection(self):
