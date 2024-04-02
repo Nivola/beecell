@@ -1,5 +1,17 @@
 # Changelog
 
+## Version 1.16.0 ( mar , 2024)
+
+* Added
+    * check tax_code
+* Fixed
+    * AMQP Client: stop_ioloop_on_close=False
+    * fixed is instead in in swagger helper
+    * punctual import
+    * Remove unused import
+    * Sort import
+
+
 ## Version 1.15.3 ( mar , 2024)
 
 * Added ...
