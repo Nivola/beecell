@@ -100,6 +100,17 @@ class CacheClient(object):
             for key in keys:
                 res.append({"key": key, "value": self.redis_manager.get(key)})
         return res
+    
+    def get_keys_by_pattern(self, pattern):
+        """Get keys by pattern
+
+        :param pattern: key search pattern
+        :return: list of items
+        """
+        # print("+++++ CacheClient - get_by_pattern - pattern: %s" % pattern)
+        keys = self.redis_manager.keys(self.prefix + pattern)
+        # print("+++++ CacheClient - get_by_pattern - keys: %s" % keys)
+        return keys
 
     def delete_by_pattern(self, pattern):
         """Delete keys by pattern
