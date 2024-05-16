@@ -10,6 +10,7 @@ from random import choice
 from re import match
 from logging import getLogger
 from six import ensure_text
+from typing import Union
 
 logger = getLogger(__name__)
 
@@ -76,3 +77,22 @@ def is_uuid(oid):
     if match("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", str(oid)) is not None:
         return True
     return False
+
+def test_oid(oid: Union[str, int])-> str:
+    """Test oid in order to know if it is an id, uuid or name
+
+    Args:
+        oid (Union[str, int]): oid to  test
+
+    Returns:
+        str: id|uuid|name|unknown
+    """
+    if type(oid) == int:
+        return "id"
+    elif str(oid).isdigit():
+        return "id"
+    elif match("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", str(oid)) is not None:
+        return "uuid"
+    elif match("[\-\w\d]+", str(oid)):
+        return "name"
+    return "unknown"
