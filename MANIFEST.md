@@ -19,5 +19,5 @@ redis==3.5.3
 scp==0.13.6
 SQLAlchemy==1.4.23
 sshtunnel==0.4.0
-ujson==4.1.0
+ujson==5.8.0
 urllib3==1.26.6
