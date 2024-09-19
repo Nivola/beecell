@@ -6,6 +6,7 @@ The original copyright notice and the license, under which CSI-Piemonte received
 are set forth below. You can find the original source code at the link set hereafter.
 Please refer to the accompanying credits file for additional notices.
 
+
 [MIT](https://opensource.org/licenses/MIT)\
 apispec,5.1.0
 apispec-webframeworks,0.5.2
@@ -19,6 +20,7 @@ SQLAlchemy,1.4.23
 sshtunnel,0.4.0
 urllib3,1.26.6
 
+
 [BSD 3-clause](https://opensource.org/licenses/BSD-3-Clause)\
 Flask,2.0.1
 celery,5.2.3
@@ -29,12 +31,11 @@ psutil,5.8.0
 ujson,5.8.0
 networkx,2.6.2
 
-[Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)\
-bcrypt,3.2.0
 
 [LGPL 3.0](https://opensource.org/licenses/LGPL-3.0)\
 scp,0.13.6
 paramiko,2.7.2
+
 
 [Python Software Foundation](https://docs.python.org/3/license.html)
 python-ldap,3.3.1

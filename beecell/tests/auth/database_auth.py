@@ -2,7 +2,7 @@
 #
 # (C) Copyright 2018-2023 CSI-Piemonte
 
-import bcrypt
+from Crypto.Protocol.KDF import bcrypt_check
 from sqlalchemy import Column, String, Integer, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from beecell.auth import SystemUser, DatabaseAuth, AbstractAuthDbManager
@@ -35,7 +35,7 @@ class User(Base):
         if is_encrypted(self.password):
             res = decrypt_data(self.password) == password.encode("utf-8")
         else:
-            res = bcrypt.checkpw(password.encode("utf-8"), self.password.encode("utf-8"))
+            res = bcrypt_check(password.encode("utf-8"), self.password.encode("utf-8"))
         return res
 
 

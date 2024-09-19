@@ -1,6 +1,5 @@
 apispec==5.1.0
 apispec-webframeworks==0.5.2
-bcrypt==3.2.0
 celery==5.2.3
 Flask==2.0.1
 Flask-Login==0.6.0
