@@ -1,0 +1,221 @@
+changelog:
+    -
+        version: 1.16.0
+        date: 2024-03-26
+        desc: rilascio funzionalità
+        added:
+            - check tax_code
+        fixed:
+            - AMQP Client stop_ioloop_on_close=False
+            - fixed is instead in in swagger helper
+            - punctual import
+            - Remove unused import
+            - Sort import
+    -
+        version: 1.15.3
+        date: 2024-03-11
+        desc: rilascio funzionalità
+        added:
+            - 'CacheClient with RedisManager: cahce client may use redis-sentinel or redis'
+        fixed:
+            - fix bug sulle cache get keys
+            - fix bug in cache delete
+    -
+        version: 1.15.0
+        date: 2025-10-12
+        desc: rilascio funzionalità
+        added:
+            - setup debug for  code/debugpy
+            - new environment vars for checks and info
+        fixed:
+            - obscure data utility function
+            - checkemail utility function
+            - timeout
+
+    -
+        version: 1.14.0
+        date: 2023-06-22
+        desc: rilascio funzionalità
+        added:
+        - is_name and is_uuid check methods
+        - added identity manager Class
+        fixed:
+            - Mailer send with no files attached
+            - log elasticsearch rename client
+            - send email fix multiple recipients
+            - time and timeout optimization
+
+    -
+        version: 1.13.0
+        date: 2023-02-24
+        desc: rilascio funzionalità
+        added:
+        fixed:
+            - minor changes
+
+    -
+        version: 1.12.0
+        date: 2023-01-27
+        desc: rilascio funzionalità
+        added:
+        fixed:
+            - minor changes
+
+    -
+        version: 1.11.0
+        date: 2022-10-11
+        fixed:
+            - Various bugfixes
+    -
+        version: 1.9.0
+        date: 2022-02-11
+        desc: rilascio funzionalità
+        added:
+            - add method split_string_in_chunks in simple
+            - add method setex in RedisManager
+            - add package crypto_util and class RasCrypto that manage asymmetric cryptography with rsa
+            - add manage_connection in SqlManager
+            - add method compile_query
+            - add K8shHandler to manage new line when logging an exception and read from filebeat
+        fixed:
+            - improved import in simple module
+            - moved read_file in file module to improve load performance
+            - moved password methods in password module to improve load performance
+            - moved dict, list, string, date methods in types package to improve load performance
+            - moved cryptography methods in crypto module to improve load performance
+            - correct RedisManager timeout setting. socket_timeout was not from param and default value of 0.1s is too low
+            - removed in ldap.authenticate code for reconnection. code is bad and bypass wrong password
+
+            - Various bugfixes
+    -
+        version: 1.8.0
+        date: 2021-06-11
+        desc: rilascio funzionalità
+        added:
+            - add support connection using ssh tunnel to paramiko_shell
+            - add rsync client authentication with ssh key
+            - add management of redis cluster with sentinel
+            - add tunnel configuration for sql manager
+            - add method exec_statements in sql manager
+        fixed:
+            - fixed parse_redis_uri to parse redis sentinel uri
+            - replaced character | with + in simple.truncate
+            - renamed schema in db in SqlManager
+    -
+        version: 1.7.1
+        date: 2021-02-05
+        desc: rilascio correttive
+        added:
+            - added command ParamikoShell scp to exec secure copy
+            - added class Rsync to run rsync between folder
+            - add MysqlManager methods show_binary_log and purge_binary_log to manage binary logs
+            - add method validate_string
+        fixed:
+            - |
+                correct some bugs in ParamikoShell: exit sometimes was not captured, command trace run twice.
+            - correct connection release in MysqlManager
+            - correct User._check_password
+            - change method LdapAuth.authenticate to authenticate(self, username, password, max_retry=3, cur_retry=0). Add param
+            - max_retry to manage some connections retry to ldap
+
+            - update Copyright to 2020-2021
+            - Various bugfixes
+        removed:
+            - removed cement_cmd package. Compatible only with python 2
+            - removed module server.gevent_ssl
+            - removed test for redis cluster
+    -
+        version: 1.7.0
+        date: 2020-12-31
+        desc: rilascio funzionalità
+        added:
+            - added mysql manager methods to manage mysql replica
+            - added methods get_line, get_pretty_size
+            - add ParamikoShell commands mkdir, chown, chmod
+        fixed:
+            - |
+                correct some bugs in ParamikoShell: exit sometimes was not captured, command trace run twice.
+            - correct connection release in MysqlManager
+            - correct User._check_password
+
+            - update Copyright to 2020-2021
+        removed:
+            - removed cement_cmd package. Compatible only with python 2
+            - removed module server.gevent_ssl
+            - removed test for redis cluster
+    -
+        version: 1.6.1
+        date: 2020-06-21
+        desc: rilascio funzionalità
+        added:
+            - added syslog_handler
+            - add CacheClient method get_by_pattern
+        fixed:
+            - fixed some bugs
+    -
+        version: 1.6.0
+        date: 2019-11-08
+        desc: rilascio funzionalità
+        added:
+            - add method multi_get
+            - add method is_string
+        fixed:
+            - bug on redis-cluster run_cmd that does not return results if connection to redis cluster fails
+            - changed timeout in ParamikoShell from 1.0 to 10.0 seconds
+    -
+        version: 1.5.0
+        date: 2019-09-04
+        desc: rilascio funzionalità
+        added:
+            - add scan method to RedisManager
+            - add method prefixlength_to_netmask
+            - module network
+            - added logger for elasticsearch
+        fixed:
+            - Various bugfixes
+
+            - requirements update
+    -
+        version: 1.4.0
+        date: 2019-05-34
+        desc: rilascio funzionalità
+        added:
+            - cache manager based on redis
+        fixed:
+            - corrected parameters of database session creation. Set autoflush=True and expire_on_commit=True
+
+            - modify class auth.LdapAuth. Now login workflow has the following steps ldap login using a  system user, query
+            - ldap for user existence, get user dn, ldap login using user dn and password
+    -
+        version: 1.3.0
+        date: 2019-02-27
+        desc: rilascio funzionalità
+        added:
+            - test runner to use with concurrent unit test
+        fixed:
+            - Various bugfixes
+    -
+        version: 1.2.0
+        date: 2019-02-01
+        desc: rilascio funzionalità
+        added:
+        fixed:
+            - Various bugfixes
+
+            - changed method **random_password*- to create a more stronger password
+    -
+        version: 1.1.0
+        date: 2019-01-13
+        desc: rilascio funzionalità
+        added:
+            - added methods simple.dict_get, simple.dict_set
+        fixed:
+            - Various bugfixes
+    -
+        version: 1.0.0
+        date: 2018-07-31
+        dsc: First production preview release.
+    -
+        version: 0.1.0
+        date: 2016-04-18
+        desc: First private preview release.
