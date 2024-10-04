@@ -32,6 +32,10 @@ ujson,5.8.0
 networkx,2.6.2
 
 
+[Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)\
+bcrypt,3.2.0
+
+
 [LGPL 3.0](https://opensource.org/licenses/LGPL-3.0)\
 scp,0.13.6
 paramiko,2.7.2
