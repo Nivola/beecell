@@ -1,5 +1,10 @@
 # Changelog
 
+## Versione 1.17.1 (?)
+* Cryptography
+  - rsa 2048
+  - fernet module
+
 ## Version 1.16.0 (2024-03-26)
 rilascio funzionalità
 
