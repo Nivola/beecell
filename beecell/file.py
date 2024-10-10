@@ -3,6 +3,7 @@
 # (C) Copyright 2018-2023 CSI-Piemonte
 
 import xml.etree.ElementTree as et
+from os.path import expanduser
 from yaml import full_load
 from six import b
 from ujson import loads
@@ -17,7 +18,8 @@ def read_file(file_name, parse=True):
     :param parse: if True parse file
     :return: data
     """
-    f = open(file_name, "r")
+    
+    f = open(expanduser(file_name), "r")
     data = f.read()
     extension = file_name[-4:].lower()
     if parse is True:
