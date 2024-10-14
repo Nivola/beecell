@@ -106,28 +106,6 @@ def get_attrib2(inst, key, default_value=None):
 
     return value
 
-
-from flask import Request
-
-
-def get_remote_ip(request: Request):
-    """Get a remote id
-
-    :param request: request to do
-    :return:  remote ip
-    """
-    try:
-        try:
-            # get remote ip when use nginx as balancer
-            ipaddr = request.environ["HTTP_X_REAL_IP"]
-        except:
-            ipaddr = request.environ["REMOTE_ADDR"]
-
-        return ipaddr
-    except RuntimeError:
-        return None
-
-
 def prefixlength_to_netmask(prefixlength):
     """Convert a cidr prefix length in subnet mask. Ex. 24 to 255.255.255.0.
 
