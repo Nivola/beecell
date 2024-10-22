@@ -70,7 +70,7 @@ class Fernet:
         ciphertext = cipher.encrypt(padded_data)
 
         # Embed the current timestamp (8 bytes)
-        timestamp = int(time()).to_bytes(8)
+        timestamp = int(time()).to_bytes(8, byteorder="big")
 
         # Token format: version (1 byte) + timestamp (8 bytes) + IV (16 bytes) + ciphertext
         token = b'\x80' + timestamp + iv + ciphertext
