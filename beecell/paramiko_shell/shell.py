@@ -264,9 +264,15 @@ class ParamikoShell(object):
         :param dest: remote file name
         :return:
         """
+        if self.tunnel_conf is not None:
+            self.create_tunnel()
+
         ftp_client = self.client.open_sftp()
         res = ftp_client.put(source, dest)
         ftp_client.close()
+
+        if self.tunnel_conf is not None:
+            self.close_tunnel()
         return res
 
     def file_get(self, source, dest):
@@ -276,9 +282,15 @@ class ParamikoShell(object):
         :param dest: local file name
         :return:
         """
+        if self.tunnel_conf is not None:
+            self.create_tunnel()
+
         ftp_client = self.client.open_sftp()
         res = ftp_client.get(source, dest)
         ftp_client.close()
+
+        if self.tunnel_conf is not None:
+            self.close_tunnel()
         return res
 
     def file_list_dir(self, path):
@@ -287,6 +299,9 @@ class ParamikoShell(object):
         :param path: directory path
         :return:
         """
+        if self.tunnel_conf is not None:
+            self.create_tunnel()
+
         ftp_client = self.client.open_sftp()
         res = ftp_client.listdir_attr(path)
         ftp_client.close()
@@ -294,6 +309,9 @@ class ParamikoShell(object):
             self.post_action(status=None, cmd="ls -al %s" % path, elapsed=0)
         if self.post_logout is not None:
             self.post_logout()
+
+        if self.tunnel_conf is not None:
+            self.close_tunnel()
         return res
 
     def open_file(self, filename):
