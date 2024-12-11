@@ -1,6 +1,7 @@
 beecell is written and maintained by:
 
 * Ahmad Nazha
+* Alessandro More'
 * Antonio Brasile
 * Daniela Ferrarini
 * Davide Sacchetto
