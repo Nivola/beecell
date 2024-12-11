@@ -92,15 +92,15 @@ def sign_data(seckey64, data):
     """
     # Import the key
     key = RSA.import_key(a2b_base64(seckey64))
-    
+
     # Create SHA256 hash directly
     hash_data = SHA256.new(bytes(data, encoding="utf-8"))
-    
+
     # Sign the hashed data
     signature = PKCS1_v1_5.new(key).sign(hash_data)
-    
+
     # Return signature in hex format
-    return b2a_hex(signature).decode('utf-8')
+    return b2a_hex(signature).decode("utf-8")
 
 
 def verify_data(pubkey64, data, sign):
@@ -111,10 +111,10 @@ def verify_data(pubkey64, data, sign):
     """
     # Import the public key
     key = RSA.import_key(a2b_base64(pubkey64))
-    
+
     # Create SHA256 hash of the data
     hash_data = SHA256.new(bytes(data, encoding="utf-8"))
-    
+
     # Verify the signature
     return PKCS1_v1_5.new(key).verify(hash_data, a2b_hex(sign))
 

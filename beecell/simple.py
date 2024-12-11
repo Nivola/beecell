@@ -106,6 +106,7 @@ def get_attrib2(inst, key, default_value=None):
 
     return value
 
+
 def prefixlength_to_netmask(prefixlength):
     """Convert a cidr prefix length in subnet mask. Ex. 24 to 255.255.255.0.
 

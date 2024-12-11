@@ -8,7 +8,8 @@ with open("%sVERSION" % __file__.replace("__init__.py", "")) as f:
 __git_last_commit__ = ""
 try:
     import os
-    LAST_COMMIT_PATH = os.getenv('LAST_COMMIT_BEECELL')
+
+    LAST_COMMIT_PATH = os.getenv("LAST_COMMIT_BEECELL")
     if LAST_COMMIT_PATH is not None:
         with open(LAST_COMMIT_PATH) as f:
             __git_last_commit__ = f.read()

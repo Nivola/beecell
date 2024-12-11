@@ -4,6 +4,7 @@
 
 import os
 import xml.etree.ElementTree as et
+
 # from xmltodict import parse as xmltodict
 from yaml import full_load
 from ujson import loads
@@ -30,6 +31,7 @@ def check_encrypted(data, fernet: Fernet):
             value = fernet.decrypt(value)
             data[key] = value.decode("utf-8")
     return data
+
 
 # def read_file(file_name, parse=True):
 def read_file(file_name: str, parse=True, secret: str = None) -> dict:

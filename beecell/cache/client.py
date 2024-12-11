@@ -100,7 +100,7 @@ class CacheClient(object):
             for key in keys:
                 res.append({"key": key, "value": self.redis_manager.get(key)})
         return res
-    
+
     def get_keys_by_pattern(self, pattern):
         """Get keys by pattern
 

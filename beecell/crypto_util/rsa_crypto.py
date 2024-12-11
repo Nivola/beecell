@@ -17,7 +17,7 @@ class RasCrypto:
         """
         Generate new private key.
         """
-        return  RSA.generate(key_size, e=public_exponent)
+        return RSA.generate(key_size, e=public_exponent)
 
     def import_private_key(self, private_key_base64, password=None):
         """
@@ -38,9 +38,9 @@ class RasCrypto:
         Export private key as string.
         """
         if password is not None:
-            pem = private_key.export_key(format='PEM', passphrase=password, pkcs=8)
+            pem = private_key.export_key(format="PEM", passphrase=password, pkcs=8)
         else:
-            pem = private_key.export_key(format='PEM')
+            pem = private_key.export_key(format="PEM")
         if not base64_encode:
             return pem
         return b64encode(pem)
@@ -49,7 +49,7 @@ class RasCrypto:
         """
         Export public key as string.
         """
-        pem = private_key.publickey().export_key(format='PEM')
+        pem = private_key.publickey().export_key(format="PEM")
         if not base64_encode:
             return pem
         return b64encode(pem)
@@ -60,7 +60,7 @@ class RasCrypto:
         """
         # Create a PKCS1_OAEP cipher using hashlib's sha256
         cipher = PKCS1_OAEP.new(public_key, hashAlgo=sha256)
-        ciphertext = cipher.encrypt(message.encode('utf-8'))
+        ciphertext = cipher.encrypt(message.encode("utf-8"))
 
         if not base64_encode:
             return ciphertext
@@ -74,4 +74,4 @@ class RasCrypto:
             ciphertext = b64decode(ciphertext)
         # Create a PKCS1_OAEP cipher using hashlib's sha256
         cipher = PKCS1_OAEP.new(private_key, hashAlgo=sha256)
-        return cipher.decrypt(ciphertext).decode('uft-8')
+        return cipher.decrypt(ciphertext).decode("uft-8")

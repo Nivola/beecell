@@ -78,7 +78,8 @@ def is_uuid(oid):
         return True
     return False
 
-def test_oid(oid: Union[str, int])-> str:
+
+def test_oid(oid: Union[str, int]) -> str:
     """Test oid in order to know if it is an id, uuid or name
 
     Args:

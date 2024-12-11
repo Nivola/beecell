@@ -11,10 +11,10 @@ from marshmallow.validate import OneOf
 from flex.core import validate_api_call
 
 logger = getLogger(__name__)
-global_marshmallow_plugin = MarshmallowPlugin() # imported by some views
+global_marshmallow_plugin = MarshmallowPlugin()  # imported by some views
+
 
 class SwaggerHelper(object):
-
     def __init__(self):
         global global_marshmallow_plugin
         self.spec = APISpec(

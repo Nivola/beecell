@@ -548,7 +548,7 @@ class RedisManager(ConnectionManager):
         :return: lists of keys with value
         """
         return self.conn.lrem(*args, **kwargs)
-    
+
     # new methods
     def expire(self, name, time: int):
         return self.conn.expire(name, time)

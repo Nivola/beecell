@@ -37,9 +37,7 @@ class Fernet:
         Expect a base64-encoded key of length 32 bytes.
         """
         if len(key) != 32:
-            raise ValueError(
-                "Fernet key must be 32 url-safe base64-encoded bytes."
-            )
+            raise ValueError("Fernet key must be 32 url-safe base64-encoded bytes.")
 
         self._signing_key = key[:16]  # HMAC key
         self._encryption_key = key[16:]  # AES key (128-bit)
@@ -73,7 +71,7 @@ class Fernet:
         timestamp = int(time()).to_bytes(8, byteorder="big")
 
         # Token format: version (1 byte) + timestamp (8 bytes) + IV (16 bytes) + ciphertext
-        token = b'\x80' + timestamp + iv + ciphertext
+        token = b"\x80" + timestamp + iv + ciphertext
 
         # HMAC (SHA256) to ensure integrity, using the signing key
         hmac_value = hmac.new(self._signing_key, token, sha256).digest()
@@ -81,7 +79,7 @@ class Fernet:
         # Append the HMAC to the token
         token += hmac_value
 
-        return urlsafe_b64encode(token).rstrip(b'=')
+        return urlsafe_b64encode(token).rstrip(b"=")
 
     def decrypt(self, token):
         """
@@ -93,7 +91,7 @@ class Fernet:
         :return: Decrypted data.
         """
         # Decode token; add padding to be used to decode
-        token = urlsafe_b64decode(token + b'==')
+        token = urlsafe_b64decode(token + b"==")
         token_min_size = 48
         if len(token) < token_min_size:
             raise ValueError("Invalid Token")
@@ -108,7 +106,7 @@ class Fernet:
         # HMAC check
         expected_hmac = hmac.new(self._signing_key, token[:-32], sha256).digest()
         if not hmac.compare_digest(expected_hmac, hmac_value):
-            raise ValueError('HMAC check failed')
+            raise ValueError("HMAC check failed")
 
         # Decrypt
         cipher = AES.new(self._encryption_key, AES.MODE_CBC, iv)

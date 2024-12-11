@@ -9,7 +9,7 @@ import ssl
 import re
 from logging import getLogger
 from sys import version_info
-from paramiko import SSHClient, MissingHostKeyPolicy 
+from paramiko import SSHClient, MissingHostKeyPolicy
 import urllib3
 from urllib3.util.ssl_ import create_urllib3_context
 from six.moves import http_client

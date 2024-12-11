@@ -67,6 +67,7 @@ def validate_string(data, validation_string=r"[^a-zA-Z0-9\-]."):
     data = char_re.search(data)
     return not bool(data)
 
+
 def validate_service_name(name: str):
     """
     Validate a service name:
@@ -77,13 +78,14 @@ def validate_service_name(name: str):
     :param name: name to validate
     :return: True if validation is OK
     """
-    if name is None or len(name)==0:
+    if name is None or len(name) == 0:
         return False
-    if any( (not c.isalnum()) and c != "-" for c in name):
+    if any((not c.isalnum()) and c != "-" for c in name):
         return False
-    if not name[0].isalpha() or name[-1]=='-':
+    if not name[0].isalpha() or name[-1] == "-":
         return False
     return True
+
 
 def split_string_in_chunks(string, pos=100):
     """split a string in chunks
