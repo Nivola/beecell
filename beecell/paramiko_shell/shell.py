@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2019 CSI-Piemonte
-# (C) Copyright 2019-2020 CSI-Piemonte
-# (C) Copyright 2020-2021 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
 import os
 from os import popen
