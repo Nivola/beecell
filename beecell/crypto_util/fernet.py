@@ -19,7 +19,7 @@ class Fernet:
 
     Usage:
 
-    key_base64 = b'3_k6xV77gdhdgRCKdCcwjIxUUHwPemQgLW3j_NdSVb8='
+    key_base64 = b'<some key>'
     key = urlsafe_b64decode(key_base64)  # Decode key
     fernet = Fernet(key)
 

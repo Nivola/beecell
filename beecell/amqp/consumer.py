@@ -42,7 +42,7 @@ class AsyncConsumer(object):
 
         :param str amqp_params: The AMQP connection params. Dict like:
                                 {'host':'172.16.0.8', 'port':5672, 'vhost':'/',
-                                 'user':'guest', 'pwd':'testlab',
+                                 'user':'guest', 'pwd':'xxxxxx',
                                  'queue':'gibbon.job', 'durable':False}
         :param callback: callback function
         :param auto_reconnect: set to True if you want portal2 reconnect
@@ -358,7 +358,7 @@ class AsyncSubscriber(object):
 
         :param str amqp_params: The AMQP connection params. Dict like:
                                 {'host':'172.16.0.8', 'port':5672, 'vhost':'/',
-                                 'user':'guest', 'pwd':'testlab',
+                                 'user':'guest', 'pwd':'xxxxx',
                                  'exchange':{'name':'message', 'type':'fanout'},
                                  'routing_key':'example.text', 'durable':False}
         :param callback: callback function

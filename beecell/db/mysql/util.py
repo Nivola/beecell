@@ -33,7 +33,7 @@ def compile_query(query):
     params = []
     for k in comp.positiontup:
         v = comp.params[k]
-        if isinstance(v, unicode):
+        if isinstance(v, str):
             v = v.encode(enc)
         params.append(escape(v, conversions))
     return (comp.string.encode(enc) % tuple(params)).decode(enc)
@@ -41,9 +41,9 @@ def compile_query(query):
 
 def get_process_list():
     port = 3308
-    host = "10.102.47.205"
+    host = "0.0.0.0"
     user = "root"
-    pwd = "testlab"
+    pwd = "xxxxxx"
     socket = "/var/lib/mysql2/mysql2.sock"
     cmd = [
         "mysql",
