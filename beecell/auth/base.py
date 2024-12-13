@@ -5,7 +5,6 @@
 import logging
 from typing import List
 from flask_login import UserMixin
-from typing import List, Union
 
 
 class SystemUser(UserMixin):

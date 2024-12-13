@@ -3,8 +3,6 @@
 # (C) Copyright 2018-2024 CSI-Piemonte
 
 import logging
-from sqlalchemy.exc import OperationalError
-from sshtunnel import SSHTunnelForwarder
 from time import sleep
 import os
 from datetime import datetime, timedelta

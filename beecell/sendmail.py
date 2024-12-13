@@ -2,8 +2,6 @@
 #
 # (C) Copyright 2018-2024 CSI-Piemonte
 
-from email import encoders
-from email.mime.base import MIMEBase
 import logging
 from pathlib import Path
 from smtplib import SMTP, SMTP_SSL
