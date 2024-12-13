@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
 import logging
+from typing import List
 from flask_login import UserMixin
 from typing import List, Union
 

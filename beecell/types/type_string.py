@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
 from inspect import isclass
 from re import compile as re_compile
@@ -54,7 +54,10 @@ def truncate(msg: str, size: int = 600, replace_new_line: bool = True) -> str:
 
 
 def validate_string(data, validation_string=r"[^a-zA-Z0-9\-]."):
-    """Validate a string respect a set of allowed characters
+    """
+    DO NOT USE. USE validate_service_name
+
+    Validate a string respect a set of allowed characters
 
     :param data: data to validate
     :param validation_string: validation string [deafult=r'[^a-zA-Z0-9\-].']
@@ -63,6 +66,25 @@ def validate_string(data, validation_string=r"[^a-zA-Z0-9\-]."):
     char_re = re_compile(validation_string)
     data = char_re.search(data)
     return not bool(data)
+
+
+def validate_service_name(name: str):
+    """
+    Validate a service name:
+    - only alphanumeric characters or "-"
+    - first character must be a letter
+    - last character can't be a "-"
+
+    :param name: name to validate
+    :return: True if validation is OK
+    """
+    if name is None or len(name) == 0:
+        return False
+    if any((not c.isalnum()) and c != "-" for c in name):
+        return False
+    if not name[0].isalpha() or name[-1] == "-":
+        return False
+    return True
 
 
 def split_string_in_chunks(string, pos=100):

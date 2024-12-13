@@ -1,24 +1,26 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
-from flex.core import validate_api_call
 from logging import getLogger
+from copy import deepcopy
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 from apispec_webframeworks.flask import FlaskPlugin
 from marshmallow.validate import OneOf
-from copy import deepcopy
+from flex.core import validate_api_call
 
 logger = getLogger(__name__)
+global_marshmallow_plugin = MarshmallowPlugin()  # imported by some views
 
 
 class SwaggerHelper(object):
     def __init__(self):
+        global global_marshmallow_plugin
         self.spec = APISpec(
             title="",
             version="",
-            plugins=[FlaskPlugin(), MarshmallowPlugin()],
+            plugins=[FlaskPlugin(), global_marshmallow_plugin],
             openapi_version="2.0",
         )
 
@@ -130,7 +132,7 @@ class ApiValidator(object):
         return []
 
     def get_schema_keys(self, data, parent=None, required=None):
-        if required in None:
+        if required is None:
             required = []
         if "$ref" in data:
             # #/responses/NotFound

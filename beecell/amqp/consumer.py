@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
 
 import logging
-import pika
 import time
 import pickle
+import pika
 from pika.exceptions import AMQPError, AMQPConnectionError
 
 
@@ -42,7 +42,7 @@ class AsyncConsumer(object):
 
         :param str amqp_params: The AMQP connection params. Dict like:
                                 {'host':'172.16.0.8', 'port':5672, 'vhost':'/',
-                                 'user':'guest', 'pwd':'testlab',
+                                 'user':'guest', 'pwd':'xxxxxx',
                                  'queue':'gibbon.job', 'durable':False}
         :param callback: callback function
         :param auto_reconnect: set to True if you want portal2 reconnect
@@ -96,7 +96,7 @@ class AsyncConsumer(object):
             on_open_callback=self.on_connection_open,
             on_open_error_callback=self.on_connection_error,
             on_close_callback=self.on_connection_closed,
-            stop_ioloop_on_close=False,
+            # stop_ioloop_on_close=False,
         )
 
     def close_connection(self):
@@ -358,7 +358,7 @@ class AsyncSubscriber(object):
 
         :param str amqp_params: The AMQP connection params. Dict like:
                                 {'host':'172.16.0.8', 'port':5672, 'vhost':'/',
-                                 'user':'guest', 'pwd':'testlab',
+                                 'user':'guest', 'pwd':'xxxxx',
                                  'exchange':{'name':'message', 'type':'fanout'},
                                  'routing_key':'example.text', 'durable':False}
         :param callback: callback function

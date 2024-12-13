@@ -1,14 +1,14 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
+import bcrypt
 from sqlalchemy import Column, String, Integer, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from beecell.auth import SystemUser, DatabaseAuth, AbstractAuthDbManager
 from beecell.db.manager import SqlManager
 from beecell.simple import is_encrypted, decrypt_data
 from beecell.tests.test_util import BeecellTestCase, runtest
-import bcrypt
 
 
 tests = ["test_login"]

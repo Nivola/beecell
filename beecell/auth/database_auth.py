@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
-from .base import AuthError, AbstractAuth
 from beecell.db import QueryError
+from .base import AuthError, AbstractAuth
 
 
 class DatabaseAuth(AbstractAuth):

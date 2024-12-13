@@ -1,10 +1,9 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
 import pickle
 import logging
-from datetime import timedelta
 from uuid import uuid4
 from redis import Redis
 from werkzeug.datastructures import CallbackDict

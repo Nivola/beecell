@@ -1,12 +1,28 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
+from bson import BSON
+from flask import request, Request
 from beecell.simple import jsonDumps
 
-import json
-from bson import BSON
-from flask import request
+
+def get_remote_ip(request: Request):
+    """Get a remote id
+
+    :param request: request to do
+    :return:  remote ip
+    """
+    try:
+        try:
+            # get remote ip when use nginx as balancer
+            ipaddr = request.environ["HTTP_X_REAL_IP"]
+        except:
+            ipaddr = request.environ["REMOTE_ADDR"]
+
+        return ipaddr
+    except RuntimeError:
+        return None
 
 
 def get_error(exception, code, data, mime="json"):

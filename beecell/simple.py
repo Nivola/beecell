@@ -1,15 +1,11 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
-from inspect import getmembers, isclass
 from struct import pack
 from logging import getLogger
 from socket import inet_ntoa
 from math import ceil
-
-logger = getLogger(__name__)
-
 
 from .crypto import *
 from .types.type_date import *
@@ -20,6 +16,8 @@ from .types.type_id import *
 from .types.type_class import *
 from .file import *
 from .password import *
+
+logger = getLogger(__name__)
 
 
 def nround(number, decimal=4):
@@ -107,27 +105,6 @@ def get_attrib2(inst, key, default_value=None):
         value = inst.__dict__[key]
 
     return value
-
-
-from flask import Request
-
-
-def get_remote_ip(request: Request):
-    """Get a remote id
-
-    :param request: request to do
-    :return:  remote ip
-    """
-    try:
-        try:
-            # get remote ip when use nginx as balancer
-            ipaddr = request.environ["HTTP_X_REAL_IP"]
-        except:
-            ipaddr = request.environ["REMOTE_ADDR"]
-
-        return ipaddr
-    except RuntimeError:
-        return None
 
 
 def prefixlength_to_netmask(prefixlength):

@@ -1,21 +1,19 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2019 CSI-Piemonte
-# (C) Copyright 2019-2020 CSI-Piemonte
-# (C) Copyright 2020-2021 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
 import os
 from os import popen
 from tempfile import NamedTemporaryFile
-from paramiko.client import SSHClient, MissingHostKeyPolicy
-from paramiko import RSAKey
 from logging import getLogger
-from six import StringIO, ensure_text, ensure_binary
 import fcntl
 import termios
 import struct
 import sys
-from gevent.os import make_nonblocking, nb_read, nb_write
+from six import StringIO, ensure_text, ensure_binary
+from paramiko import RSAKey
+from paramiko.client import SSHClient, MissingHostKeyPolicy
+from gevent.os import make_nonblocking, nb_write
 from sshtunnel import SSHTunnelForwarder
 
 try:
@@ -163,16 +161,6 @@ class ParamikoShell(object):
         self.tunnel.stop()
 
     def cmd1(self, cmd):
-        from six import b, u, ensure_text
-
-        try:
-            import termios
-            import tty
-
-            has_termios = True
-        except ImportError:
-            has_termios = False
-
         channel = self.client.get_transport().open_session()
         channel.settimeout(5)
         channel.setblocking(1)
@@ -274,9 +262,15 @@ class ParamikoShell(object):
         :param dest: remote file name
         :return:
         """
+        if self.tunnel_conf is not None:
+            self.create_tunnel()
+
         ftp_client = self.client.open_sftp()
         res = ftp_client.put(source, dest)
         ftp_client.close()
+
+        if self.tunnel_conf is not None:
+            self.close_tunnel()
         return res
 
     def file_get(self, source, dest):
@@ -286,9 +280,15 @@ class ParamikoShell(object):
         :param dest: local file name
         :return:
         """
+        if self.tunnel_conf is not None:
+            self.create_tunnel()
+
         ftp_client = self.client.open_sftp()
         res = ftp_client.get(source, dest)
         ftp_client.close()
+
+        if self.tunnel_conf is not None:
+            self.close_tunnel()
         return res
 
     def file_list_dir(self, path):
@@ -297,6 +297,9 @@ class ParamikoShell(object):
         :param path: directory path
         :return:
         """
+        if self.tunnel_conf is not None:
+            self.create_tunnel()
+
         ftp_client = self.client.open_sftp()
         res = ftp_client.listdir_attr(path)
         ftp_client.close()
@@ -304,6 +307,9 @@ class ParamikoShell(object):
             self.post_action(status=None, cmd="ls -al %s" % path, elapsed=0)
         if self.post_logout is not None:
             self.post_logout()
+
+        if self.tunnel_conf is not None:
+            self.close_tunnel()
         return res
 
     def open_file(self, filename):

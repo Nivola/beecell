@@ -1,16 +1,18 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
 import logging
 from sqlalchemy.exc import OperationalError
 from sshtunnel import SSHTunnelForwarder
 from time import sleep
 import os
+from datetime import datetime, timedelta
+from sshtunnel import SSHTunnelForwarder
 import ujson as json
 from sqlalchemy import create_engine, exc, event, text
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker
-from datetime import datetime, timedelta
 from beecell.simple import truncate
 from beecell.types.type_date import format_date
 
@@ -404,9 +406,12 @@ class RedisManager(ConnectionManager):
         :param pattern: key search pattern [default='*']
         :return: list of tuple (key, type, ttl)
         """
+        # print("+++++ RedisManager - delete - pattern: %s" % pattern)
         keys = self.conn.keys(pattern)
+        # print("+++++ RedisManager - delete - keys: %s" % keys)
         if len(keys) > 0:
             res = self.conn.delete(*keys)
+            # print("+++++ RedisManager - delete - res: %s" % res)
             return res
         return None
 
@@ -545,6 +550,13 @@ class RedisManager(ConnectionManager):
         :return: lists of keys with value
         """
         return self.conn.lrem(*args, **kwargs)
+
+    # new methods
+    def expire(self, name, time: int):
+        return self.conn.expire(name, time)
+
+    def keys(self, pattern):
+        return self.conn.keys(pattern)
 
 
 def manage_connection(method):

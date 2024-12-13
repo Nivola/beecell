@@ -1,16 +1,16 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
 import json
-import sqlalchemy
+from sqlalchemy import Text
 from sqlalchemy.types import TypeDecorator
 from beecell.types.type_string import is_not_blank
 from beecell.simple import jsonDumps
 
 
 class TextDictType(TypeDecorator):
-    impl = sqlalchemy.Text()
+    impl = Text()
 
     def process_bind_param(self, value, dialect):
         if value is not None:

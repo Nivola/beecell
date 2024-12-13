@@ -1,9 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2023 CSI-Piemonte
-
-from inspect import isclass
-from re import compile as re_compile
+# (C) Copyright 2018-2024 CSI-Piemonte
 
 
 def getmembers(obj, predicate=None):

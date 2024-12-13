@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
 
-import pika
-import pickle
 import logging
+import pickle
+import pika
 
 logger = logging.getLogger(__name__)
 

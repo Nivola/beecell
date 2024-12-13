@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
 import logging
 import os
@@ -12,10 +12,10 @@ from six.moves.urllib.parse import urlencode
 from six.moves.urllib.request import urlopen
 from six.moves import http_client
 import yaml
-from beecell.logger import LoggerHelper
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from beecell.logger import LoggerHelper
 from beecell.simple import dict_get
 
 logger = logging.getLogger(__name__)
@@ -95,7 +95,7 @@ class BeecellTestCase(unittest.TestCase):
                 datal.append(self.convert(v, separator))
             data = datal
 
-        elif isinstance(data, str) or isinstance(data, unicode):
+        elif isinstance(data, str):
             if data.find("$REF$") == 0:
                 data = dict_get(self.test_config, data.lstrip("$REF$"), separator)
 

@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
-import ldap
 from six import ensure_str
+import ldap
 from beecell.simple import truncate
 from .base import AuthError, AbstractAuth
 

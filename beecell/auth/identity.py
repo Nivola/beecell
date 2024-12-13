@@ -3,14 +3,9 @@ import binascii
 import zlib
 import json
 import pickle
+from typing import List
 from beecell.db.manager import RedisManager
-from beecell.debug import dbgprint
 from .base import AuthError
-
-# from beecell.db.manager import RedisManager
-# from beecell.auth.base import AuthError
-
-from typing import List, Union
 
 PREFIX = "identity:"
 PREFIX_INDEX = "identity:index:"

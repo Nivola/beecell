@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
 """
 Usage: console.py [options] [args...]
 -s service -c command
-  
+
 Options:
   -h, --help               Print help and exit
   -v, --version            Print version and exit
@@ -16,7 +16,7 @@ Examples::
 
     start portal2: console.py -c start clsk_desk
     stop portal2: console.py -c stop clsk_desk
-    kill portal2: console.py -c kill clsk_desk    
+    kill portal2: console.py -c kill clsk_desk
     reload portal2: console.py -c reload clsk_desk
 """
 import subprocess

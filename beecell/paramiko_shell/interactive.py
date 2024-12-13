@@ -1,13 +1,13 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
-from logging import getLogger
-import sys
-from gevent import spawn, joinall, sleep, socket, queue
-from gevent.os import make_nonblocking, nb_read, nb_write
 import re
+import sys
+from logging import getLogger
 from six import b, u, ensure_text
+from gevent import spawn, joinall, sleep, socket
+from gevent.os import make_nonblocking, nb_read, nb_write
 
 logger = getLogger(__name__)
 
