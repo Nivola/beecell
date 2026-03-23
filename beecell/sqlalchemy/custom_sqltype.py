@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 import json
 from sqlalchemy import Text
@@ -11,6 +11,7 @@ from beecell.simple import jsonDumps
 
 class TextDictType(TypeDecorator):
     impl = Text()
+    cache_ok = True
 
     def process_bind_param(self, value, dialect):
         if value is not None:
@@ -19,7 +20,7 @@ class TextDictType(TypeDecorator):
             value = "{}"
         return value
 
-    def process_result_value(self, value, dialect):
+    def process_result_value(self, value: str, dialect):
         if is_not_blank(value):
             value = json.loads(value)
         else:

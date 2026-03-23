@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 import hmac
 from base64 import urlsafe_b64encode, urlsafe_b64decode
@@ -32,7 +32,7 @@ class Fernet:
     print("Decrypted data:", decrypted_data)
     """
 
-    def __init__(self, key: Union[bytes, str, None]) -> None:
+    def __init__(self, key: Union[bytes, str]):
         """
         Expect a base64-encoded key of length 32 bytes.
         """

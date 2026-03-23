@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 import logging
 import os
@@ -8,9 +8,9 @@ import unittest
 import pprint
 import time
 import json
-from six.moves.urllib.parse import urlencode
-from six.moves.urllib.request import urlopen
-from six.moves import http_client
+from urllib.parse import urlencode
+from urllib.request import urlopen
+import http.client as http_client
 import yaml
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker

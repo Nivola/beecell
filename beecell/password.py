@@ -1,11 +1,12 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 from logging import getLogger
 from string import ascii_uppercase, ascii_letters, digits, ascii_lowercase
 from os import urandom
 from random import SystemRandom
+from typing import Dict, Union, Any, Optional, List
 
 logger = getLogger(__name__)
 
@@ -45,7 +46,7 @@ def random_password(length=10, strong=False):
     return password
 
 
-def obscure_data(data, fields=None):
+def obscure_data(data: Union[str, bytes, Dict[str, Any]], fields=None):
     """Obscure some fields in data, fields can be password.
 
     :param data: data to check
@@ -71,7 +72,7 @@ def obscure_data(data, fields=None):
     return data
 
 
-def obscure_string(data, fields=None):
+def obscure_string(data: Union[bytes, str], fields: Optional[List[str]]=None):
     """Obscure entire string if it contains passwords.
 
     :param data: data to check

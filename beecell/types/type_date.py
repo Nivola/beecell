@@ -1,12 +1,13 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 from datetime import datetime
-from six import ensure_text
+from ..util import ensure_text
+from typing import Optional
 
 
-def parse_date(data_str, format=None):
+def parse_date(data_str: str, format: Optional[str]=None):
     """Parse string to date
 
     :param data_str: date in string format
@@ -24,7 +25,7 @@ def parse_date(data_str, format=None):
     return res
 
 
-def format_date(date, format=None, microsec=False):
+def format_date(date: datetime, format: Optional[str]=None, microsec=False):
     """Format date as rfc3339.
 
     Ref. https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html

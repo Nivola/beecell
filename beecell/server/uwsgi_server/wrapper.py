@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 """
 The uwsgi Python module
@@ -9,7 +9,7 @@ The uWSGI portal2 automagically adds a uwsgi module into your Python apps.
 This is useful for configuring the uWSGI portal2, use its internal functions and get statistics.
 """
 try:
-    import uwsgi
+    import uwsgi # type: ignore  # noqa  # pylint: disable=import-error
 
     class UwsgiUtil(object):
         """ """
@@ -41,12 +41,10 @@ try:
         def __init__(self):
             pass
 
-        def started_on(self, value):
+        def started_on(self):
             """The Unix timestamp of uWSGI's startup.
-
-            :param int value:
             """
-            return uwsgi.started_on(value)
+            return uwsgi.started_on
 
         def request_id(self):
             """ """
@@ -183,9 +181,9 @@ try:
             """ """
             return uwsgi.websocket_recv_nb()
 
-        def websocket_send_from_sharedarea(self, id, pos):
-            """ """
-            uwsgi.websocket_send_from_sharedarea(id, pos)
+        #def websocket_send_from_sharedarea(self, id, pos):
+        #    """ """
+        #    uwsgi.websocket_send_from_sharedarea(id, pos)
 
         def reload(self):
             """
@@ -245,9 +243,9 @@ try:
             """
             return uwsgi.signal_wait(signum)
 
-        def signal_registered(self):
+        def signal_registered(self, signum):
             """ """
-            return uwsgi.signal_registered()
+            return uwsgi.signal_registered(signum)
 
         def signal_received(self):
             """Get the number of the last signal received. Used in conjunction with signal_wait."""
@@ -269,7 +267,7 @@ try:
             :param seconds : The interval at which to raise the signal.
             :param iterations : How many times to raise the signal. 0 (the default) means infinity.
             """
-            return uwsgi.add_rb_timer(signum, seconds, iterations=0)
+            return uwsgi.add_rb_timer(signum, seconds, iterations=iterations)
 
         def chunked_read(self, timeout):
             """chunked read

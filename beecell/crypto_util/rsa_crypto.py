@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 from hashlib import sha256
 from base64 import b64decode, b64encode
+from typing import Optional
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 
@@ -33,7 +34,7 @@ class RasCrypto:
         public_key_bytes = b64decode(public_key_base64)
         return RSA.import_key(public_key_bytes)
 
-    def get_private_key_pem(self, private_key, password=None, base64_encode=True):
+    def get_private_key_pem(self, private_key: RSA.RsaKey, password: Optional[str]=None, base64_encode=True):
         """
         Export private key as string.
         """
@@ -45,7 +46,7 @@ class RasCrypto:
             return pem
         return b64encode(pem)
 
-    def get_public_key_pem(self, private_key, base64_encode=True):
+    def get_public_key_pem(self, private_key: RSA.RsaKey, base64_encode=True):
         """
         Export public key as string.
         """
@@ -54,7 +55,7 @@ class RasCrypto:
             return pem
         return b64encode(pem)
 
-    def encrypt(self, public_key, message, base64_encode=True):
+    def encrypt(self, public_key: RSA.RsaKey, message: str, base64_encode=True) -> bytes:
         """
         Encrypt message.
         """
@@ -66,7 +67,7 @@ class RasCrypto:
             return ciphertext
         return b64encode(ciphertext)
 
-    def decrypt(self, private_key, ciphertext, base64_decode=True):
+    def decrypt(self, private_key: RSA.RsaKey, ciphertext: bytes, base64_decode=True) -> str:
         """
         Decrypt message.
         """

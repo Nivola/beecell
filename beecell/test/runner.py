@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 import logging
 import sys
@@ -110,7 +110,7 @@ class TestRunner(object):
         stream=sys.stderr,
         descriptions=True,
         verbosity=1,
-        failfast=False,
+        failfast=True,
         buffer=False,
         resultclass=None,
         index=0,

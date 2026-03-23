@@ -1,15 +1,14 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
-import bcrypt
+from Crypto.Protocol.KDF import bcrypt_check
 from sqlalchemy import Column, String, Integer, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from beecell.auth import SystemUser, DatabaseAuth, AbstractAuthDbManager
 from beecell.db.manager import SqlManager
 from beecell.simple import is_encrypted, decrypt_data
 from beecell.tests.test_util import BeecellTestCase, runtest
-
 
 tests = ["test_login"]
 
@@ -35,7 +34,7 @@ class User(Base):
         if is_encrypted(self.password):
             res = decrypt_data(self.password) == password.encode("utf-8")
         else:
-            res = bcrypt.checkpw(password.encode("utf-8"), self.password.encode("utf-8"))
+            res = bcrypt_check(password.encode("utf-8"), self.password.encode("utf-8"))
         return res
 
 
@@ -45,7 +44,7 @@ class AuthDbManager(AbstractAuthDbManager):
         query = session.query(User).filter_by(name=oid)
         return query.first()
 
-    def verify_user_password(self, user, password):
+    def verify_user_password(self, user: 'User', password):
         # verifying the password
         res = user._check_password(password)
         return res

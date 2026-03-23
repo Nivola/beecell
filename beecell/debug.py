@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 import traceback
 import os
 import sys
@@ -78,6 +78,32 @@ def debug_cmp():
         except RuntimeError:
             debugpy_logger.error("🐞⚡️debugpy⚡️ ❱❱❱ - Got Runtime error.")
 
+
+def dbg(*argv):
+    import pprint
+    import inspect
+
+    callingframe = inspect.currentframe().f_back
+    print(
+        "\n DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG",
+        "\n======================================================================================================\n",
+        inspect.getframeinfo(callingframe, context=1),
+        "\n =================== locals ===================\n",
+        pprint.pformat(callingframe.f_locals),
+        "\n ==================== argv ====================\n",
+        sep=" ",
+    )
+    for msg in argv:
+        if isinstance(msg, Exception):
+            # Print exception information and stack trace entries from traceback object tb to file. This differs from print_tb() in the following ways:
+            print("\n","exception", type(msg), msg, "\n",sep=":")
+            traceback.print_exc()
+        elif not isinstance(msg, str) :
+            print("\n", type(msg), "::", pprint.pformat(msg))
+        else:
+            print("\n",type(msg), "::", msg)
+    print("\n======================================================================================================",
+          "\n DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG DBG ")
 
 def dbgprint(*args, **kwargs):
     import inspect

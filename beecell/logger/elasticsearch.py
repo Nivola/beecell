@@ -1,14 +1,17 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
-import logging
 from datetime import datetime
-from logging import Handler, Formatter
+from logging import (
+    Handler,
+    Formatter,
+    getLogger
+)
 import json
 
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class ElasticsearchFormatter(Formatter):
@@ -105,7 +108,7 @@ class ElasticsearchHandler(Handler):
 
         # ex. logstash-2024.03.23
         index = "%s-%s" % (self.index, date.strftime("%Y.%m.%d"))
-        logger.debug("_emit - index: %s" % index)
+        logger.debug("_emit - index: %s", index)
 
         # self.client.index(index=index, body=msg, request_timeout=30, doc_type="doc")
         self.elasticsearch._request_timeout = 30

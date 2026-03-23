@@ -1,0 +1,11 @@
+[allowlist]
+paths = [
+  '''_build/''',
+  '''.*\.so$''',
+  '''.project''',
+  '''.pydevproject''',
+  '''.idea/''',
+  '''.manage*''',
+  '''.scannerwork/''',
+  '''.*\.py[co]$''',
+]

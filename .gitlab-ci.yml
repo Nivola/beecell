@@ -1,0 +1,55 @@
+---
+# OS
+image:
+  name: automation.site03.nivolapiemonte.it:5000/ol9-ansible-gitrunner:latest
+
+# Var
+variables:
+  ANSIBLE_FORCE_COLOR: 'true'
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_TAG
+      changes:
+        - beecell/VERSION
+      when: always
+    - when: never
+
+stages:
+  - deploy
+
+deploy_job:
+  stage: deploy
+  before_script:
+    - |
+      # Metadata
+      export version=`cat beecell/VERSION | tr -d '\r\n'`
+      echo "Running deploy for ${CI_COMMIT_TAG}. Version: ${version}"
+    # ujson and python-ldap prerequisite
+    - dnf install gcc-c++ python3.12-devel.x86_64 openldap-devel
+    # Twine
+    - pip3.12 install twine
+  script:
+    # build
+    - python3.12 setup.py sdist
+    - python3.12 -m twine check dist/*
+    # test
+    - pip3.12 install dist/beecell-$version.tar.gz
+    - python3.12 -c "import beecell"
+    # Test (TODO)
+    # - cd beecell/tests/
+    # - pip install pycryptodome
+    # - cp -p beecell.yml ${HOME}
+    # - <setup conf>
+    # - python3.12 sendmail.py
+    # - python3.12 paramiko_shell.py
+    # - python3.12 networkx_layout.py
+    # - python3.12 db/manager_mysql.py
+    # - python3.12 db/manager_redis.py
+    # - python3.12 auth/perm.py
+    # - python3.12 auth/ldap_auth.py
+    # - python3.12 auth/database_auth.py
+    # deploy
+    - python3.12 -m twine upload -u pypi -p 'carusopass8' --repository-url http://automation.site03.nivolapiemonte.it:3141/pypi/stable dist/*
+  tags:
+    - business_setup

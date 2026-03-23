@@ -1,11 +1,20 @@
+#!/usr/bin/env python
+# SPDX-License-Identifier: EUPL-1.2
+#
+# (C) Copyright 2018-2026 CSI-Piemonte
+
+
 from __future__ import annotations
 import binascii
 import zlib
 import json
 import pickle
-from typing import List
+from typing import Dict, List, Tuple, TYPE_CHECKING, Optional
 from beecell.db.manager import RedisManager
 from .base import AuthError
+if TYPE_CHECKING:
+    Permission = Tuple[int, int, str, str, str, int, str]
+    from beehive.common.apimanager import ApiController, ApiManager, ApiModule
 
 PREFIX = "identity:"
 PREFIX_INDEX = "identity:index:"
@@ -14,11 +23,12 @@ EXPIRE = 3600
 
 class IdentityMgr(object):
     """
-    identity manager
-    this class manage  the operation on identity as stored on redis
-    the identity is created using the user permission in filed user.perms
-    When the user restirct his current permissions the full list of permission are stred in field  fullperms
+    Identity manager
 
+    - this class manages operations on identity as stored on redis \n
+    - the identity is created using the user permission in filed user.perms \n
+    - When the user restricts their current permissions,
+    the full (original) list of permissions is stored in the fullperms field \n
     """
 
     def __init__(self) -> None:
@@ -26,20 +36,29 @@ class IdentityMgr(object):
         self._expire = EXPIRE
         self._uuid: str = None
         self._mgr: RedisManager = None
-        self._identity: dict = None
+        self._identity: Dict = None
         self._compressed_perms: str = None
         self._fullcompressed_perms: str = None
         self._modified: bool = False
-        self._perms: List[List] = None
-        self._fullperms: List[List] = None
-        pass
+        self._perms: Optional[List['Permission']] = None
+        self._fullperms: Optional[List['Permission']] = None
 
     @property
     def ttl(self) -> int:
-        return self._mgr.conn.ttl(PREFIX + self._uuid)
+        """
+        Get identity ttl
+
+        :raises AuthError: raise :class:`AuthError`
+        """
+        try:
+            return self._mgr.conn.ttl(PREFIX + self._uuid)
+        except Exception as ex:
+            raise AuthError(
+                info=str(ex), desc="", code=AuthError.CONNECTIONERROR
+            ) from ex
 
     @ttl.setter
-    def ttl(self, expire: int) -> int:
+    def ttl(self, expire: int):
         self._mgr.conn.expire(PREFIX + self._uuid, expire)
         self._mgr.conn.expire(PREFIX_INDEX + self.user, expire)
 
@@ -78,7 +97,9 @@ class IdentityMgr(object):
 
         except Exception as ex:
             ##dbgprint(ex)
-            raise AuthError(info=str(ex), desc="", code=AuthError.CONNECTIONERROR)
+            raise AuthError(
+                info=str(ex), desc="", code=AuthError.CONNECTIONERROR
+            ) from ex
 
     def _get(self, update_ttl: bool = True):
         """Get identity from redis
@@ -98,11 +119,17 @@ class IdentityMgr(object):
                     self.reset_ttl()
             else:
                 raise AuthError(
-                    info="Identity %s does not exist or is expired" % self._uuid, desc="", code=AuthError.TOKENEXPIRED
+                    info="Identity %s does not exist or is expired" % self._uuid,
+                    desc="", code=AuthError.TOKENEXPIRED
                 )
         except Exception as ex:
             ##dbgprint(ex)
-            raise AuthError(info=str(ex), desc="", code=AuthError.UNDEFINED)
+            if isinstance(ex, AuthError):
+                # if already an AuthError and code is set, reraise
+                if ex.code is not None:
+                    raise ex
+            # otherwise raise generic AuthError
+            raise AuthError(info=str(ex), desc="", code=AuthError.UNDEFINED) from ex
 
     def reset_ttl(self, never_expire=False):
         """reset  identity ttl
@@ -123,28 +150,21 @@ class IdentityMgr(object):
 
         except Exception as ex:
             ##dbgprint(ex)
-            raise AuthError(info=str(ex), desc="", code=AuthError.CONNECTIONERROR)
+            raise AuthError(
+                info=str(ex), desc="", code=AuthError.CONNECTIONERROR
+            ) from ex
 
     def save(self, never_expire=False):
-        """
-        Save identity if not modified only reset ttl
+        """Save identity if not modified only reset ttl
+
+        :param never_expire: set to never expire; defaults to False
+        :type never_expire: bool, optional
+        :raise AuthError: on error
         """
         if self._modified:
             self._store(never_expire)
         else:
             self.reset_ttl(never_expire)
-
-    @property
-    def ttl(self) -> int:
-        """
-        Get identity ttl
-        :raises AuthError: raise :class:`AuthError`
-        """
-        try:
-            return self._mgr.conn.ttl(PREFIX + self._uuid)
-        except Exception as ex:
-            ##dbgprint(ex)
-            raise AuthError(info=str(ex), desc="", code=AuthError.CONNECTIONERROR)
 
     @property
     def identity(self) -> dict:
@@ -157,11 +177,15 @@ class IdentityMgr(object):
             if self._identity is None:
                 self._get()
             return self._identity
-        except AuthError as ex:
-            raise ex
         except Exception as ex:
-            ##dbgprint(ex)
-            raise AuthError(info=str(ex), desc="", code=AuthError.UNDEFINED)
+            if isinstance(ex, AuthError):
+                # if already an AuthError and code is set, reraise
+                if ex.code is not None:
+                    raise ex
+            # otherwise raise generic AuthError
+            raise AuthError(
+                info=str(ex), desc="", code=AuthError.CONNECTIONERROR
+            ) from ex
 
     @property
     def user(self) -> str:
@@ -176,15 +200,19 @@ class IdentityMgr(object):
                 self._get()
             self._user = self._identity.get("user", {}).get("id")
             return self._user
-
-        except AuthError as ex:
-            raise ex
         except Exception as ex:
             ##dbgprint(ex)
-            raise AuthError(info=str(ex), desc="", code=AuthError.UNDEFINED)
+            if isinstance(ex, AuthError):
+                # if already an AuthError and code is set, reraise
+                if ex.code is not None:
+                    raise ex
+            # otherwise raise generic AuthError
+            raise AuthError(
+                info=str(ex), desc="", code=AuthError.UNDEFINED
+            ) from ex
 
     @property
-    def full_perms(self) -> List[List]:
+    def full_perms(self) -> Optional[List['Permission']]:
         """
         Get identity full list of permissions
 
@@ -193,15 +221,18 @@ class IdentityMgr(object):
         """
         try:
             if self._fullperms is None:
-                self._fullperms = json.loads(zlib.decompress(binascii.a2b_base64(self._fullcompressed_perms)))
+                self._fullperms = json.loads(
+                    zlib.decompress(binascii.a2b_base64(self._fullcompressed_perms))
+                )
             return self._fullperms
-
         except Exception as ex:
             ##dbgprint(ex)
-            raise AuthError(info=str(ex), desc="", code=AuthError.UNDEFINED)
+            raise AuthError(
+                info=str(ex), desc="", code=AuthError.UNDEFINED
+            ) from ex
 
     @property
-    def perms(self) -> List[List]:
+    def perms(self) -> Optional[List['Permission']]:
         """
         Get identity list of permissions
 
@@ -210,14 +241,18 @@ class IdentityMgr(object):
         """
         try:
             if self._perms is None:
-                self._perms = json.loads(zlib.decompress(binascii.a2b_base64(self._compressed_perms)))
+                self._perms = json.loads(
+                    zlib.decompress(binascii.a2b_base64(self._compressed_perms))
+                )
             return self._perms
         except Exception as ex:
             ##dbgprint(ex)
-            raise AuthError(info=str(ex), desc="", code=AuthError.UNDEFINED)
+            raise AuthError(
+                info=str(ex), desc="", code=AuthError.UNDEFINED
+            ) from ex
 
     @perms.setter
-    def perms(self, newperms: List[List]):
+    def perms(self, newperms: List['Permission']):
         """
         Get identity list of permissions
 
@@ -226,32 +261,44 @@ class IdentityMgr(object):
         """
         try:
             self._perms = newperms
-            self._compressed_perms = binascii.b2a_base64(zlib.compress(json.dumps(self._perms).encode("utf-8")))
+            self._compressed_perms = binascii.b2a_base64(
+                zlib.compress(json.dumps(self._perms).encode("utf-8"))
+            )
             self._identity["user"]["perms"] = self._compressed_perms
             self._key_value = pickle.dumps(self._identity)
             self._modified = True
 
         except Exception as ex:
             ##dbgprint(ex)
-            raise AuthError(info=str(ex), desc="", code=AuthError.UNDEFINED)
+            raise AuthError(
+                info=str(ex), desc="", code=AuthError.UNDEFINED
+            ) from ex
 
     def restore_full_perms(self):
         self._identity["user"]["perms"] = self._fullcompressed_perms
         self._compressed_perms = self._fullcompressed_perms
-        self._perms = json.loads(zlib.decompress(binascii.a2b_base64(self._compressed_perms)))
+        self._perms = json.loads(
+            zlib.decompress(binascii.a2b_base64(self._compressed_perms))
+        )
         self._modified = True
 
-    def can(self, action: str = None, objtype: str = None, objid: str = None, objdef: str = None):
+    def can(
+        self,
+        action: str = None,
+        objtype: str = None,
+        objid: str = None,
+        objdef: str = None
+    ):
         """
         Verify if identity can execute an action over a certain object type.
         usate solo 2-type 3-definition 4-objid 6-action
-        |0-pid  |1-oid |2-type     |3-definition                         | 4-objid       | 5-aid|6-action
-        |3554420|444305|'resource' |'Zabbix.Template'                    |'*//*'         |1     |'*'    |
-        |3554348|444296|'container'|'Zabbix'                             |'*'            |1     |'*'    |
-        |1871913|233990|'ssh'      |'SshKey'                             |'8d83c41bdd'   |2     |'view' |
-        |1870769|233847|'ssh'      |'SshGroup'                           |'5312d5694c'   |2     |'view' |
-        |1870777|233848|'ssh'      |'SshGroup.SshNode'                   |'5312d5694c//*'|2     |'view' |
-        |1870776|233848|'ssh'      |'SshGroup.SshNode'                   |'5312d5694c//*'|6     |'use'  |
+        |0-pid  |1-oid |2-type     |3-definition       | 4-objid       | 5-aid|6-action
+        |3554420|444305|'resource' |'Zabbix.Template'  |'*//*'         |1     |'*'    |
+        |3554348|444296|'container'|'Zabbix'           |'*'            |1     |'*'    |
+        |1871913|233990|'ssh'      |'SshKey'           |'8d83c41bdd'   |2     |'view' |
+        |1870769|233847|'ssh'      |'SshGroup'         |'5312d5694c'   |2     |'view' |
+        |1870777|233848|'ssh'      |'SshGroup.SshNode' |'5312d5694c//*'|2     |'view' |
+        |1870776|233848|'ssh'      |'SshGroup.SshNode' |'5312d5694c//*'|6     |'use'  |
 
         :param action: str es * view use write,
         :param objtype: str service, ssh, resource ,
@@ -267,7 +314,6 @@ class IdentityMgr(object):
         objdef = objdef.lower()
         objids = objid.split("//")
         try:
-            res = {}
             for perm in self.full_perms:
                 perm_objtype = perm[2].lower()
                 perm_objdef = perm[3].lower()
@@ -285,19 +331,31 @@ class IdentityMgr(object):
             return False
         except Exception as ex:
             ##dbgprint(ex)
-            raise AuthError(info=str(ex), desc="", code=10)
+            raise AuthError(
+                info=str(ex), desc="", code=AuthError.DOMAINERROR # TODO check
+            ) from ex
 
     def set_perms(self, newperms: List[List], store: bool = True):
-        """
-        check if identity has permissions for new perms
-        if identity new perms are copatible with perms then new perms are set ti identity
+        """check if identity has permissions for new perms
+        if identity new perms are compatible with perms then new perms are set to identity
+
+        :param newperms: list of new permissions
+        :type newperms: List[List[int, int, str, str, str, int, str]]
+        :param store: _description_, defaults to True
+        :type store: bool, optional
+        :raises AuthError: _description_
         """
         for check_per in newperms:
             check_objtype = check_per[2]
             check_objdef = check_per[3]
             check_objid = check_per[4]
             check_action = check_per[6]
-            if not self.can(action=check_action, objtype=check_objtype, objid=check_objid, objdef=check_objdef):
+            if not self.can(
+                action=check_action,
+                objtype=check_objtype,
+                objid=check_objid,
+                objdef=check_objdef
+            ):
                 raise AuthError(
                     info="action %s, on %s %s %s cannot be perfomed by user"
                     % (check_action, check_objtype, check_objdef, check_objid),
@@ -309,7 +367,13 @@ class IdentityMgr(object):
             self._store()
 
     @staticmethod
-    def set_identity(uuid, identity, redismanager: RedisManager, expire=True, expire_time=None) -> IdentityMgr:
+    def set_identity(
+        uuid,
+        identity,
+        redismanager: RedisManager,
+        expire=True,
+        expire_time=None
+    ) -> IdentityMgr:
         """Set beehive identity with token uid
 
         :param uid: authorization token
@@ -347,12 +411,14 @@ class IdentityMgr(object):
         # self.logger.info("Set identity %s in redis" % uid)
 
     @staticmethod
-    def get_identity(uuid, redismanager: RedisManager, update_ttl: bool = False) -> dict:
+    def get_identity(uuid: str, redismanager: RedisManager, update_ttl: bool = False) -> dict:
         """Get identity
-        if identity does not exixte raise AuthError
+        if identity does not exist raise AuthError
+
         :param uid: identity id
         :param redimanager identity manager
         :return: {'uid':..., 'user':..., timestamp':..., 'pubkey':..., 'seckey':...}
+        :raises AuthError: if error does not exist, or if error during ttl fetch
         """
         imgr = IdentityMgr()
         imgr._uuid = uuid
@@ -387,11 +453,16 @@ class IdentityMgr(object):
             return res
         except Exception as ex:
             ##dbgprint(ex)
-            raise AuthError(info=str(ex), desc="No identities found", code=AuthError.UNDEFINED)
+            raise AuthError(
+                info=str(ex), desc="No identities found", code=AuthError.UNDEFINED
+            ) from ex
 
     @staticmethod
     def factory(
-        uuid: str, controller=None, module=None, apimanager=None, redismanager: RedisManager = None
+        uuid: str, controller: Optional['ApiController'] = None,
+        module: Optional['ApiModule'] = None,
+        apimanager: Optional['ApiManager'] = None,
+        redismanager: Optional[RedisManager] = None
     ) -> IdentityMgr:
         """
         IdentityMgr factory
@@ -411,7 +482,11 @@ class IdentityMgr(object):
                 ret.set_expire(controller.module.api_manager.expire)
                 ret._mgr = controller.module.api_manager.redis_identity_manager
             else:
-                raise AuthError(info="cannot find a redis connection", desc="", code=AuthError.CONNECTIONERROR)
+                raise AuthError(
+                    info="cannot find a redis connection",
+                    desc="",
+                    code=AuthError.CONNECTIONERROR
+                )
 
             ##dbgprint( idmgr=ret),
             ret._get()
@@ -419,15 +494,25 @@ class IdentityMgr(object):
             return ret
         except Exception as ex:
             ##dbgprint(ex)
-            raise AuthError(info=ex, desc="", code=AuthError.PASSWORDEXPIRED)
+            if isinstance(ex, AuthError):
+                # if already an AuthError and code is set, reraise
+                if ex.code is not None:
+                    raise ex
+            # otherwise raise AuthError with explicit code
+            raise AuthError(info=str(ex), desc="", code=AuthError.PASSWORDEXPIRED) from ex
 
 
 def identity_mgr_factory(
-    uuid: str, controller=None, module=None, apimanager=None, redismanager: RedisManager = None
+    uuid: str,
+    controller: Optional['ApiController'] = None,
+    module: Optional['ApiModule'] = None,
+    apimanager: Optional['ApiManager'] = None,
+    redismanager: Optional[RedisManager] = None
 ) -> IdentityMgr:
     """
     IdentityMgr factory
     """
     return IdentityMgr.factory(
-        uuid, controller=controller, module=module, apimanager=apimanager, redismanager=redismanager
+        uuid, controller=controller, module=module, apimanager=apimanager,
+        redismanager=redismanager
     )

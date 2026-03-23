@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 from inspect import isclass
 from re import compile as re_compile
-
+from typing import Any, Optional
 
 def str2bool(value: str):
     """Convert value from string to bool
@@ -36,10 +36,10 @@ def bool2str(value):
     return res
 
 
-def truncate(msg: str, size: int = 600, replace_new_line: bool = True) -> str:
+def truncate(msg: Any, size: int = 600, replace_new_line: bool = True, append_dots=True) -> str:
     """Truncate message to fixed size.
 
-    :param str msg: message to truncate
+    :param msg: message to truncate
     :param size: max message length [default=400]
     :return: truncated Message with ...
     """
@@ -48,7 +48,10 @@ def truncate(msg: str, size: int = 600, replace_new_line: bool = True) -> str:
         msg = msg.replace("\n", " + ")
 
     if len(msg) > size:
-        return msg[0:size] + "..."
+        if append_dots:
+            return msg[0:size] + "..."
+        else:
+            return msg[0:size]
     else:
         return msg
 
@@ -60,7 +63,7 @@ def validate_string(data, validation_string=r"[^a-zA-Z0-9\-]."):
     Validate a string respect a set of allowed characters
 
     :param data: data to validate
-    :param validation_string: validation string [deafult=r'[^a-zA-Z0-9\-].']
+    :param validation_string: validation string
     :return: True if validation is OK
     """
     char_re = re_compile(validation_string)
@@ -116,7 +119,7 @@ def compat(data):
     return data
 
 
-def is_blank(myString):
+def is_blank(myString: Optional[str]):
     """Test if string is blank
 
     :param myString: string to test
@@ -126,7 +129,7 @@ def is_blank(myString):
     return not (myString and myString.strip())
 
 
-def is_not_blank(myString):
+def is_not_blank(myString: Optional[str]):
     """Test if string is not blank
 
     :param myString: string to test
@@ -134,21 +137,3 @@ def is_not_blank(myString):
     """
 
     return bool(myString and myString.strip())
-
-
-def get_pretty_size(data):
-    """Convert size in pritty string"""
-    KB = 1024
-    MB = KB * 1024
-    GB = MB * 1024
-    TB = GB * 1024
-
-    if KB < data < MB:
-        data = "%sKB" % round(data / KB, 2)
-    elif MB <= data < GB:
-        data = "%sMB" % round(data / MB, 2)
-    elif GB <= data < TB:
-        data = "%sGB" % round(data / GB, 2)
-    elif data >= TB:
-        data = "%sTB" % round(data / TB, 2)
-    return data

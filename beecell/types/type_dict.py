@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
-
-from typing import Union
+# (C) Copyright 2018-2026 CSI-Piemonte
+import collections
+from typing import Union, Dict
 
 
 def merge_dicts(*dict_args):
@@ -45,7 +45,7 @@ def dict_get(data: Union[list, dict], key: str, separator: str = ".", default=No
     return res
 
 
-def dict_set(data, key, value, separator="."):
+def dict_set(data: Dict, key: str, value, separator="."):
     """Set a key in a dict. Key can be a composition of different keys separated by a separator.
 
     :param data: dictionary to query
@@ -55,7 +55,7 @@ def dict_set(data, key, value, separator="."):
     :return:
     """
 
-    def __dict_set(data):
+    def __dict_set(data: Dict):
         k = keys.pop()
         if len(keys) == 0:
             data[k] = value
@@ -72,7 +72,7 @@ def dict_set(data, key, value, separator="."):
     return data
 
 
-def dict_unset(data, key, separator="."):
+def dict_unset(data: Dict, key: str, separator="."):
     """Unset a key in a dict. Key can be a composition of different keys separated by a separator.
 
     :param data: dictionary to query
@@ -81,7 +81,7 @@ def dict_unset(data, key, separator="."):
     :return:
     """
 
-    def __dict_unset(data):
+    def __dict_unset(data: Dict):
         k = keys.pop()
         if len(keys) == 0:
             if k in data:
@@ -98,7 +98,7 @@ def dict_unset(data, key, separator="."):
     return data
 
 
-def flatten_dict(data, delimiter=":", loopArray=True):
+def flatten_dict(data: Dict, delimiter=":", loopArray=True):
     """Flat dictionary conversion
 
     :param data: input data
@@ -133,3 +133,23 @@ def flatten_dict(data, delimiter=":", loopArray=True):
                 yield key, value
 
     return dict(items())
+
+def recursive_update(d:dict, u:dict)-> dict:
+    """
+    Recursively update dictionary 'd' with values from dictionary 'u'.
+    Similar to dict.update() but updates nested dictionaries recursively.
+    """
+    # only for first call
+    if u is None:
+        return d
+
+    if d is None:
+        d = u
+        return d
+
+    for k, v in u.items():
+        if isinstance(v, collections.abc.Mapping):
+            d[k] = recursive_update(d.get(k, {}), v)
+        else:
+            d[k] = v
+    return d

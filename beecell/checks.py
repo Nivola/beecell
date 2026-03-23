@@ -1,13 +1,18 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 import re
 from logging import getLogger
 
 logger = getLogger(__name__)
 
+def is_lab_dev():
+    from os import getenv
+    if "lab" in getenv("API_ENV",""):
+        return True
+    return False
 
-def check_tax_code(codice_fiscale):
+def check_tax_code(codice_fiscale: str):
     CODICE_REGEXP = "^[0-9A-Z]{16}$"
     SETDISP = [1, 0, 5, 7, 9, 13, 15, 17, 19, 21, 2, 4, 18, 20, 11, 3, 6, 8, 12, 14, 16, 10, 22, 25, 24, 23]
     ORD_ZERO = ord("0")

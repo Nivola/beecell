@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 import os
 from os import popen
@@ -10,11 +10,24 @@ import fcntl
 import termios
 import struct
 import sys
-from six import StringIO, ensure_text, ensure_binary
+from io import StringIO
+
+# MONKEY PATCH: Fix for 'sshtunnel' crash with 'paramiko' >= 4.0.0.
+# Paramiko 4.0 removed 'DSSKey', but 'sshtunnel' requires it during import.
+# We inject a dummy class to satisfy the dependency without re-enabling insecure DSA keys.
+import paramiko
+if not hasattr(paramiko, "DSSKey"):
+    class FakeDSSKey:
+        def __init__(self, *args, **kwargs):
+            raise NotImplementedError("DSSKey (DSA) is no longer supported by Paramiko 4+")
+
+    paramiko.DSSKey = FakeDSSKey
+
 from paramiko import RSAKey
 from paramiko.client import SSHClient, MissingHostKeyPolicy
 from gevent.os import make_nonblocking, nb_write
 from sshtunnel import SSHTunnelForwarder
+from ..util import  ensure_text, ensure_binary
 
 try:
     from scp import SCPClient
@@ -102,14 +115,41 @@ class ParamikoShell(object):
                 )
             )
         except Exception as ex:
-            logger.error(
-                "Local user {}: unable to connect to server={} port={} user={}".format(
-                    self.loc_user, host, port, self.user
+            logger.error(ex, exc_info=True)
+            
+            try:
+                logger.info("Retry; your target systems do not support either RSA2 or the server-sig-algs protocol extension.\
+                        Specifically, you need to specify disabled_algorithms={'keys': ['rsa-sha2-256', 'rsa-sha2-512']}"
                 )
-            )
-            if self.post_logout is not None:
-                self.post_logout(status=str(ex))
-            raise
+                self.client.connect(
+                    host,
+                    port,
+                    username=self.user,
+                    password=self.pwd,
+                    key_filename=self.keyfile,
+                    pkey=self.pkey,
+                    look_for_keys=False,
+                    compress=True,
+                    timeout=self.timeout,
+                    auth_timeout=self.timeout,
+                    banner_timeout=self.timeout,
+                    disabled_algorithms={'pubkeys': ['rsa-sha2-256', 'rsa-sha2-512']},
+                    **kwargs,
+                )
+                logger.info(
+                    "Retry; Local user {}: established connection with server={} port={} user={}".format(
+                        self.loc_user, host, port, self.user
+                    )
+                )
+            except Exception as ex:
+                logger.error(
+                    "Retry; Local user {}: unable to connect to server={} port={} user={}".format(
+                        self.loc_user, host, port, self.user
+                    )
+                )
+                if self.post_logout is not None:
+                    self.post_logout(status=str(ex))
+                raise
 
     def terminal_size(self):
         th, tw, hp, wp = struct.unpack("HHHH", fcntl.ioctl(0, termios.TIOCGWINSZ, struct.pack("HHHH", 0, 0, 0, 0)))

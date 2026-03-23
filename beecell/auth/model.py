@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 
 class AuthDbManagerError(Exception):
@@ -27,4 +27,4 @@ class AbstractAuthDbManager(object):
         :param user: Orm User istance
         :param password: Password to verify
         """
-        return NotImplemented
+        raise NotImplementedError()

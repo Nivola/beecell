@@ -10,3 +10,4 @@ _build/
 beecell.egg-info
 build/
 .scannerwork/
+ansible-navigator.log

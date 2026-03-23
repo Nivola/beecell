@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 from setuptools import setup
 from setuptools.command.install import install as _install
@@ -23,14 +23,14 @@ class install(_install):
 
 
 def load_requires():
-    with open("./MANIFEST.md") as f:
+    with open("./MANIFEST-ansible.md") as f:
         requires = f.read()
     return requires
 
 
 def load_version():
     with open("./beecell/VERSION") as f:
-        version = f.read()
+        version = f.read().rstrip()
     return version
 
 
@@ -41,6 +41,7 @@ if __name__ == "__main__":
         version=version,
         description="Utility",
         long_description="Utility",
+        long_description_content_type="text/plain",
         author="CSI Piemonte",
         author_email="nivola.engineering@csi.it",
         license="EUPL-1.2",
@@ -48,17 +49,12 @@ if __name__ == "__main__":
         scripts=[],
         packages=[
             "beecell",
-            "beecell.amqp",
             "beecell.auth",
             "beecell.cache",
             "beecell.crypto_util",
             "beecell.db",
-            "beecell.db.mysql",
             "beecell.flask",
-            "beecell.flask.login",
-            "beecell.flask.login.bootstrap",
             "beecell.logger",
-            "beecell.logger.server",
             "beecell.networkx",
             "beecell.paramiko_shell",
             "beecell.server",
@@ -81,7 +77,6 @@ if __name__ == "__main__":
             "beecell.__init__",
             "beecell.network",
             "beecell.password",
-            "beecell.perf",
             "beecell.remote",
             "beecell.sendmail",
             "beecell.simple",
@@ -91,9 +86,9 @@ if __name__ == "__main__":
             "Programming Language :: Python",
         ],
         entry_points={},
-        data_files=[],
         package_dir={"beecell": "beecell"},
         package_data={"beecell": ["VERSION"]},
+        data_files=[('beecell', ["MANIFEST-ansible.md","MANIFEST.md"])],
         install_requires=load_requires(),
         dependency_links=[],
         zip_safe=True,

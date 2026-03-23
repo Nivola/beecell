@@ -1,11 +1,12 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 from struct import pack
 from logging import getLogger
 from socket import inet_ntoa
 from math import ceil
+from typing import Dict
 
 from .crypto import *
 from .types.type_date import *
@@ -20,7 +21,7 @@ from .password import *
 logger = getLogger(__name__)
 
 
-def nround(number, decimal=4):
+def nround(number, decimal=4) -> str:
     """Round a given number
 
     Example: decimal = 2
@@ -41,7 +42,7 @@ class AttribException(Exception):
     pass
 
 
-def get_attrib(value_dict, key, default_value, exception=False):
+def get_attrib(value_dict: Dict, key, default_value, exception=False):
     """Get a value of dictionary given a key if it exist, otherwise it throw an exception or give a default value.
 
     :param value_dict: dictionary to query
@@ -64,7 +65,7 @@ def get_attrib(value_dict, key, default_value, exception=False):
     return value
 
 
-def get_value(value_dict: dict, key: str, default_value, exception: bool = False, vtype=None):
+def get_value(value_dict: Dict, key: str, default_value, exception: bool = False, vtype=None):
     """Get a value of dictionary given a key if it exist, otherwise it throw an exception or give a default value.
         Moreover it perform a type checking of returned value.
 
@@ -147,14 +148,19 @@ def get_line(size, char="-"):
 
 def get_pretty_size(data):
     """Convert size in pritty string"""
-    if 1024 < data <= 1048576:
-        data = "%sKB" % round(data / 1024, 2)
-    elif 1048576 < data <= 1073741824:
-        data = "%sMB" % round(data / 1048576, 2)
-    elif 1073741824 < data < 1099511627776:
-        data = "%sGB" % round(data / 1073741824, 2)
-    elif data > 1099511627776:
-        data = "%sTB" % round(data / 1099511627776, 2)
+    KB = 1024
+    MB = KB * 1024
+    GB = MB * 1024
+    TB = GB * 1024
+
+    if KB < data < MB:
+        data = "%sKB" % round(data / KB, 2)
+    elif MB <= data < GB:
+        data = "%sMB" % round(data / MB, 2)
+    elif GB <= data < TB:
+        data = "%sGB" % round(data / GB, 2)
+    elif data >= TB:
+        data = "%sTB" % round(data / TB, 2)
     return data
 
 

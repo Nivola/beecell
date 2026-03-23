@@ -1,0 +1,17 @@
+apispec==5.1.0
+Flask==3.1.2
+Flask-Login==0.6.3
+flex==6.14.1
+gevent==24.11.1
+marshmallow==3.25.1
+networkx==3.2.1
+paramiko==4.0.0
+bonsai==1.5.4
+pymysql==1.0.2
+PyYAML==6.0.3
+redis==4.6.0
+scp==0.13.6
+SQLAlchemy==2.0.45
+sshtunnel==0.4.0
+ujson==5.11.0
+urllib3==1.26.6

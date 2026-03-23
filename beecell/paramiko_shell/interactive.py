@@ -1,13 +1,16 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 import re
 import sys
 from logging import getLogger
-from six import b, u, ensure_text
 from gevent import spawn, joinall, sleep, socket
 from gevent.os import make_nonblocking, nb_read, nb_write
+from ..util import b, u, ensure_text
+from typing import TYPE_CHECKING, Callable
+if TYPE_CHECKING:
+    from paramiko.channel import Channel
 
 logger = getLogger(__name__)
 
@@ -21,14 +24,14 @@ except ImportError:
     has_termios = False
 
 
-def interactive_shell(chan, log=False, trace=False, trace_func=None):
+def interactive_shell(chan: 'Channel', log=False, trace=False, trace_func=None):
     if has_termios:
         posix_shell(chan, log, trace, trace_func)
     else:
         windows_shell(chan, log, trace, trace_func)
 
 
-def posix_shell(chan, log, trace, trace_func):
+def posix_shell(chan: 'Channel', log: bool, trace: bool, trace_func: Callable):
     logger.info("Run shell to ssh channel: %s" % chan)
     old_stdin = termios.tcgetattr(sys.stdin.fileno())
     tty.setraw(sys.stdin.fileno())

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 from docutils import nodes
 from docutils.parsers.rst import directives, Directive
@@ -15,7 +15,7 @@ html_escape_table = {
 }
 
 
-def html_escape(text):
+def html_escape(text: str):
     """Produce entities within text."""
     return "".join(html_escape_table.get(c, c) for c in text)
 

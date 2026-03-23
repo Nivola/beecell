@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 from hashlib import sha256
 from binascii import a2b_base64, a2b_hex, b2a_hex
@@ -9,7 +9,8 @@ from logging import getLogger
 from Crypto.PublicKey import RSA
 from Crypto.Hash import SHA256
 from Crypto.Signature import PKCS1_v1_5
-from six import b, ensure_text, ensure_binary
+from .util import b, ensure_text, ensure_binary
+from typing import Union
 from beecell.crypto_util.fernet import Fernet
 
 
@@ -36,7 +37,7 @@ def check_vault(data, key):
     return data
 
 
-def is_encrypted(data):
+def is_encrypted(data: Union[bytes, str]):
     """
     Check if data is encrypted with fernet token and AES128.
 
@@ -116,7 +117,7 @@ def verify_data(pubkey64, data, sign):
     hash_data = SHA256.new(bytes(data, encoding="utf-8"))
 
     # Verify the signature
-    return PKCS1_v1_5.new(key).verify(hash_data, a2b_hex(sign))
+    return PKCS1_v1_5.new(key).verify(hash_data, a2b_hex(sign)) # pylint: disable=E1102
 
 
 def compute_sha256_hexdigest(data: str) -> str:

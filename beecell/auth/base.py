@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 import logging
-from typing import List
+from typing import List, Optional, Type
 from flask_login import UserMixin
 
 
@@ -13,11 +13,11 @@ class SystemUser(UserMixin):
     confirmed_at = None
     last_login_at = None
     current_login_at = None
-    last_login_ip = None
-    current_login_ip = None
+    last_login_ip: Optional[str] = None
+    current_login_ip: Optional[str] = None
     login_count = None
 
-    def __init__(self, uid, email, password, active, login_ip=None, domain=None):
+    def __init__(self, uid, email: str, password: Optional[str] = None, active = True, login_ip=None, domain=None):
         self.logger = logging.getLogger(self.__class__.__module__ + "." + self.__class__.__name__)
 
         self.id: str = uid
@@ -28,7 +28,7 @@ class SystemUser(UserMixin):
         self._roles: List[str] = None
         self._perms = None
         self._attrib = None
-        self.current_login_ip: str = login_ip
+        self.current_login_ip = login_ip
 
         self.logger.debug("Create flask_login user instance: %s, %s" % (uid, email))
 
@@ -137,14 +137,14 @@ class AuthError(Exception):
         return "code: %s, info: %s, desc: %s" % (self.code, self.info, self.desc)
 
 
-class AbstractAuth(object):
+class AbstractAuth:
     """Abstract auhtentication provider.
 
     :param user_class: User class returned if authentication succesfully. Class can be :class:`SystemUser` or a class
         that extend this one.
     """
 
-    def __init__(self, user_class):
+    def __init__(self, user_class: Type['SystemUser']):
         self.logger = logging.getLogger(self.__class__.__module__ + "." + self.__class__.__name__)
 
         self.user_class = user_class

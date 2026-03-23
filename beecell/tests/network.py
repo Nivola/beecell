@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 from beecell.network import InternetProtocol
 from beecell.tests.test_util import runtest
@@ -28,7 +28,7 @@ class NetworkTestCase(BeecellTestCase):
         self.assertEqual(res, 6)
 
     def test_get_names(self):
-        res = self.client.get_names()
+        self.client.get_names()
 
 
 if __name__ == "__main__":

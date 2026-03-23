@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 
 def is_string(data):
@@ -10,7 +10,7 @@ def is_string(data):
     return res
 
 
-def is_int(s):
+def is_int(s: str):
     """Check whether string s is a positive or negative integer
 
     :param s: the string to validate

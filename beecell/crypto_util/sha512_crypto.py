@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 import hashlib
 import typing
@@ -61,7 +61,9 @@ def digest(data: bytes) -> bytes:
 
 
 def sha512_crypt(
-    password: typing.Union[bytes, str], salt: typing.Union[bytes, str], rounds: int = ROUNDS_DEFAULT
+        password: typing.Union[bytes, str],
+        salt: typing.Optional[typing.Union[bytes, str]] = None,
+        rounds: int = ROUNDS_DEFAULT
 ) -> str:
     """Custom implementation of SHA512-crypt."""
     # Ensure password and salt are byte-encoded
@@ -129,4 +131,4 @@ def extract_salt_and_rounds(hash_str: str) -> tuple[bytes, int]:
 def password_ok(input_password, existing_crypted_password):
     """Return if the password is ok."""
     (salt, rounds) = extract_salt_and_rounds(existing_crypted_password)
-    return existing_crypted_password == sha512_crypt(input_password, salt, rounds)
+    return existing_crypted_password == sha512_crypt(input_password, salt=salt, rounds=rounds)

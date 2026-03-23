@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 from bson import BSON
 from flask import request, Request
@@ -49,6 +49,7 @@ def get_response(data, mime="json"):
 
 
 def get_mime():
+    mime = None
     if request.method == "POST":
         try:
             mime = request.form["mime"]
@@ -60,6 +61,7 @@ def get_mime():
 
 
 def get_app():
+    appname = None
     if request.method == "POST":
         try:
             appname = request.form["app"]

@@ -1,13 +1,17 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
+from typing import TYPE_CHECKING, Type
 from beecell.db import QueryError
-from .base import AuthError, AbstractAuth
-
+from beecell.auth.base import AuthError, AbstractAuth
+if TYPE_CHECKING:
+    from beecell.auth.base import SystemUser
+    from beecell.auth.model import AbstractAuthDbManager
+    from beecell.db.manager import ConnectionManager
 
 class DatabaseAuth(AbstractAuth):
-    def __init__(self, auth_manager, conn_manager, user_class):
+    def __init__(self, auth_manager: Type['AbstractAuthDbManager'], conn_manager: 'ConnectionManager', user_class: Type['SystemUser']):
         """Database authentication manager
 
         :param auth_manager: authentication manager. A class that extend beecell.auth.model.AuthManager and implement at

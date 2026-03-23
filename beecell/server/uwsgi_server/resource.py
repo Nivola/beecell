@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 from logging import getLogger
 from time import gmtime, strftime
@@ -21,7 +21,7 @@ class UwsgiManager(object):
     def __init__(self):
         self.logger = getLogger(self.__class__.__module__ + "." + self.__class__.__name__)
 
-    def _get_proc_infos(self, p, extended=False):
+    def _get_proc_infos(self, p: psutil.Process, extended=False):
         """Internal function to get process infos
 
         :param p: process instance

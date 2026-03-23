@@ -1,90 +1,155 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 from logging import getLogger
-from copy import deepcopy
+#from copy import deepcopy
+from typing import TYPE_CHECKING, Dict, Type
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 from apispec_webframeworks.flask import FlaskPlugin
+from flasgger import Schema
+from marshmallow import missing
+from marshmallow.schema import SchemaMeta
 from marshmallow.validate import OneOf
-from flex.core import validate_api_call
-
+#from flex.core import validate_api_call
+if TYPE_CHECKING:
+    from marshmallow.fields import Field as SchemaField
 logger = getLogger(__name__)
-global_marshmallow_plugin = MarshmallowPlugin()  # imported by some views
+#global_marshmallow_plugin = MarshmallowPlugin()  # imported by some views
 
+VALID_CONTEXTS = {"query", "path", "header", "body"}
 
 class SwaggerHelper(object):
     def __init__(self):
-        global global_marshmallow_plugin
+        #global global_marshmallow_plugin
         self.spec = APISpec(
             title="",
             version="",
-            plugins=[FlaskPlugin(), global_marshmallow_plugin],
+            plugins=[FlaskPlugin(), MarshmallowPlugin()],
             openapi_version="2.0",
         )
 
-    @staticmethod
-    def responses(orig, data):
-        new = deepcopy(orig)
-        new.update(data)
-        return new
+    #@staticmethod
+    #def responses(orig, data):
+    #    new = deepcopy(orig)
+    #    new.update(data)
+    #    return new
 
-    def get_parameters(self, schema):
-        """Get swagger query parameters from schema
+    def get_parameters(self, schema: Type[Schema]):
+        """Get swagger query parameters from schema and convert them
+        to Swagger/OpenAPI parameter definitions
 
         :param schema: marshmallow schema
         :param where: can be path or query
-        """
-        fields = schema.__dict__.get("_declared_fields", [])
-        res = []
-        kvargs = {}
-        for field, value in fields.items():
-            if getattr(value, "data_key", None) is not None:
-                field = value.data_key
 
+        example:
+
+            class MySchema(Schema):
+                name = fields.String(required=True, metadata={"context": "query"})
+
+        becomes:
+
+            {
+                "in": "query",
+                "name": "name",
+                "required": true,
+                "type": "string"
+            }
+        """
+        try:
+            from apispec.ext.marshmallow.field_converter import FieldConverterMixin
+            field_converter = FieldConverterMixin()
+        except:
+            field_converter = None
+
+        if not isinstance(schema, (Schema, SchemaMeta)):
+            raise TypeError(
+                f"Expected schema to be a Marshmallow Schema or Schema class, got {type(schema)}"
+            )
+
+        # get declared marshmallow fields
+        fields: Dict[str, 'SchemaField'] = schema.__dict__.get("_declared_fields", {})
+        res = []
+        for field_name, value in fields.items():
+            kvargs = {}
+            # does the field have an alias that is used instead?
+            if getattr(value, "data_key", None) is not None:
+                field_name = value.data_key
+
+            # does the field specify a context? (e.g. body, query)
             context = value.metadata.get("context", None)
             if context is not None:
+                if context not in VALID_CONTEXTS:
+                    raise ValueError(
+                        f"Invalid context '{context}' for field '{field_name}'. "
+                        f"Valid contexts: {VALID_CONTEXTS}"
+                    )
+
                 if context == "body":
+                    if not hasattr(value, "nested") or value.nested is None:
+                        raise ValueError(
+                            f"Field '{field_name}' marked as body must have a 'nested' schema"
+                        )
+                    # nested schena representing the request body
                     kvargs = {
                         "in": "body",
                         "name": "body",
-                        "schema": {"$ref": "#/definitions/%s" % value.nested.__name__},
+                        "schema": {"$ref": f"#/definitions/{value.nested.__name__}"},
                     }
                 else:
                     kvargs = {
                         "in": context,
-                        "name": field,
+                        "name": field_name,
                         "required": value.required,
                         "description": value.metadata.get("description", ""),
                     }
 
+                    # map marshmallow field class to swagger type
+
+                    # TODO replace everything with the proper functions
                     field_type = value.__class__.__name__.lower()
-                    if field_type == "date":
-                        kvargs["type"] = "string"
-                        kvargs["format"] = "date"
-                    elif field_type == "datetime":
-                        kvargs["type"] = "string"
-                        kvargs["format"] = "datetime"
-                    elif field_type == "list":
-                        try:
-                            kvargs["type"] = "array"
-                            kvargs["collectionFormat"] = value.metadata.get("collection_format", "")
+
+                    if field_converter is not None:
+                        # returns a dict with type and format
+                        kvargs.update(field_converter.field2type_and_format(value))
+                    else:
+                        if field_type == "date":
+                            kvargs["type"] = "string"
+                            kvargs["format"] = "date"
+                        elif field_type == "datetime":
+                            kvargs["type"] = "string"
+                            kvargs["format"] = "datetime"
+                        #elif field_type == "list" # handled in common code below
+                        else:
+                            kvargs["type"] = field_type
+
+                    if field_type == "list":
+                        #kvargs["type"] = "array"
+                        kvargs["collectionFormat"] = value.metadata.get("collection_format", "multi")
+                        if hasattr(value, "inner") and value.inner is not None:
                             subfield_type = value.inner.__class__.__name__.lower()
                             kvargs["items"] = {"type": subfield_type}
-                        except:
-                            logger.warning("", exc_info=True)
-                    else:
-                        kvargs["type"] = field_type
-                    if bool(value.default) is not False:
+                        else:
+                            raise ValueError(
+                                f"Field '{field_name}' is a List but 'inner' type is missing"
+                            )
+                    if getattr(value, "default", missing) is not missing:
                         kvargs["default"] = value.default
                     if value.validate is not None and isinstance(value.validate, OneOf):
                         kvargs["enum"] = value.validate.choices
-
-            res.append(kvargs)
+            else:
+                logger.warning(
+                    "Field '%s' in schema '%s' has no context defined. "
+                    "It will not appear in Swagger parameters.",
+                    field_name,
+                    schema.__name__,
+                )
+            if kvargs:
+                res.append(kvargs)
         return res
 
-
+"""
 class ApiValidator(object):
     def __init__(self, schema, uri, method):
         self.logger = getLogger(self.__class__.__module__ + "." + self.__class__.__name__)
@@ -214,3 +279,4 @@ class ApiValidator(object):
             self.compare()
             self.logger.debug("Api request %s is valid" % self.uri)
         return True
+"""

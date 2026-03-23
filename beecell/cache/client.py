@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 import logging
 import ujson as json
@@ -9,7 +9,6 @@ import codecs
 from typing import Any
 from beecell.db.manager import RedisManager
 from beecell.simple import truncate, jsonDumps
-
 
 class CacheClient(object):
     """ """
@@ -131,3 +130,113 @@ class CacheClient(object):
         ret = self.redis_manager.expire(self.prefix + key, ttl)
         self.logger.debug("Extend cache item %s ttl to %s - ret: %s" % (key, ttl, ret))
         return ret
+
+class NullCacheClient:
+    """no-op cache to avoid if ...cache calls as guards
+    when cache is disabled"""
+
+    def __init__(self, redis_manager: RedisManager, prefix="cache."):
+        """Initialize cache client
+
+        :param redis: redis manager reference (RedisManager)
+        :param prefix: chache key prefix
+        """
+        self.logger = logging.getLogger(self.__class__.__module__ + "." + self.__class__.__name__)
+        self.prefix = prefix
+
+    def ping(self):
+        self.logger.info("NullCacheClient: simulating ping")
+        return True
+
+    def set(self, key: str, value, ttl=600, pickling=False):
+        """simulate setting a cache item
+
+        :param key: cache item key
+        :param value: cache item value
+        :param ttl: item time to live [default=600s]
+        :param picling: if true marshal value using pickle otherways use json [default=False]
+        :return: True
+        """
+        self.logger.info(
+            "NullCacheClient: skipping set cache item for key:%s - value: %s - ttl: %s",
+            key, value, ttl
+        )
+        return True
+
+    def get(self, key: str) -> Any:
+        """Get a cache item
+
+        :param key: cache item key
+        :return: value
+        """
+        self.logger.info(
+            "NullCacheClient: simulating cache miss for key: %s", key
+        )
+        return None
+
+    def expire(self, key, ttl=600) -> bool:
+        """Set key expire time
+
+        :param key: cache item key
+        :param ttl: item time to live [default=600s]
+        :return: True
+        """
+        self.logger.info(
+            "NullCacheClient: simulating expire for key: %s - ttl: %s", key, ttl
+        )
+        return True
+
+    def delete(self, key):
+        """Delete a cache item
+
+        :param key: cache item key
+        :return: True
+        """
+        self.logger.info(
+            "NullCacheClient: simulating delete for key: %s", key
+        )
+        return True
+
+    def get_by_pattern(self, pattern):
+        """Get keys by pattern
+
+        :param pattern: key search pattern
+        :return: list of items
+        """
+        self.logger.info(
+            "NullCacheClient: simulating get_by_pattern %s", pattern
+        )
+        return []
+
+    def get_keys_by_pattern(self, pattern):
+        """Get keys by pattern
+
+        :param pattern: key search pattern
+        :return: list of items
+        """
+        self.logger.info(
+            "NullCacheClient: simulating get_keys_by_pattern %s", pattern
+        )
+        return []
+
+    def delete_by_pattern(self, pattern):
+        """Delete keys by pattern
+
+        :param pattern: key search pattern
+        :return: True
+        """
+        self.logger.info(
+            "NullCacheClient: simulating delete by pattern: %s", pattern
+        )
+        return True
+
+    def extend_ttl(self, key, ttl=600) -> bool:
+        """Extend a cache item ttl
+
+        :param key: cache item key
+        :return: True
+        """
+        self.logger.info(
+            "NullCacheClient: simulating extend cache item %s ttl to %s - ret: True", key, ttl
+        )
+        return True
